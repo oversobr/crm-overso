@@ -28,6 +28,13 @@ function RootDocument({ children }: { children: ReactNode }) {
     <html lang="pt-BR">
       <head>
         <HeadContent />
+        {/* Aplica o tema salvo ANTES da tela pintar, senão pisca escuro→claro. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('overso:tema');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}",
+          }}
+        />
       </head>
       <body>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

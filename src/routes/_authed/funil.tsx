@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowDown } from "lucide-react";
 
 import { Card, StatCard, Vazio } from "@/components/ui";
+import { DadosBlur } from "@/components/dados-blur";
 import { funilQuery } from "@/lib/queries";
 
 import { Cabecalho, usePainel } from "@/components/painel";
@@ -30,9 +31,9 @@ function Etapa({
           {valor} ({Math.round(pct * 10) / 10}%)
         </p>
       </div>
-      <div className="mt-2 h-9 overflow-hidden rounded-lg bg-surface-2">
+      <div className="mt-2 h-9 overflow-hidden rounded-xl bg-surface-2">
         <div
-          className={`flex h-full min-w-14 items-center justify-center rounded-lg text-xs font-semibold text-base transition-all ${cor}`}
+          className={`flex h-full min-w-14 items-center justify-center rounded-xl text-xs font-semibold text-white transition-all ${cor}`}
           style={{ width: `${Math.max(pct, 4)}%` }}
         >
           {valor}
@@ -61,7 +62,7 @@ function FunilPage() {
   if (error) {
     return (
       <>
-        <Cabecalho titulo="Funil" />
+        <Cabecalho titulo="Funil" atualizavel />
         <Card>
           <div className="py-8 text-center">
             <p className="text-sm text-rose-400">Não consegui carregar o funil.</p>
@@ -75,7 +76,7 @@ function FunilPage() {
   if (isLoading || !f) {
     return (
       <>
-        <Cabecalho titulo="Funil" />
+        <Cabecalho titulo="Funil" atualizavel />
         <Card>
           <Vazio>{isLoading ? "Carregando…" : "Sem dados ainda."}</Vazio>
         </Card>
@@ -92,12 +93,13 @@ function FunilPage() {
 
   return (
     <>
-      <Cabecalho titulo="Funil" />
+      <Cabecalho titulo="Funil" atualizavel />
 
+      <DadosBlur>
       <Card
         titulo="Funil de Conversão"
         acao={
-          <span className="rounded-full border border-line/60 px-3 py-1 text-xs text-muted">
+          <span className="rounded-full border border-line/70 px-3 py-1 text-xs text-muted">
             {periodo}
           </span>
         }
@@ -137,6 +139,7 @@ function FunilPage() {
           </p>
         </div>
       </Card>
+      </DadosBlur>
     </>
   );
 }

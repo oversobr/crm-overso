@@ -135,15 +135,21 @@ export const fonteQuery = (projectId: string | undefined, campaignId: string | n
     },
   });
 
-export const serieQuery = (projectId: string | undefined, campaignId: string | null) =>
+export type PontoSerie = { dia: string; total: number; completos: number; parciais: number };
+
+export const serieQuery = (
+  projectId: string | undefined,
+  campaignId: string | null,
+  dias = 7,
+) =>
   queryOptions({
-    queryKey: ["serie", projectId, campaignId],
+    queryKey: ["serie", projectId, campaignId, dias],
     enabled: Boolean(projectId),
-    queryFn: async (): Promise<{ dia: string; total: number }[]> => {
-      const desde = new Date(Date.now() - 6 * 864e5).toISOString().slice(0, 10);
+    queryFn: async (): Promise<PontoSerie[]> => {
+      const desde = new Date(Date.now() - (dias - 1) * 864e5).toISOString().slice(0, 10);
       let q = getSupabaseBrowserClient()
         .from("leads_por_dia")
-        .select("dia, total")
+        .select("dia, total, completos")
         .eq("project_id", projectId!)
         .gte("dia", desde);
       if (campaignId) q = q.eq("campaign_id", campaignId);
@@ -151,12 +157,30 @@ export const serieQuery = (projectId: string | undefined, campaignId: string | n
       if (error) throw error;
 
       // Preenche os dias sem lead, senão o gráfico "pula" datas.
-      const linhas = (data ?? []) as { dia: string; total: number }[];
-      const mapa = new Map(linhas.map((r) => [r.dia, Number(r.total)]));
-      return Array.from({ length: 7 }, (_, i) => {
-        const d = new Date(Date.now() - (6 - i) * 864e5).toISOString().slice(0, 10);
-        return { dia: d, total: mapa.get(d) ?? 0 };
+      const linhas = (data ?? []) as { dia: string; total: number; completos: number }[];
+      const mapa = new Map(linhas.map((r) => [r.dia, r]));
+      return Array.from({ length: dias }, (_, i) => {
+        const d = new Date(Date.now() - (dias - 1 - i) * 864e5).toISOString().slice(0, 10);
+        const r = mapa.get(d);
+        const total = Number(r?.total ?? 0);
+        const completos = Number(r?.completos ?? 0);
+        return { dia: d, total, completos, parciais: Math.max(0, total - completos) };
       });
+    },
+  });
+
+/** Quantos leads um projeto tem — usado pra avisar antes de remover o cliente. */
+export const contarLeadsQuery = (projectId: string | undefined) =>
+  queryOptions({
+    queryKey: ["contar-leads", projectId],
+    enabled: Boolean(projectId),
+    queryFn: async (): Promise<number> => {
+      const { count, error } = await getSupabaseBrowserClient()
+        .from("leads")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", projectId!);
+      if (error) throw error;
+      return count ?? 0;
     },
   });
 
@@ -165,5 +189,14 @@ export async function atualizarStatus(leadId: string, status: string) {
     .from("leads")
     .update({ status })
     .eq("id", leadId);
+  if (error) throw error;
+}
+
+/**
+ * Exclui um lead. Só admin do projeto consegue (a policy leads_delete no
+ * banco garante isso — o botão no painel é só a interface).
+ */
+export async function excluirLead(leadId: string) {
+  const { error } = await getSupabaseBrowserClient().from("leads").delete().eq("id", leadId);
   if (error) throw error;
 }

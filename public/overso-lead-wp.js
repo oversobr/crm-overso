@@ -55,6 +55,38 @@
       if (document.referrer && document.referrer.indexOf(location.hostname) === -1) {
         utms.referrer = document.referrer;
       }
+      // Dispositivo do lead, deduzido do userAgent. Guardado junto das UTMs
+      // (JSON livre), então não exige mudança no banco.
+      var ua = navigator.userAgent || "";
+      utms.dispositivo = /iPad|Tablet|PlayBook|Silk|(Android(?!.*Mobile))/.test(ua)
+        ? "Tablet"
+        : /Mobi|iPhone|iPod|Android.*Mobile|Windows Phone/.test(ua)
+          ? "Celular"
+          : "Computador";
+      utms.sistema = /iPhone|iPad|iPod/.test(ua)
+        ? "iOS"
+        : /Android/.test(ua)
+          ? "Android"
+          : /Windows/.test(ua)
+            ? "Windows"
+            : /Mac OS X|Macintosh/.test(ua)
+              ? "macOS"
+              : /Linux/.test(ua)
+                ? "Linux"
+                : "—";
+      utms.navegador = /Edg\//.test(ua)
+        ? "Edge"
+        : /OPR\/|Opera/.test(ua)
+          ? "Opera"
+          : /SamsungBrowser/.test(ua)
+            ? "Samsung"
+            : /Chrome\//.test(ua)
+              ? "Chrome"
+              : /Firefox\//.test(ua)
+                ? "Firefox"
+                : /Safari\//.test(ua)
+                  ? "Safari"
+                  : "—";
       sessionStorage.setItem(SS_UTMS, JSON.stringify(utms));
     }
   } catch (e) {}

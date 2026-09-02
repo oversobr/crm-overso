@@ -1,10 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Download, MessageCircle, Search, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { Select, StatusBadge, Vazio } from "@/components/ui";
-import { atualizarStatus, leadsQuery, POR_PAGINA } from "@/lib/queries";
+import { StatusBadge, Vazio } from "@/components/ui";
+import { Dropdown } from "@/components/dropdown";
+import { IconeWhatsApp } from "@/components/icons";
+import { Modal } from "@/components/modal";
+import { DadosBlur } from "@/components/dados-blur";
+import { atualizarStatus, excluirLead, leadsQuery, POR_PAGINA } from "@/lib/queries";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import type { Lead, Status } from "@/lib/types";
 import { STATUS_LABEL } from "@/lib/types";
@@ -37,6 +41,8 @@ function Leads() {
   const [tipo, setTipo] = useState("");
   const [pagina, setPagina] = useState(0);
   const [aberto, setAberto] = useState<Lead | null>(null);
+  // Confirmação de exclusão em dois passos, pra não apagar lead sem querer.
+  const [confirmandoExcluir, setConfirmandoExcluir] = useState(false);
 
   const { data, isLoading } = useQuery(
     leadsQuery({
@@ -60,6 +66,22 @@ function Leads() {
       void qc.invalidateQueries({ queryKey: ["leads"] });
     },
   });
+
+  const excluir = useMutation({
+    mutationFn: (id: string) => excluirLead(id),
+    onSuccess: () => {
+      setAberto(null);
+      setConfirmandoExcluir(false);
+      void qc.invalidateQueries({ queryKey: ["leads"] });
+      void qc.invalidateQueries({ queryKey: ["funil"] });
+    },
+  });
+
+  // Fecha o drawer zerando o estado de confirmação, senão ele reabre "armado".
+  function fecharDrawer() {
+    setAberto(null);
+    setConfirmandoExcluir(false);
+  }
 
   /** Exporta o resultado do filtro inteiro, não só a página na tela. */
   async function exportar() {
@@ -118,8 +140,9 @@ function Leads() {
 
   return (
     <>
-      <Cabecalho titulo="Leads" />
+      <Cabecalho titulo="Leads" atualizavel />
 
+      <DadosBlur>
       <div className="mb-3 flex flex-wrap gap-3">
         <div className="relative min-w-72 flex-1">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
@@ -130,49 +153,49 @@ function Leads() {
               setPagina(0);
             }}
             placeholder="Buscar por nome, email ou WhatsApp…"
-            className="w-full rounded-lg border border-line/60 bg-surface/70 py-2.5 pl-9 pr-3 text-sm outline-none focus:border-gold/50"
+            className="w-full rounded-xl border border-line/70 bg-surface py-2.5 pl-9 pr-3 text-sm outline-none focus:border-gold/50"
           />
         </div>
 
-        <Select
-          valor={tipo}
+        <Dropdown
+          value={tipo}
           onChange={(v) => {
             setTipo(v);
             setPagina(0);
           }}
-        >
-          <option value="">Tipo: Todos</option>
-          <option value="completo">Completos</option>
-          <option value="parcial">Parciais</option>
-        </Select>
+          options={[
+            { value: "", label: "Tipo: Todos" },
+            { value: "completo", label: "Completos" },
+            { value: "parcial", label: "Parciais" },
+          ]}
+          triggerClassName="rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-gold/40"
+        />
 
-        <Select
-          valor={status}
+        <Dropdown
+          value={status}
           onChange={(v) => {
             setStatus(v);
             setPagina(0);
           }}
-        >
-          <option value="">Status: Todos</option>
-          {Object.entries(STATUS_LABEL).map(([k, v]) => (
-            <option key={k} value={k}>
-              {v}
-            </option>
-          ))}
-        </Select>
+          options={[
+            { value: "", label: "Status: Todos" },
+            ...Object.entries(STATUS_LABEL).map(([k, v]) => ({ value: k, label: v })),
+          ]}
+          triggerClassName="rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-gold/40"
+        />
 
         <button
           onClick={exportar}
-          className="flex items-center gap-2 rounded-lg border border-line/60 bg-surface/70 px-3 py-2 text-sm transition hover:border-gold/40"
+          className="flex items-center gap-2 rounded-full border border-line/70 bg-surface px-3 py-2 text-sm transition hover:border-gold/50"
         >
           <Download size={14} /> Exportar CSV
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-line/60 bg-surface/70">
+      <div className="overflow-hidden rounded-2xl border border-line/70 bg-surface">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-line/50 bg-base/40 text-left text-[11px] uppercase tracking-wider text-muted">
+            <tr className="border-b border-line/70 bg-base/40 text-left text-[11px] uppercase tracking-wider text-muted">
               <th className="px-4 py-3 font-medium">Nome</th>
               <th className="px-4 py-3 font-medium">WhatsApp</th>
               <th className="px-4 py-3 font-medium">Perfil</th>
@@ -211,7 +234,7 @@ function Leads() {
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex rounded-md p-1.5 text-emerald-400 ring-1 ring-emerald-500/25 transition hover:bg-emerald-500/10"
                     >
-                      <MessageCircle size={14} />
+                      <IconeWhatsApp className="h-4 w-4" />
                     </a>
                   )}
                 </td>
@@ -232,7 +255,7 @@ function Leads() {
             <button
               disabled={pagina === 0}
               onClick={() => setPagina((p) => p - 1)}
-              className="rounded-md border border-line/60 p-1.5 disabled:opacity-30"
+              className="rounded-md border border-line/70 p-1.5 disabled:opacity-30"
             >
               <ChevronLeft size={14} />
             </button>
@@ -242,89 +265,191 @@ function Leads() {
             <button
               disabled={pagina + 1 >= paginas}
               onClick={() => setPagina((p) => p + 1)}
-              className="rounded-md border border-line/60 p-1.5 disabled:opacity-30"
+              className="rounded-md border border-line/70 p-1.5 disabled:opacity-30"
             >
               <ChevronRight size={14} />
             </button>
           </div>
         </div>
       </div>
+      </DadosBlur>
 
-      {aberto && (
-        <aside className="fixed inset-y-0 right-0 z-50 w-[420px] overflow-y-auto border-l border-line/60 bg-surface p-6 shadow-2xl">
-          <header className="flex items-center justify-between">
-            <h2 className="display text-lg font-bold text-gold">Detalhes do Lead</h2>
-            <button onClick={() => setAberto(null)} className="text-muted hover:text-ink">
-              <X size={18} />
-            </button>
-          </header>
+      <Modal
+        aberto={aberto != null}
+        onFechar={fecharDrawer}
+        titulo="Detalhes do Lead"
+        maxW="max-w-2xl"
+      >
+        {aberto && (
+          <div className="max-h-[72vh] space-y-5 overflow-y-auto pr-1">
+            {/* CONTATO — quem é e como falar. */}
+            <Bloco rotulo="Contato">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Dado
+                  rotulo="Nome"
+                  valor={aberto.nome ?? (aberto.completo ? "(sem nome)" : "Lead parcial")}
+                />
+                <Dado rotulo="Email" valor={aberto.email ?? "—"} />
+                <Dado
+                  rotulo="WhatsApp"
+                  valor={
+                    aberto.whatsapp ? (
+                      <a
+                        href={`https://wa.me/${aberto.whatsapp}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-emerald-600 hover:underline dark:text-emerald-400"
+                      >
+                        <IconeWhatsApp className="h-4 w-4" /> {aberto.whatsapp}
+                      </a>
+                    ) : (
+                      "—"
+                    )
+                  }
+                />
+              </div>
+            </Bloco>
 
-          <Campo rotulo="Nome" valor={aberto.nome ?? (aberto.completo ? "(sem nome)" : "Lead parcial")} />
-          <Campo rotulo="Email" valor={aberto.email ?? "—"} />
-          <Campo rotulo="WhatsApp" valor={aberto.whatsapp ?? "—"} />
-          <Campo rotulo="Data" valor={new Date(aberto.criado_em).toLocaleString("pt-BR")} />
-          <Campo rotulo="Origem" valor={aberto.origem ?? "—"} />
+            {/* RESPOSTAS — logo após Contato: ambos são "sobre a pessoa". */}
+            {extras(aberto).length > 0 && (
+              <Bloco rotulo="Respostas do formulário">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {extras(aberto).map(([k, v]) => (
+                    <div key={k} className="rounded-xl border border-line/70 bg-surface p-3">
+                      <p className="text-[11px] text-muted">{k}</p>
+                      <p className="mt-0.5 text-sm text-ink">
+                        {Array.isArray(v) ? v.join(", ") : String(v)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </Bloco>
+            )}
 
-          <p className="mt-5 text-[11px] font-medium uppercase tracking-wider text-muted">Status</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
+            {/* STATUS — gestão do pipeline. */}
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                Status
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {(Object.keys(STATUS_LABEL) as Status[]).map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => mudarStatus.mutate({ id: aberto.id, novo: s })}
+                    className={`rounded-xl px-3 py-1.5 text-xs transition ${
+                      aberto.status === s
+                        ? "bg-gold font-semibold text-white"
+                        : "border border-line/70 text-muted hover:text-ink"
+                    }`}
+                  >
+                    {STATUS_LABEL[s]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* ORIGEM & CAMPANHA — tudo que é aquisição, junto. */}
+            <Bloco rotulo="Origem & Campanha">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <Dado rotulo="Data" valor={new Date(aberto.criado_em).toLocaleString("pt-BR")} />
+                {(aberto.utms.dispositivo || aberto.utms.sistema || aberto.utms.navegador) && (
+                  <Dado
+                    rotulo="Dispositivo"
+                    valor={[aberto.utms.dispositivo, aberto.utms.sistema, aberto.utms.navegador]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  />
+                )}
+                {Object.entries(aberto.utms)
+                  .filter(([k]) => !["dispositivo", "sistema", "navegador"].includes(k))
+                  .map(([k, v]) => (
+                    <Dado key={k} rotulo={k.replace("utm_", "")} valor={String(v)} />
+                  ))}
+              </div>
+              {aberto.origem && (
+                <p
+                  className="mt-4 truncate border-t border-line/60 pt-3 text-xs text-muted"
+                  title={aberto.origem}
+                >
+                  {hostPath(aberto.origem)}
+                </p>
+              )}
+            </Bloco>
+
+            {/* Excluir — ação destrutiva, isolada no rodapé. */}
+            <div className="border-t border-line/70 pt-4">
               <button
-                key={s}
-                onClick={() => mudarStatus.mutate({ id: aberto.id, novo: s })}
-                className={`rounded-lg px-3 py-1.5 text-xs transition ${
-                  aberto.status === s
-                    ? "bg-gold font-semibold text-base"
-                    : "border border-line/60 text-muted hover:text-ink"
-                }`}
+                onClick={() => setConfirmandoExcluir(true)}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 py-2.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
               >
-                {STATUS_LABEL[s]}
+                <Trash2 size={15} /> Excluir lead
               </button>
-            ))}
+            </div>
           </div>
+        )}
+      </Modal>
 
-          {Object.keys(aberto.utms).length > 0 && (
-            <>
-              <p className="mt-5 text-[11px] font-medium uppercase tracking-wider text-muted">
-                UTMs
-              </p>
-              <div className="mt-2 space-y-1 text-xs">
-                {Object.entries(aberto.utms).map(([k, v]) => (
-                  <p key={k} className="text-muted">
-                    <span className="text-ink">{k.replace("utm_", "")}:</span> {v}
-                  </p>
-                ))}
-              </div>
-            </>
-          )}
-
-          {extras(aberto).length > 0 && (
-            <>
-              <p className="mt-5 text-[11px] font-medium uppercase tracking-wider text-muted">
-                Respostas
-              </p>
-              <div className="mt-2 space-y-2">
-                {extras(aberto).map(([k, v]) => (
-                  <div key={k} className="rounded-lg border border-line/50 bg-surface-2/60 p-3">
-                    <p className="text-[11px] text-muted">{k}</p>
-                    <p className="mt-0.5 text-sm text-ink">
-                      {Array.isArray(v) ? v.join(", ") : String(v)}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </aside>
-      )}
+      {/* Confirmação de exclusão do lead em popup (sem digitar nome: lead
+          pode não ter nome). O type-to-confirm fica só pra remover cliente. */}
+      <Modal
+        aberto={confirmandoExcluir}
+        onFechar={() => setConfirmandoExcluir(false)}
+        titulo="Excluir lead"
+      >
+        <p className="text-sm text-ink">
+          Excluir {aberto?.nome ? <span className="font-semibold">{aberto.nome}</span> : "este lead"}{" "}
+          permanentemente?
+        </p>
+        <p className="mt-0.5 text-xs text-muted">Não dá para desfazer.</p>
+        {excluir.isError && (
+          <p className="mt-2 text-xs text-rose-500">{(excluir.error as Error).message}</p>
+        )}
+        <div className="mt-5 flex gap-2">
+          <button
+            onClick={() => aberto && excluir.mutate(aberto.id)}
+            disabled={excluir.isPending}
+            className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+          >
+            {excluir.isPending ? "Excluindo…" : "Sim, excluir"}
+          </button>
+          <button
+            onClick={() => setConfirmandoExcluir(false)}
+            className="flex-1 rounded-xl border border-line/70 py-2.5 text-sm text-muted transition hover:text-ink"
+          >
+            Cancelar
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
 
-function Campo({ rotulo, valor }: { rotulo: string; valor: string }) {
+/** Rótulo + valor, uma célula da grade de detalhes. */
+function Dado({ rotulo, valor }: { rotulo: string; valor: React.ReactNode }) {
   return (
-    <div className="mt-4">
+    <div className="min-w-0">
       <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{rotulo}</p>
       <p className="mt-0.5 break-words text-sm text-ink">{valor}</p>
     </div>
   );
+}
+
+/** Grupo de informações correlacionadas — rótulo + card em região comum. */
+function Bloco({ rotulo, children }: { rotulo: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted">{rotulo}</p>
+      <div className="rounded-xl border border-line/70 bg-surface-2/40 p-4">{children}</div>
+    </section>
+  );
+}
+
+/** host + caminho da URL de origem — a URL crua é longa; as UTMs já a decodificam. */
+function hostPath(url: string): string {
+  try {
+    const u = new URL(url);
+    return u.host + u.pathname;
+  } catch {
+    return url;
+  }
 }

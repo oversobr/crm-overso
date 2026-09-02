@@ -47,7 +47,7 @@ function Login() {
     <main className="flex min-h-screen items-center justify-center px-4">
       <form
         onSubmit={entrar}
-        className="w-full max-w-sm rounded-xl border border-line/60 bg-surface/70 p-7"
+        className="w-full max-w-sm rounded-xl border border-line/70 bg-surface p-7"
       >
         <h1 className="display text-2xl font-bold text-gold">Painel CRM</h1>
         <p className="mt-1 text-sm text-muted">Entre para ver seus leads.</p>
@@ -60,7 +60,7 @@ function Login() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-line/60 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="mt-1.5 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
         />
 
         <label className="mt-4 block text-xs font-medium uppercase tracking-wider text-muted">
@@ -71,7 +71,7 @@ function Login() {
           required
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
-          className="mt-1.5 w-full rounded-lg border border-line/60 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="mt-1.5 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
         />
 
         {erro && <p className="mt-4 text-sm text-rose-400">{erro}</p>}
@@ -79,7 +79,7 @@ function Login() {
         <button
           type="submit"
           disabled={carregando}
-          className="mt-6 w-full rounded-lg bg-gold py-2.5 text-sm font-semibold text-base transition hover:bg-gold-dim disabled:opacity-60"
+          className="mt-6 w-full rounded-xl bg-gold py-2.5 text-sm font-semibold text-white transition hover:bg-gold-dim disabled:opacity-60"
         >
           {carregando ? "Entrando…" : "Entrar"}
         </button>

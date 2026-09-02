@@ -1,17 +1,96 @@
 @import "tailwindcss";
 
-/* Paleta do painel: navy profundo + dourado, como nos mockups. */
+/* Faz o variante `dark:` responder ao NOSSO data-theme (não ao sistema),
+   pra bater com o botão de troca. Ex.: `text-slate-700 dark:text-slate-300`. */
+@custom-variant dark (&:where([data-theme="dark"] *));
+
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM OVERSO
+   ───────────────────────────────────────────────────────────────────
+   1) PRIMITIVAS — as 5 cores da identidade + alguns passos derivados.
+      Nomeadas `brand-*` (não colidem com as paletas padrão do Tailwind).
+      Geram utilitários diretos: bg-brand-500, text-brand-900, etc.
+
+        brand-900  #161F2B  navy quase preto   (col 1)
+        brand-800  #17304C  navy               (col 2)
+        brand-500  #1C62C9  AZUL da marca      (col 3)  ← acento
+        brand-300  #B7C3CC  cinza-azulado      (col 4)
+        brand-100  #EEF1F3  quase branco       (col 5)
+
+   2) SEMÂNTICAS — papéis (base, surface, ink, accent…). É o que as telas
+      usam. Trocam de valor por tema; as telas não sabem qual tema é.
+      `--color-gold` é o nome legado do acento — hoje vale o azul da marca.
+   ═══════════════════════════════════════════════════════════════════ */
 @theme {
-  --color-base: #081321;
-  --color-surface: #0f2036;
-  --color-surface-2: #16293f;
-  --color-line: #223b57;
-  --color-gold: #d3b17d;
-  --color-gold-dim: #a98c5f;
-  --color-ink: #e9eff6;
-  --color-muted: #8ba0b8;
+  /* ---- 1. PRIMITIVAS (identidade) ---- */
+  --color-brand-950: #10161f;
+  --color-brand-900: #161f2b; /* col 1 */
+  --color-brand-800: #17304c; /* col 2 */
+  --color-brand-700: #21406a;
+  --color-brand-600: #1850a6;
+  --color-brand-500: #1c62c9; /* col 3 — acento */
+  --color-brand-400: #4b83d6;
+  --color-brand-300: #b7c3cc; /* col 4 */
+  --color-brand-200: #d7dee3;
+  --color-brand-100: #eef1f3; /* col 5 */
+
+  /* ---- 2. SEMÂNTICAS (default = ESCURO) ---- */
+  --color-base: #161f2b;
+  --color-sidebar: #10161f; /* menu: levemente mais escuro que a base */
+  --color-surface: #1b2d47;
+  --color-surface-2: #223a5c;
+  --color-line: #2f4d74;
+  --color-ink: #eef1f3;
+  --color-muted: #9fb0c0;
+
+  --color-gold: #2a6ee0; /* acento (azul, levemente clareado p/ fundo escuro) */
+  --color-gold-dim: #1850a6; /* acento hover */
+  --color-fill: #2a6ee0; /* preenchimento vivo (gráfico) */
+  --color-fill-2: #7d93ab; /* segunda série do gráfico */
 
   --font-display: Georgia, "Times New Roman", serif;
+}
+
+/* ── TEMA CLARO (branco + azul da marca) ───────────────────────────── */
+:root[data-theme="light"] {
+  --color-base: #eef1f3; /* col 5 */
+  --color-sidebar: #e4e9ed; /* menu: levemente mais escuro que a base */
+  --color-surface: #ffffff;
+  --color-surface-2: #e4e9ed;
+  --color-line: #d3dbe1;
+  --color-ink: #161f2b; /* col 1 */
+  --color-muted: #5c6f83;
+
+  --color-gold: #1c62c9; /* col 3 — azul da marca */
+  --color-gold-dim: #1850a6;
+  --color-fill: #1c62c9;
+  --color-fill-2: #b7c3cc; /* col 4 */
+}
+
+/* Explícito pro toggle vencer nos dois sentidos. */
+:root[data-theme="dark"] {
+  --color-base: #161f2b;
+  --color-sidebar: #10161f;
+  --color-surface: #1b2d47;
+  --color-surface-2: #223a5c;
+  --color-line: #2f4d74;
+  --color-ink: #eef1f3;
+  --color-muted: #9fb0c0;
+  --color-gold: #2a6ee0;
+  --color-gold-dim: #1850a6;
+  --color-fill: #2a6ee0;
+  --color-fill-2: #7d93ab;
+}
+
+/* Remove as setinhas (spinner) dos campos de número. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 html, body, #root { height: 100%; }
@@ -21,12 +100,52 @@ body {
   color: var(--color-ink);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .display { font-family: var(--font-display); letter-spacing: -0.01em; }
 
-/* Barra de rolagem discreta pra não brigar com o fundo escuro. */
+/* Entrada da notificação (toast). */
+@keyframes overso-toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.toast-in { animation: overso-toast-in 0.22s ease-out; }
+
+/* Barra de progresso indeterminada — mostra que os dados estão atualizando. */
+@keyframes overso-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+.bar-loading { animation: overso-bar 1.1s ease-in-out infinite; }
+
+/* Dado "respirando" enquanto atualiza, sem sumir da tela. */
+.atualizando { animation: overso-pulse 1.1s ease-in-out infinite; }
+@keyframes overso-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Modal: fundo escurece, painel entra com leve zoom. */
+@keyframes overso-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overso-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.modal-backdrop { animation: overso-fade 0.18s ease-out; }
+.modal-panel { animation: overso-modal-in 0.2s ease-out; }
+
+/* Conteúdo sendo atualizado: desfoca e apaga um pouco, mostrando que os
+   dados na tela estão sendo trocados. Volta suave quando termina. */
+.conteudo-atualizando {
+  filter: blur(3px);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+/* Barra de rolagem: discreta e coerente com o tema. */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #1e364f; border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: #2a4864; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }

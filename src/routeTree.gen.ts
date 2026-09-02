@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as AuthedConectarRouteImport } from './routes/_authed/conectar'
+import { Route as AuthedConfiguracaoRouteImport } from './routes/_authed/configuracao'
 import { Route as AuthedFunilRouteImport } from './routes/_authed/funil'
 import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
 
@@ -35,6 +36,11 @@ const AuthedConectarRoute = AuthedConectarRouteImport.update({
   path: '/conectar',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedConfiguracaoRoute = AuthedConfiguracaoRouteImport.update({
+  id: '/configuracao',
+  path: '/configuracao',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedFunilRoute = AuthedFunilRouteImport.update({
   id: '/funil',
   path: '/funil',
@@ -50,12 +56,14 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
   '/conectar': typeof AuthedConectarRoute
+  '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/conectar': typeof AuthedConectarRoute
+  '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
   '/': typeof AuthedIndexRoute
@@ -65,20 +73,23 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/conectar': typeof AuthedConectarRoute
+  '/_authed/configuracao': typeof AuthedConfiguracaoRoute
   '/_authed/funil': typeof AuthedFunilRoute
   '/_authed/leads': typeof AuthedLeadsRoute
   '/_authed/': typeof AuthedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/conectar' | '/funil' | '/leads'
+  fullPaths:
+    '/' | '/login' | '/conectar' | '/configuracao' | '/funil' | '/leads'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/conectar' | '/funil' | '/leads' | '/'
+  to: '/login' | '/conectar' | '/configuracao' | '/funil' | '/leads' | '/'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
     | '/_authed/conectar'
+    | '/_authed/configuracao'
     | '/_authed/funil'
     | '/_authed/leads'
     | '/_authed/'
@@ -119,6 +130,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedConectarRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/configuracao': {
+      id: '/_authed/configuracao'
+      path: '/configuracao'
+      fullPath: '/configuracao'
+      preLoaderRoute: typeof AuthedConfiguracaoRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/funil': {
       id: '/_authed/funil'
       path: '/funil'
@@ -138,6 +156,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedConectarRoute: typeof AuthedConectarRoute
+  AuthedConfiguracaoRoute: typeof AuthedConfiguracaoRoute
   AuthedFunilRoute: typeof AuthedFunilRoute
   AuthedLeadsRoute: typeof AuthedLeadsRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
@@ -145,6 +164,7 @@ interface AuthedRouteChildren {
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedConectarRoute: AuthedConectarRoute,
+  AuthedConfiguracaoRoute: AuthedConfiguracaoRoute,
   AuthedFunilRoute: AuthedFunilRoute,
   AuthedLeadsRoute: AuthedLeadsRoute,
   AuthedIndexRoute: AuthedIndexRoute,
