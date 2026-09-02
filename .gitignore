@@ -1,0 +1,16 @@
+# deps
+node_modules
+# build
+dist
+.output
+.nitro
+.tanstack
+.wrangler
+# segredos — NUNCA subir
+.env
+.env.*
+!.env.example
+*.local
+# sistema
+.DS_Store
+*.log
