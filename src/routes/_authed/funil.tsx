@@ -53,7 +53,24 @@ function Passagem({ texto }: { texto: string }) {
 
 function FunilPage() {
   const { projeto, campanha } = usePainel();
-  const { data: f, isLoading } = useQuery(funilQuery(projeto?.id, campanha?.id ?? null));
+  const { data: f, isLoading, error } = useQuery(funilQuery(projeto?.id, campanha?.id ?? null));
+
+  // Mostra o erro em vez de girar pra sempre: se a query falhar (ex.: um 400
+  // do banco), o usuário vê a mensagem e sabe o que houve, em vez de um
+  // "Carregando…" eterno que não conta nada.
+  if (error) {
+    return (
+      <>
+        <Cabecalho titulo="Funil" />
+        <Card>
+          <div className="py-8 text-center">
+            <p className="text-sm text-rose-400">Não consegui carregar o funil.</p>
+            <p className="mt-1 text-xs text-muted">{(error as Error).message}</p>
+          </div>
+        </Card>
+      </>
+    );
+  }
 
   if (isLoading || !f) {
     return (

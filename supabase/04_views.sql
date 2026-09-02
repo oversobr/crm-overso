@@ -29,10 +29,17 @@ lds as (
          count(*) filter (where not completo)  as parciais
   from public.leads
   group by 1, 2
+),
+-- Chaves (projeto, campanha) das duas pontas. Substitui o FULL JOIN, que o
+-- Postgres recusa quando a condição usa `is not distinct from` (erro 0A000).
+keys as (
+  select project_id, campaign_id from abre
+  union
+  select project_id, campaign_id from lds
 )
 select
-  coalesce(a.project_id, l.project_id)   as project_id,
-  coalesce(a.campaign_id, l.campaign_id) as campaign_id,
+  k.project_id,
+  k.campaign_id,
   coalesce(a.aberturas, 0)               as aberturas,
   coalesce(l.iniciaram, 0)               as iniciaram,
   coalesce(l.parciais, 0)                as parciais,
@@ -43,10 +50,9 @@ select
   round(100.0 * coalesce(l.completos, 0) / nullif(l.iniciaram, 0), 1) as tx_conclusao,
   -- % de quem abriu e virou lead completo — a conversão que importa
   round(100.0 * coalesce(l.completos, 0) / nullif(a.aberturas, 0), 1) as tx_conversao
-from abre a
-full outer join lds l
-  on a.project_id = l.project_id
- and a.campaign_id is not distinct from l.campaign_id;
+from keys k
+left join abre a on a.project_id = k.project_id and a.campaign_id is not distinct from k.campaign_id
+left join lds  l on l.project_id = k.project_id and l.campaign_id is not distinct from k.campaign_id;
 
 -- ── Série diária (gráfico "Leads — Últimos 7 dias") ────────────────
 create or replace view public.leads_por_dia with (security_invoker = on) as
