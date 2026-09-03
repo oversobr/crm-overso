@@ -30,7 +30,17 @@ const JA_EXIBIDOS = new Set([
 ]);
 
 const extras = (l: Lead) =>
-  Object.entries(l.respostas).filter(([k]) => !JA_EXIBIDOS.has(k.toLowerCase()));
+  Object.entries(l.respostas).filter(
+    // Ignora colunas já exibidas e chaves reservadas (ex.: _perfil).
+    ([k]) => !JA_EXIBIDOS.has(k.toLowerCase()) && !k.startsWith("_"),
+  );
+
+/** Valor da 1ª pergunta do formulário (a "profile"), com fallback. */
+const perfilDe = (l: Lead): string => {
+  const p = l.respostas["_perfil"];
+  if (p != null && String(p).trim()) return String(p);
+  return String(extras(l)[0]?.[1] ?? "—");
+};
 
 function Leads() {
   const { projeto, campanha } = usePainel();
@@ -219,7 +229,7 @@ function Leads() {
                 </td>
                 <td className="px-4 py-3 text-muted">{l.whatsapp ?? "—"}</td>
                 <td className="max-w-64 truncate px-4 py-3 text-muted">
-                  {String(extras(l)[0]?.[1] ?? "—")}
+                  {perfilDe(l)}
                 </td>
                 <td className="px-4 py-3 text-muted">{l.utms.utm_source ?? "direto"}</td>
                 <td className="px-4 py-3">
@@ -232,7 +242,7 @@ function Leads() {
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex rounded-md p-1.5 text-emerald-400 ring-1 ring-emerald-500/25 transition hover:bg-emerald-500/10"
+                      className="inline-flex rounded-lg bg-[#4ad98f] p-1.5 text-white transition hover:bg-[#25D366]"
                     >
                       <IconeWhatsApp className="h-4 w-4" />
                     </a>

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Fonte da marca: Inter em todo o sistema. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
 /* Faz o variante `dark:` responder ao NOSSO data-theme (não ao sistema),
    pra bater com o botão de troca. Ex.: `text-slate-700 dark:text-slate-300`. */
 @custom-variant dark (&:where([data-theme="dark"] *));
@@ -48,7 +51,9 @@
   --color-fill: #2a6ee0; /* preenchimento vivo (gráfico) */
   --color-fill-2: #7d93ab; /* segunda série do gráfico */
 
-  --font-display: Georgia, "Times New Roman", serif;
+  /* Inter em tudo — texto e títulos. */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* ── TEMA CLARO (branco + azul da marca) ───────────────────────────── */
@@ -93,12 +98,25 @@ input[type="number"] {
   appearance: textfield;
 }
 
+/* Cursor de mãozinha em tudo que é clicável (o navegador não faz por padrão
+   em <button>). Desabilitado mostra "bloqueado". */
+button:not(:disabled),
+[role="button"],
+a[href],
+label[for],
+summary {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+
 html, body, #root { height: 100%; }
 
 body {
   background: var(--color-base);
   color: var(--color-ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.2s ease, color 0.2s ease;
 }

@@ -138,6 +138,10 @@
   function lerForm(form) {
     var dados = {};
     var campos = form.querySelectorAll("input[name], select[name], textarea[name]");
+    // Nome do PRIMEIRO campo do formulário (ordem do DOM). Guardamos o valor
+    // dele em `_perfil` porque o JSONB no banco não preserva a ordem das
+    // perguntas — sem isso, "a primeira pergunta" se perde ao salvar.
+    var primeiroCampo = null;
 
     for (var i = 0; i < campos.length; i++) {
       var c = campos[i];
@@ -145,6 +149,9 @@
       if (c.type === "hidden" || c.type === "submit" || c.type === "button") continue;
 
       var chave = normalizar(c.name);
+      if (primeiroCampo === null && chave !== "nome" && chave !== "whatsapp" && chave !== "email") {
+        primeiroCampo = chave;
+      }
 
       if (c.type === "checkbox") {
         if (c.checked) {
@@ -158,6 +165,12 @@
       } else if (c.value && String(c.value).trim()) {
         dados[chave] = String(c.value).trim();
       }
+    }
+
+    // Marca o valor da primeira pergunta (a "profile"), se já respondida.
+    if (primeiroCampo && dados[primeiroCampo] != null) {
+      var v = dados[primeiroCampo];
+      dados._perfil = Object.prototype.toString.call(v) === "[object Array]" ? v.join(", ") : v;
     }
     return dados;
   }
