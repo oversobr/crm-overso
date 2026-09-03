@@ -33,6 +33,12 @@
   # usuário. overso-lead-wp.js também não: as LPs dos clientes apontam pra
   # esse endereço fixo e precisam receber as correções.
   <FilesMatch "^(index\.html|overso-lead-wp\.js)$">
+    # O mod_expires da hospedagem roda DEPOIS do mod_headers e reescreve o
+    # max-age (o tracker vinha com 4h de cache). Desligado aqui, o Header
+    # abaixo é o que vale.
+    <IfModule mod_expires.c>
+      ExpiresActive Off
+    </IfModule>
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
 </IfModule>
