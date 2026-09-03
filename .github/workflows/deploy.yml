@@ -1,0 +1,60 @@
+# Deploy do painel em portal.overso.co (HostGator VPS, via FTP).
+#
+# O build gera arquivos estáticos em dist/client — é só isso que sobe. Nada de
+# credencial mora neste arquivo: tudo vem dos secrets do repositório.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Permite disparar na mão pela aba Actions, sem precisar de commit.
+  workflow_dispatch:
+
+# Um deploy por vez: se dois pushes vierem juntos, o segundo espera em vez de
+# subir arquivos misturados por FTP.
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # As duas VITE_* entram no bundle na hora do build — por isso precisam
+      # existir aqui, e não no servidor.
+      - name: Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      # Regras de rota/cache do Apache viajam junto com os arquivos.
+      - name: Incluir .htaccess
+        run: cp deploy/.htaccess dist/client/.htaccess
+
+      - name: Enviar por FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # ftps = FTP com TLS (a senha não trafega em texto puro). Se a
+          # hospedagem recusar, crie a variable FTP_PROTOCOL com valor "ftp".
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          local-dir: ./dist/client/
+          # Pasta do site no FTP. O padrão "./" é a raiz da conta FTP; se o
+          # conteúdo cair no lugar errado, crie a variable FTP_DIR (ex.:
+          # "./public_html/") em Settings → Secrets and variables → Actions.
+          server-dir: ${{ vars.FTP_DIR || './' }}
+          # O deploy é incremental: a action compara com o estado da última
+          # subida e só manda o que mudou.
+          state-name: .ftp-deploy-crm.json

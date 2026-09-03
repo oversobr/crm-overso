@@ -42,6 +42,26 @@ está no `05_seed.sql`.
 **3. Ligar uma landing page** — veja [`tracker/README.md`](tracker/README.md).
 São 6 linhas na LP.
 
+## Deploy
+
+O painel é uma **SPA estática**: `npm run build` gera `dist/client/` (HTML, JS,
+CSS) e não precisa de Node no servidor. Todo push na `main` dispara
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), que builda e
+envia por FTP para a raiz de **portal.overso.co** (HostGator VPS).
+
+Secrets do repositório (Settings → Secrets and variables → Actions):
+
+| Secret | O que é |
+|---|---|
+| `FTP_HOST`, `FTP_USER`, `FTP_PASSWORD` | conta FTP da hospedagem |
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | entram no bundle durante o build |
+
+Duas *variables* opcionais ajustam o envio sem mexer no workflow: `FTP_DIR`
+(pasta do site, padrão `./`) e `FTP_PROTOCOL` (padrão `ftps`).
+
+O [`deploy/.htaccess`](deploy/.htaccess) sobe junto e é o que faz `/leads` e
+companhia sobreviverem ao F5 — sem ele o Apache devolve 404 nas rotas internas.
+
 ## O que o painel entrega
 
 - **Dashboard** — meta da campanha, total, hoje, 7 dias, fonte principal, gráfico e leads recentes
@@ -72,5 +92,6 @@ Nenhuma porcentagem pode passar de 100%.
 ## Estado
 
 Build e typecheck passam; o app sobe, o guard de sessão redireciona e o login
-renderiza. **O SQL ainda não foi executado contra um Postgres real** — isso só
+renderiza. O guard roda no navegador (o app é estático): ele cuida da UX, quem
+protege o dado é o RLS. **O SQL ainda não foi executado contra um Postgres real** — isso só
 dá para validar com um projeto Supabase de pé.

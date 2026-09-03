@@ -16,16 +16,17 @@ import { LogoOverso } from "@/components/logo";
 import { PainelProvider, usePainel } from "@/components/painel";
 import { Toaster } from "@/components/toaster";
 import { trocarTema, useTema } from "@/lib/theme";
-import { fetchCurrentUser } from "@/lib/auth";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export const Route = createFileRoute("/_authed")({
-  // O guard roda no servidor: a tela protegida nunca chega a ser enviada
-  // pra quem não tem sessão válida.
+  // App estático: o guard roda no navegador. Ele existe pra UX (mandar quem
+  // não entrou pro login) — quem protege o DADO é o RLS do Postgres, que não
+  // devolve linha nenhuma sem uma sessão válida.
   beforeLoad: async () => {
-    const user = await fetchCurrentUser();
-    if (!user) throw redirect({ to: "/login" });
-    return { user };
+    const { data } = await getSupabaseBrowserClient().auth.getSession();
+    const user = data.session?.user;
+    if (!user?.email) throw redirect({ to: "/login" });
+    return { user: { id: user.id, email: user.email } };
   },
   component: Layout,
 });
