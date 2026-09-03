@@ -167,3 +167,15 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+
+/* Autofill do Chrome: por padrão ele pinta o campo de branco/amarelo e o texto
+   some no tema escuro. O box-shadow interno repinta o fundo com o nosso token. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-ink);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface-2) inset;
+  box-shadow: 0 0 0 1000px var(--color-surface-2) inset;
+  caret-color: var(--color-ink);
+  transition: background-color 9999s ease-in-out 0s;
+}
