@@ -45,9 +45,12 @@ São 6 linhas na LP.
 ## Deploy
 
 O painel é uma **SPA estática**: `npm run build` gera `dist/client/` (HTML, JS,
-CSS) e não precisa de Node no servidor. Todo push na `main` dispara
-[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), que builda e
-envia por FTP para a raiz de **portal.overso.co** (HostGator VPS).
+CSS) e não precisa de Node no servidor.
+
+O deploy é **manual**: dispare [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+pela aba Actions → Deploy → *Run workflow* (ou `gh workflow run deploy.yml`).
+Ele builda e envia por FTP para a raiz de **portal.overso.co** (HostGator VPS).
+Push na `main` não publica nada.
 
 Secrets do repositório (Settings → Secrets and variables → Actions):
 
