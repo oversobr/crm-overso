@@ -4,10 +4,10 @@
 # credencial mora neste arquivo: tudo vem dos secrets do repositório.
 name: Deploy
 
+# Deploy é MANUAL, de propósito: push na main não publica nada. Para subir,
+# dispare pela aba Actions → Deploy → "Run workflow" (ou `gh workflow run
+# deploy.yml`). Assim dá pra commitar à vontade e publicar só quando quiser.
 on:
-  push:
-    branches: [main]
-  # Permite disparar na mão pela aba Actions, sem precisar de commit.
   workflow_dispatch:
 
 # Um deploy por vez: se dois pushes vierem juntos, o segundo espera em vez de
