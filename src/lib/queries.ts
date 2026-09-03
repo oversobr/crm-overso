@@ -137,6 +137,16 @@ export const fonteQuery = (projectId: string | undefined, campaignId: string | n
 
 export type PontoSerie = { dia: string; total: number; completos: number; parciais: number };
 
+/** Data no formato YYYY-MM-DD no fuso de Brasília (bate com as views do banco). */
+function diaBrasilia(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 export const serieQuery = (
   projectId: string | undefined,
   campaignId: string | null,
@@ -146,7 +156,7 @@ export const serieQuery = (
     queryKey: ["serie", projectId, campaignId, dias],
     enabled: Boolean(projectId),
     queryFn: async (): Promise<PontoSerie[]> => {
-      const desde = new Date(Date.now() - (dias - 1) * 864e5).toISOString().slice(0, 10);
+      const desde = diaBrasilia(new Date(Date.now() - (dias - 1) * 864e5));
       let q = getSupabaseBrowserClient()
         .from("leads_por_dia")
         .select("dia, total, completos")
@@ -160,7 +170,7 @@ export const serieQuery = (
       const linhas = (data ?? []) as { dia: string; total: number; completos: number }[];
       const mapa = new Map(linhas.map((r) => [r.dia, r]));
       return Array.from({ length: dias }, (_, i) => {
-        const d = new Date(Date.now() - (dias - 1 - i) * 864e5).toISOString().slice(0, 10);
+        const d = diaBrasilia(new Date(Date.now() - (dias - 1 - i) * 864e5));
         const r = mapa.get(d);
         const total = Number(r?.total ?? 0);
         const completos = Number(r?.completos ?? 0);
@@ -168,6 +178,32 @@ export const serieQuery = (
       });
     },
   });
+
+export type CampanhaInput = {
+  nome: string;
+  inicio: string | null;
+  fim: string | null;
+  meta_leads: number | null;
+};
+
+/** CRUD de campanha — a RLS de membro já autoriza escrita direta, sem RPC. */
+export async function criarCampanha(projectId: string, dados: CampanhaInput) {
+  const { error } = await getSupabaseBrowserClient()
+    .from("campaigns")
+    .insert({ project_id: projectId, ...dados });
+  if (error) throw new Error(error.message);
+}
+
+export async function atualizarCampanha(id: string, dados: CampanhaInput) {
+  const { error } = await getSupabaseBrowserClient().from("campaigns").update(dados).eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+export async function excluirCampanha(id: string) {
+  // Leads da campanha não somem: o schema usa `on delete set null`.
+  const { error } = await getSupabaseBrowserClient().from("campaigns").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
 
 /** Quantos leads um projeto tem — usado pra avisar antes de remover o cliente. */
 export const contarLeadsQuery = (projectId: string | undefined) =>

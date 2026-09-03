@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
 import { Moon, Sun } from "lucide-react";
 import type { ComponentType } from "react";
@@ -152,17 +153,57 @@ function Sidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-1 pt-6">
-        <BotaoTema />
-        <button
-          onClick={sair}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
-        >
-          <IconeSair />
-          Sair
-        </button>
+      <div className="mt-auto">
+        <Usuario />
+        <div className="flex flex-col gap-1">
+          <BotaoTema />
+          <button
+            onClick={sair}
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
+          >
+            <IconeSair />
+            Sair
+          </button>
+        </div>
       </div>
     </aside>
+  );
+}
+
+/** Bloco de identidade: avatar (imagem ou inicial do nome), nome e email. */
+function Usuario() {
+  const { data: user } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => {
+      const { data } = await getSupabaseBrowserClient().auth.getUser();
+      return data.user;
+    },
+  });
+
+  const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; avatar_url?: string };
+  const email = user?.email ?? "";
+  // Nome: metadata > parte antes do @ > "Usuário".
+  const nome = meta.full_name || meta.name || (email ? email.split("@")[0] : "Usuário");
+  const inicial = (nome.trim()[0] ?? "?").toUpperCase();
+
+  return (
+    <div className="mb-2 mt-6 flex items-center gap-3 border-t border-line/50 px-2 pt-4">
+      {meta.avatar_url ? (
+        <img
+          src={meta.avatar_url}
+          alt={nome}
+          className="h-9 w-9 shrink-0 rounded-full object-cover"
+        />
+      ) : (
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-semibold text-white">
+          {inicial}
+        </div>
+      )}
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium text-ink">{nome}</p>
+        <p className="truncate text-xs text-muted">{email}</p>
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Copy, Plus, Trash2 } from "lucide-react";
+import { Check, Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Cabecalho, usePainel } from "@/components/painel";
@@ -41,6 +41,9 @@ function Conectar() {
   // Projeto com o modal de exclusão aberto, e o texto digitado pra confirmar.
   const [aExcluir, setAExcluir] = useState<Project | null>(null);
   const [confirmacao, setConfirmacao] = useState("");
+  // Projeto sendo editado e o novo nome.
+  const [aEditar, setAEditar] = useState<Project | null>(null);
+  const [nomeEdit, setNomeEdit] = useState("");
   const { data: qtdLeads } = useQuery(contarLeadsQuery(aExcluir?.id));
 
   const nomeConfere = aExcluir != null && confirmacao.trim() === aExcluir.nome.trim();
@@ -58,6 +61,22 @@ function Conectar() {
       await qc.invalidateQueries({ queryKey: ["projects"] });
       // Já seleciona a página criada: o script do passo 3 passa a ser o dela.
       setProjetoId(novo.id);
+    },
+  });
+
+  const editar = useMutation({
+    mutationFn: async (v: { id: string; nome: string }) => {
+      // Admin/super-admin edita direto (RLS projects_update autoriza).
+      const { error } = await getSupabaseBrowserClient()
+        .from("projects")
+        .update({ nome: v.nome })
+        .eq("id", v.id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: async () => {
+      setAEditar(null);
+      await qc.invalidateQueries({ queryKey: ["projects"] });
+      toast("Cliente atualizado.", "success");
     },
   });
 
@@ -163,10 +182,25 @@ function Conectar() {
                       <span className="ml-2 text-xs font-normal text-gold">selecionada</span>
                     )}
                   </p>
-                  <p className="truncate font-mono text-xs text-muted">{p.ingest_key}</p>
+                  <p className="mt-1 flex items-center gap-1.5 truncate text-xs text-muted">
+                    <span className="rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                      Chave de captura
+                    </span>
+                    <span className="truncate font-mono">{p.ingest_key}</span>
+                  </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
                   <Copiar texto={p.ingest_key} rotulo="Copiar chave" />
+                  <button
+                    onClick={() => {
+                      setAEditar(p);
+                      setNomeEdit(p.nome);
+                    }}
+                    title="Editar cliente"
+                    className="rounded-lg p-2 text-muted transition hover:bg-surface-2 hover:text-ink"
+                  >
+                    <Pencil size={14} />
+                  </button>
                   <button
                     onClick={() => {
                       setAExcluir(p);
@@ -229,6 +263,48 @@ function Conectar() {
           </p>
         </div>
       </Card>
+
+      {/* Editar cliente */}
+      <Modal aberto={aEditar != null} onFechar={() => setAEditar(null)} titulo="Editar cliente">
+        {aEditar && (
+          <>
+            <label className="mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted">
+              Nome do cliente
+            </label>
+            <input
+              autoFocus
+              value={nomeEdit}
+              onChange={(e) => setNomeEdit(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && nomeEdit.trim())
+                  editar.mutate({ id: aEditar.id, nome: nomeEdit.trim() });
+              }}
+              className="w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+            />
+            <p className="mt-2 text-xs text-muted">
+              A chave de captura não muda — o script no site continua o mesmo.
+            </p>
+            {editar.isError && (
+              <p className="mt-2 text-xs text-rose-500">{(editar.error as Error).message}</p>
+            )}
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => nomeEdit.trim() && editar.mutate({ id: aEditar.id, nome: nomeEdit.trim() })}
+                disabled={!nomeEdit.trim() || editar.isPending}
+                className="flex-1 rounded-xl bg-gold py-2.5 text-sm font-semibold text-white transition hover:bg-gold-dim disabled:opacity-40"
+              >
+                {editar.isPending ? "Salvando…" : "Salvar"}
+              </button>
+              <button
+                onClick={() => setAEditar(null)}
+                className="flex-1 rounded-xl border border-line/70 py-2.5 text-sm text-muted transition hover:text-ink"
+              >
+                Cancelar
+              </button>
+            </div>
+          </>
+        )}
+      </Modal>
 
       {/* Exclusão de cliente: 2ª verificação — digitar o nome exato. */}
       <Modal
