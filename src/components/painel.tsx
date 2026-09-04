@@ -78,8 +78,10 @@ export function Cabecalho({ titulo, atualizavel = false }: { titulo: string; atu
 
   return (
     <div className="mb-6">
-      <header className="flex h-10 items-center gap-4">
-        <h1 className="display text-2xl font-bold text-ink">{titulo}</h1>
+      {/* flex-wrap: no celular o seletor de campanha e o botão descem em vez
+          de espremer o título. A altura fixa só vale de sm pra cima. */}
+      <header className="flex flex-wrap items-center gap-3 sm:h-10 sm:gap-4">
+        <h1 className="display text-xl font-bold text-ink sm:text-2xl">{titulo}</h1>
 
         {campanhas.length > 0 && (
           <Dropdown

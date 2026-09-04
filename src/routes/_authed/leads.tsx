@@ -154,7 +154,7 @@ function Leads() {
 
       <DadosBlur>
       <div className="mb-3 flex flex-wrap gap-3">
-        <div className="relative min-w-72 flex-1">
+        <div className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-72">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             value={busca}
@@ -202,17 +202,23 @@ function Leads() {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-line/70 bg-surface">
+      {/* overflow-x-auto é só a rede de segurança: com as colunas escondidas a
+          tabela cabe na tela, mas se algum nome muito longo esticar, a rolagem
+          fica na tabela em vez de entortar a página inteira. Sem min-w de
+          propósito — ela forçaria rolagem mesmo quando as 2 colunas cabem. */}
+      <div className="overflow-x-auto rounded-2xl border border-line/70 bg-surface">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line/70 bg-base/40 text-left text-[11px] uppercase tracking-wider text-muted">
+              {/* Nome e Status ficam sempre; o resto reaparece conforme a tela
+                 cresce. Nada se perde: tocar na linha abre o detalhe completo. */}
               <th className="px-4 py-3 font-medium">Nome</th>
-              <th className="px-4 py-3 font-medium">WhatsApp</th>
-              <th className="px-4 py-3 font-medium">Perfil</th>
-              <th className="px-4 py-3 font-medium">Origem</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">WhatsApp</th>
+              <th className="hidden px-4 py-3 font-medium xl:table-cell">Perfil</th>
+              <th className="hidden px-4 py-3 font-medium lg:table-cell">Origem</th>
               <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Ações</th>
-              <th className="px-4 py-3 font-medium">Data</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">Ações</th>
+              <th className="hidden px-4 py-3 font-medium md:table-cell">Data</th>
             </tr>
           </thead>
           <tbody>
@@ -227,15 +233,15 @@ function Leads() {
                     {l.nome ?? (l.completo ? "(sem nome)" : "Lead parcial")}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-muted">{l.whatsapp ?? "—"}</td>
-                <td className="max-w-64 truncate px-4 py-3 text-muted">
+                <td className="hidden px-4 py-3 text-muted sm:table-cell">{l.whatsapp ?? "—"}</td>
+                <td className="hidden max-w-64 truncate px-4 py-3 text-muted xl:table-cell">
                   {perfilDe(l)}
                 </td>
-                <td className="px-4 py-3 text-muted">{l.utms.utm_source ?? "direto"}</td>
+                <td className="hidden px-4 py-3 text-muted lg:table-cell">{l.utms.utm_source ?? "direto"}</td>
                 <td className="px-4 py-3">
                   <StatusBadge status={l.status} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 sm:table-cell">
                   {l.whatsapp && (
                     <a
                       href={`https://wa.me/${l.whatsapp}`}
@@ -248,7 +254,7 @@ function Leads() {
                     </a>
                   )}
                 </td>
-                <td className="px-4 py-3 text-muted">
+                <td className="hidden px-4 py-3 text-muted md:table-cell">
                   {new Date(l.criado_em).toLocaleDateString("pt-BR")}
                 </td>
               </tr>
@@ -259,7 +265,7 @@ function Leads() {
         {isLoading && <Vazio>Carregando…</Vazio>}
         {!isLoading && linhas.length === 0 && <Vazio>Nenhum lead encontrado.</Vazio>}
 
-        <div className="flex items-center justify-between border-t border-line/40 px-4 py-3 text-sm text-muted">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line/40 px-4 py-3 text-sm text-muted">
           <span>{total} lead(s) encontrado(s)</span>
           <div className="flex items-center gap-2">
             <button

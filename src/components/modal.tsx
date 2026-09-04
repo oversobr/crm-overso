@@ -43,7 +43,9 @@ export function Modal({
         onClick={onFechar}
       />
       <div
-        className={`modal-panel relative w-full ${maxW} rounded-2xl border border-line/70 bg-surface p-6 shadow-2xl`}
+        // max-h + overflow: o detalhe do lead é alto e, no celular, passava
+        // da tela sem nenhuma forma de alcançar o resto.
+        className={`modal-panel relative max-h-[calc(100dvh-2rem)] w-full overflow-y-auto ${maxW} rounded-2xl border border-line/70 bg-surface p-5 shadow-2xl sm:p-6`}
       >
         {titulo && (
           <header className="mb-4 flex items-center justify-between gap-4">
