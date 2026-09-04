@@ -20,15 +20,12 @@
 -- ═══════════════════════════════════════════════════════════════════
 
 -- ── 1. Quem pode abrir a aba Conectar ──────────────────────────────
--- Super-admin, ou quem é admin de pelo menos uma página. É um booleano
--- do USUÁRIO (não de um projeto) porque a tela lista todas as páginas.
+-- Só super-admin. Cadastrar cliente é operação da OVERSO, não do cliente:
+-- ser `admin` de uma página dá poder SOBRE AQUELA PÁGINA (equipe, leads),
+-- não sobre o CRM. Quem entra na lista se decide em Acesso global (13).
 create or replace function public.pode_conectar()
 returns boolean language sql stable security definer set search_path = public as $$
-  select public.is_super_admin()
-      or exists (
-        select 1 from public.project_members
-        where user_id = auth.uid() and papel = 'admin'
-      );
+  select public.is_super_admin();
 $$;
 
 revoke all on function public.pode_conectar() from public, anon;
@@ -42,20 +39,22 @@ grant execute on function public.pode_conectar() to authenticated;
 revoke select on public.projects from public, authenticated;
 grant select (id, nome, slug, criado_em) on public.projects to authenticated;
 
--- ── 3. As páginas que o usuário administra, com a chave ────────────
--- security definer para poder ler a coluna que acabamos de fechar; o
--- filtro pode_gerenciar() é o que decide o que sai.
+-- ── 3. As páginas com a chave de captura ───────────────────────────
+-- security definer para poder ler a coluna que acabamos de fechar. Mesma
+-- regra do item 1: a chave é o que liga uma LP ao CRM, e quem faz essa
+-- ligação é a OVERSO. Com a chave em mãos qualquer um injeta lead no
+-- cliente, então ela não sai para admin de página nem para membro.
 create or replace function public.projetos_gerenciaveis()
 returns table(id uuid, nome text, slug text, ingest_key text)
 language plpgsql stable security definer set search_path = public as $$
 begin
-  if auth.uid() is null then
-    raise exception 'precisa estar autenticado' using errcode = '42501';
+  if not public.pode_conectar() then
+    raise exception 'apenas a equipe OVERSO acessa as chaves de captura'
+      using errcode = '42501';
   end if;
   return query
     select p.id, p.nome, p.slug, p.ingest_key
     from public.projects p
-    where public.pode_gerenciar(p.id)
     order by p.nome;
 end;
 $$;
@@ -124,8 +123,21 @@ grant execute on function public.criar_projeto(text, text) to authenticated;
 notify pgrst, 'reload schema';
 
 -- ── Conferência ────────────────────────────────────────────────────
--- Logado como MEMBRO (não admin), estas devem ser as respostas:
---   select pode_conectar();                        -> false
---   select * from projetos_gerenciaveis();         -> 0 linhas
---   select ingest_key from projects;               -> ERRO de permissão
---   select id, nome, slug from projects;           -> as páginas dele (ok)
+-- ATENÇÃO: no SQL Editor você é DONO do banco, e dono ignora RLS e grant de
+-- coluna — o teste ali mente. Finja ser o usuário, na mesma transação:
+--
+--   begin;
+--   select set_config('request.jwt.claims',
+--                     '{"sub":"UUID-DO-USUARIO","role":"authenticated"}', true);
+--   set local role authenticated;
+--
+--   select pode_conectar();               -- membro: false | admin de página: false
+--   select id, nome, slug from projects;  -- as páginas dele (segue funcionando)
+--   rollback;
+--
+-- E, num bloco separado (o erro aborta a transação):
+--   select ingest_key from projects;      -- ERRO de permissão
+--   select * from projetos_gerenciaveis();-- ERRO: só a equipe OVERSO
+--
+-- Como super-admin, pode_conectar() volta true e projetos_gerenciaveis()
+-- devolve todas as páginas com a chave.

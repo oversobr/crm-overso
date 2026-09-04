@@ -17,47 +17,26 @@ export const projectsQuery = () =>
   });
 
 
-/** Id do usuário logado, direto da sessão local — sem ida ao servidor. */
-async function usuarioId(): Promise<string | null> {
-  const { data } = await getSupabaseBrowserClient().auth.getSession();
-  return data.session?.user.id ?? null;
-}
-
 /**
- * Se o usuário pode abrir a aba "Conectar Cliente": super-admin, ou admin de
- * pelo menos uma página.
+ * Se o usuário pode abrir a aba "Conectar Cliente" — ou seja, cadastrar um
+ * cliente novo no CRM.
  *
- * A conta é feita com o que EXISTE no banco desde o 12_equipe.sql, de
- * propósito. A primeira versão perguntava a uma função nova (`pode_conectar`)
- * e, enquanto a migration não rodasse, a aba sumia até para o dono do painel
- * — o portão falha fechado, então uma função ausente virava porta trancada.
- * Painel não pode depender de migration para funcionar.
+ * A regra é super-admin, e só. Cadastrar cliente é operação da OVERSO, não do
+ * cliente: quem é `admin` de uma página administra AQUELA página (equipe,
+ * leads), não o CRM inteiro. Quem entra na lista é decidido em
+ * Configuração → Acesso global (tabela super_admins, 12/13_*.sql).
+ *
+ * `is_super_admin()` existe desde o 12_equipe, então isto não depende de
+ * migration nenhuma — a aba nunca some por causa de SQL não aplicado.
  */
 export const podeConectarQuery = () =>
   queryOptions({
     queryKey: ["pode-conectar"],
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<boolean> => {
-      const sb = getSupabaseBrowserClient();
-
-      // Super-admin enxerga tudo. Se a chamada falhar, seguimos para o
-      // segundo teste em vez de derrubar a resposta inteira.
-      const { data: ehSuper } = await sb.rpc("is_super_admin");
-      if (ehSuper) return true;
-
-      const uid = await usuarioId();
-      if (!uid) return false;
-
-      // A policy members_select libera a própria linha, então isto responde
-      // sem precisar de função nenhuma: sou admin de alguma página?
-      const { data, error } = await sb
-        .from("project_members")
-        .select("project_id")
-        .eq("user_id", uid)
-        .eq("papel", "admin")
-        .limit(1);
+      const { data, error } = await getSupabaseBrowserClient().rpc("is_super_admin");
       if (error) throw error;
-      return (data ?? []).length > 0;
+      return Boolean(data);
     },
   });
 
@@ -89,25 +68,13 @@ export const projetosGerenciaveisQuery = () =>
       if (!funcaoAusente(error)) throw error;
 
       // ── compatibilidade: banco sem a migration 16 ──
-      const { data: ehSuper } = await sb.rpc("is_super_admin");
-
-      let q = sb.from("projects").select("id, nome, slug, ingest_key").order("nome");
-
-      if (!ehSuper) {
-        const uid = await usuarioId();
-        if (!uid) return [];
-        const { data: vinculos, error: e1 } = await sb
-          .from("project_members")
-          .select("project_id")
-          .eq("user_id", uid)
-          .eq("papel", "admin");
-        if (e1) throw e1;
-        const ids = ((vinculos ?? []) as { project_id: string }[]).map((v) => v.project_id);
-        if (!ids.length) return [];
-        q = q.in("id", ids);
-      }
-
-      const { data: linhas, error: e2 } = await q;
+      // A coluna ingest_key ainda está aberta no select comum, então dá pra
+      // ler direto. Só super-admin chega até aqui (o portão da tela), e
+      // super-admin enxerga todas as páginas — daí não ter filtro.
+      const { data: linhas, error: e2 } = await sb
+        .from("projects")
+        .select("id, nome, slug, ingest_key")
+        .order("nome");
       if (e2) throw e2;
       return (linhas ?? []) as ProjetoGerenciavel[];
     },
