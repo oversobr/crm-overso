@@ -14,6 +14,7 @@ import {
 import { Dropdown } from "@/components/dropdown";
 import { LogoOverso } from "@/components/logo";
 import { PainelProvider, usePainel } from "@/components/painel";
+import { podeConectarQuery } from "@/lib/queries";
 import { Toaster } from "@/components/toaster";
 import { trocarTema, useTema } from "@/lib/theme";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -40,9 +41,12 @@ const MENU: { to: string; rotulo: string; Icone: IconeNav }[] = [
   { to: "/funil", rotulo: "Funil", Icone: IconeFunil },
 ];
 
-const PREFERENCIAS: { to: string; rotulo: string; Icone: IconeNav }[] = [
+// `somenteAdmin` esconde o item de quem não administra nenhuma página. É só a
+// interface: quem chamar a API direto esbarra no banco do mesmo jeito
+// (16_conectar_admin.sql).
+const PREFERENCIAS: { to: string; rotulo: string; Icone: IconeNav; somenteAdmin?: boolean }[] = [
   { to: "/configuracao", rotulo: "Configuração", Icone: IconeConfiguracao },
-  { to: "/conectar", rotulo: "Conectar Cliente", Icone: IconeConectar },
+  { to: "/conectar", rotulo: "Conectar Cliente", Icone: IconeConectar, somenteAdmin: true },
 ];
 
 function Layout() {
@@ -98,6 +102,7 @@ function Secao({ children }: { children: string }) {
 function Sidebar() {
   const router = useRouter();
   const { projeto, projetos, setProjetoId } = usePainel();
+  const { data: podeConectar } = useQuery(podeConectarQuery());
 
   async function sair() {
     await getSupabaseBrowserClient().auth.signOut();
@@ -131,9 +136,13 @@ function Sidebar() {
 
       <Secao>Preferências</Secao>
       <nav className="flex flex-col gap-1">
-        {PREFERENCIAS.map((item) => (
-          <ItemNav key={item.to} {...item} />
-        ))}
+        {/* Enquanto a resposta não chega, o item fica fora: melhor aparecer um
+            instante depois do que piscar na tela de quem não pode usá-lo. */}
+        {PREFERENCIAS.filter((item) => !item.somenteAdmin || podeConectar === true).map(
+          ({ somenteAdmin: _, ...item }) => (
+            <ItemNav key={item.to} {...item} />
+          ),
+        )}
       </nav>
 
       <div className="mt-auto">

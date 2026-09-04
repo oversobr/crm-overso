@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { getSupabaseBrowserClient } from "./supabase/client";
-import type { Campaign, Funil, Lead, Project } from "./types";
+import type { Campaign, Funil, Lead, Project, ProjetoGerenciavel } from "./types";
 
 export const projectsQuery = () =>
   queryOptions({
@@ -9,10 +9,38 @@ export const projectsQuery = () =>
     queryFn: async (): Promise<Project[]> => {
       const { data, error } = await getSupabaseBrowserClient()
         .from("projects")
-        .select("id, nome, slug, ingest_key")
+        .select("id, nome, slug")
         .order("nome");
       if (error) throw error;
       return data ?? [];
+    },
+  });
+
+
+/**
+ * Se o usuário pode abrir a aba "Conectar Cliente". É admin de alguma
+ * página, ou super-admin. O banco decide (rpc pode_conectar) — o painel só
+ * usa isto pra não mostrar uma tela que a API recusaria de qualquer forma.
+ */
+export const podeConectarQuery = () =>
+  queryOptions({
+    queryKey: ["pode-conectar"],
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await getSupabaseBrowserClient().rpc("pode_conectar");
+      if (error) throw error;
+      return Boolean(data);
+    },
+  });
+
+/** As páginas que o usuário administra, com a chave de captura de cada uma. */
+export const projetosGerenciaveisQuery = () =>
+  queryOptions({
+    queryKey: ["projetos-gerenciaveis"],
+    queryFn: async (): Promise<ProjetoGerenciavel[]> => {
+      const { data, error } = await getSupabaseBrowserClient().rpc("projetos_gerenciaveis");
+      if (error) throw error;
+      return (data ?? []) as ProjetoGerenciavel[];
     },
   });
 

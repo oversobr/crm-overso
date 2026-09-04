@@ -6,10 +6,10 @@ import { useState } from "react";
 import { Cabecalho, usePainel } from "@/components/painel";
 import { Card, Vazio } from "@/components/ui";
 import { Modal } from "@/components/modal";
-import { contarLeadsQuery, projectsQuery } from "@/lib/queries";
+import { contarLeadsQuery, podeConectarQuery, projetosGerenciaveisQuery } from "@/lib/queries";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
-import type { Project } from "@/lib/types";
+import type { ProjetoGerenciavel } from "@/lib/types";
 import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/env";
 
 export const Route = createFileRoute("/_authed/conectar")({ component: Conectar });
@@ -36,13 +36,16 @@ function Conectar() {
   const { projeto, setProjetoId } = usePainel();
   const qc = useQueryClient();
 
-  const { data: projetos = [], isLoading } = useQuery(projectsQuery());
+  const { data: podeConectar } = useQuery(podeConectarQuery());
+  // Só as páginas que o usuário administra — e é esta consulta que traz a
+  // chave de captura, fechada no select comum pelo 16_conectar_admin.sql.
+  const { data: projetos = [], isLoading } = useQuery(projetosGerenciaveisQuery());
   const [nome, setNome] = useState("");
   // Projeto com o modal de exclusão aberto, e o texto digitado pra confirmar.
-  const [aExcluir, setAExcluir] = useState<Project | null>(null);
+  const [aExcluir, setAExcluir] = useState<ProjetoGerenciavel | null>(null);
   const [confirmacao, setConfirmacao] = useState("");
   // Projeto sendo editado e o novo nome.
-  const [aEditar, setAEditar] = useState<Project | null>(null);
+  const [aEditar, setAEditar] = useState<ProjetoGerenciavel | null>(null);
   const [nomeEdit, setNomeEdit] = useState("");
   const { data: qtdLeads } = useQuery(contarLeadsQuery(aExcluir?.id));
 
@@ -59,6 +62,7 @@ function Conectar() {
     onSuccess: async (novo) => {
       setNome("");
       await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["projetos-gerenciaveis"] });
       // Já seleciona a página criada: o script do passo 3 passa a ser o dela.
       setProjetoId(novo.id);
     },
@@ -76,6 +80,7 @@ function Conectar() {
     onSuccess: async () => {
       setAEditar(null);
       await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["projetos-gerenciaveis"] });
       toast("Cliente atualizado.", "success");
     },
   });
@@ -90,6 +95,7 @@ function Conectar() {
       setAExcluir(null);
       setConfirmacao("");
       await qc.invalidateQueries({ queryKey: ["projects"] });
+      await qc.invalidateQueries({ queryKey: ["projetos-gerenciaveis"] });
       await qc.invalidateQueries({ queryKey: ["leads"] });
       await qc.invalidateQueries({ queryKey: ["funil"] });
       if (nomeRemovido) toast(`Cliente "${nomeRemovido}" removido.`, "success");
@@ -107,13 +113,32 @@ function Conectar() {
     staleTime: Infinity,
   });
 
+  const chave = projetos.find((p) => p.id === projeto?.id)?.ingest_key;
+
   const scriptPronto =
-    scriptBruto && projeto
+    scriptBruto && projeto && chave
       ? scriptBruto.replace(
           /var CFG = \{[\s\S]*?\};/,
-          `var CFG = {\n    url: "${supabaseUrl()}",\n    anonKey: "${supabaseAnonKey()}",\n    key: "${projeto.ingest_key}",\n  };`,
+          `var CFG = {\n    url: "${supabaseUrl()}",\n    anonKey: "${supabaseAnonKey()}",\n    key: "${chave}",\n  };`,
         )
       : null;
+
+  // A aba some do menu para quem não é admin, mas a URL é digitável — e
+  // sem isto a tela apareceria vazia e cheia de erro em vez de explicada.
+  // Quem insistir na API esbarra no banco do mesmo jeito.
+  if (podeConectar === false) {
+    return (
+      <>
+        <Cabecalho titulo="Conectar página" />
+        <Card>
+          <Vazio>
+            Esta área é só de quem administra as páginas. Fale com o responsável pelo painel
+            para cadastrar, editar ou remover um cliente.
+          </Vazio>
+        </Card>
+      </>
+    );
+  }
 
   return (
     <>
@@ -222,6 +247,10 @@ function Conectar() {
       <Card titulo="3. Copiar o script" className="mt-4">
         {!projeto ? (
           <Vazio>Escolha uma página acima para gerar o script dela.</Vazio>
+        ) : !chave ? (
+          // Acontece com quem é admin de uma página e só membro de outra: a
+          // página está no menu lateral, mas a chave dela não é dele.
+          <Vazio>Você não administra esta página, então a chave dela não aparece aqui.</Vazio>
         ) : !scriptPronto ? (
           <Vazio>Montando o script…</Vazio>
         ) : (

@@ -26,7 +26,14 @@ export type Lead = {
   completado_em: string | null;
 };
 
-export type Project = { id: string; nome: string; slug: string; ingest_key: string };
+export type Project = { id: string; nome: string; slug: string };
+
+/**
+ * Página que o usuário ADMINISTRA. Só esta carrega a ingest_key — o banco
+ * (16_conectar_admin.sql) fechou a coluna pro select comum, e ela só volta
+ * pela função projetos_gerenciaveis().
+ */
+export type ProjetoGerenciavel = Project & { ingest_key: string };
 
 export type Campaign = {
   id: string;
