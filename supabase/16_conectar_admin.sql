@@ -12,6 +12,11 @@
 --      não resolveria: o app é estático, e a API responderia do mesmo
 --      jeito a quem chamasse direto. Por isso a trava é por COLUNA aqui.
 --   2) criar página nova também virou coisa de admin.
+--
+-- O PAINEL NÃO DEPENDE DESTE ARQUIVO para esconder a aba: ele descobre quem
+-- é admin com o que já existe (is_super_admin + a própria linha em
+-- project_members). Isto aqui é o endurecimento — o que impede a chamada
+-- direta à API. Pode rodar a qualquer momento, sem janela de painel quebrado.
 -- ═══════════════════════════════════════════════════════════════════
 
 -- ── 1. Quem pode abrir a aba Conectar ──────────────────────────────

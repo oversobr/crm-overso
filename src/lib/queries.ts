@@ -17,30 +17,99 @@ export const projectsQuery = () =>
   });
 
 
+/** Id do usuário logado, direto da sessão local — sem ida ao servidor. */
+async function usuarioId(): Promise<string | null> {
+  const { data } = await getSupabaseBrowserClient().auth.getSession();
+  return data.session?.user.id ?? null;
+}
+
 /**
- * Se o usuário pode abrir a aba "Conectar Cliente". É admin de alguma
- * página, ou super-admin. O banco decide (rpc pode_conectar) — o painel só
- * usa isto pra não mostrar uma tela que a API recusaria de qualquer forma.
+ * Se o usuário pode abrir a aba "Conectar Cliente": super-admin, ou admin de
+ * pelo menos uma página.
+ *
+ * A conta é feita com o que EXISTE no banco desde o 12_equipe.sql, de
+ * propósito. A primeira versão perguntava a uma função nova (`pode_conectar`)
+ * e, enquanto a migration não rodasse, a aba sumia até para o dono do painel
+ * — o portão falha fechado, então uma função ausente virava porta trancada.
+ * Painel não pode depender de migration para funcionar.
  */
 export const podeConectarQuery = () =>
   queryOptions({
     queryKey: ["pode-conectar"],
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<boolean> => {
-      const { data, error } = await getSupabaseBrowserClient().rpc("pode_conectar");
+      const sb = getSupabaseBrowserClient();
+
+      // Super-admin enxerga tudo. Se a chamada falhar, seguimos para o
+      // segundo teste em vez de derrubar a resposta inteira.
+      const { data: ehSuper } = await sb.rpc("is_super_admin");
+      if (ehSuper) return true;
+
+      const uid = await usuarioId();
+      if (!uid) return false;
+
+      // A policy members_select libera a própria linha, então isto responde
+      // sem precisar de função nenhuma: sou admin de alguma página?
+      const { data, error } = await sb
+        .from("project_members")
+        .select("project_id")
+        .eq("user_id", uid)
+        .eq("papel", "admin")
+        .limit(1);
       if (error) throw error;
-      return Boolean(data);
+      return (data ?? []).length > 0;
     },
   });
 
-/** As páginas que o usuário administra, com a chave de captura de cada uma. */
+/** Erro de "função não existe" do PostgREST — o banco ainda sem a migration 16. */
+function funcaoAusente(erro: { code?: string; message?: string } | null) {
+  return (
+    erro?.code === "PGRST202" ||
+    /does not exist|schema cache/i.test(erro?.message ?? "")
+  );
+}
+
+/**
+ * As páginas que o usuário administra, com a chave de captura de cada uma.
+ *
+ * Caminho preferido: a função `projetos_gerenciaveis()` do 16_conectar_admin,
+ * que é a única forma de ler a `ingest_key` depois que a coluna é fechada.
+ * Enquanto essa migration não roda, cai no caminho antigo — a coluna ainda
+ * está aberta, e o filtro de quem é admin é feito aqui. O trecho de
+ * compatibilidade pode sair assim que o 16 estiver aplicado em produção.
+ */
 export const projetosGerenciaveisQuery = () =>
   queryOptions({
     queryKey: ["projetos-gerenciaveis"],
     queryFn: async (): Promise<ProjetoGerenciavel[]> => {
-      const { data, error } = await getSupabaseBrowserClient().rpc("projetos_gerenciaveis");
-      if (error) throw error;
-      return (data ?? []) as ProjetoGerenciavel[];
+      const sb = getSupabaseBrowserClient();
+
+      const { data, error } = await sb.rpc("projetos_gerenciaveis");
+      if (!error) return (data ?? []) as ProjetoGerenciavel[];
+      if (!funcaoAusente(error)) throw error;
+
+      // ── compatibilidade: banco sem a migration 16 ──
+      const { data: ehSuper } = await sb.rpc("is_super_admin");
+
+      let q = sb.from("projects").select("id, nome, slug, ingest_key").order("nome");
+
+      if (!ehSuper) {
+        const uid = await usuarioId();
+        if (!uid) return [];
+        const { data: vinculos, error: e1 } = await sb
+          .from("project_members")
+          .select("project_id")
+          .eq("user_id", uid)
+          .eq("papel", "admin");
+        if (e1) throw e1;
+        const ids = ((vinculos ?? []) as { project_id: string }[]).map((v) => v.project_id);
+        if (!ids.length) return [];
+        q = q.in("id", ids);
+      }
+
+      const { data: linhas, error: e2 } = await q;
+      if (e2) throw e2;
+      return (linhas ?? []) as ProjetoGerenciavel[];
     },
   });
 
