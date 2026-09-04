@@ -370,8 +370,9 @@ function Leads() {
                       .join(" · ")}
                   />
                 )}
+                <SeloAnuncio utms={aberto.utms} />
                 {Object.entries(aberto.utms)
-                  .filter(([k]) => !["dispositivo", "sistema", "navegador"].includes(k))
+                  .filter(([k]) => !UTMS_COM_LUGAR_PROPRIO.includes(k))
                   .map(([k, v]) => (
                     <Dado key={k} rotulo={k.replace("utm_", "")} valor={String(v)} />
                   ))}
@@ -435,6 +436,54 @@ function Leads() {
 }
 
 /** Rótulo + valor, uma célula da grade de detalhes. */
+/**
+ * Identificadores de clique de anúncio. São tokens opacos e longuíssimos
+ * (`fbclid=IwAR3x…`) que não dizem nada a quem lê — servem pra devolver a
+ * conversão à plataforma depois (Conversions API). Continuam gravados no
+ * banco; na tela viram um selo com o nome de quem trouxe o lead.
+ */
+const CLIQUE_ANUNCIO: Record<string, { rotulo: string; classe: string }> = {
+  fbclid: {
+    rotulo: "Meta",
+    classe: "bg-sky-500/12 text-sky-700 ring-sky-600/25 dark:text-sky-300 dark:ring-sky-500/30",
+  },
+  gclid: {
+    rotulo: "Google Ads",
+    classe:
+      "bg-amber-500/12 text-amber-700 ring-amber-600/25 dark:text-amber-300 dark:ring-amber-500/30",
+  },
+};
+
+/** Chaves que o bloco de origem não lista cruas — cada uma tem lugar próprio. */
+const UTMS_COM_LUGAR_PROPRIO = ["dispositivo", "sistema", "navegador", ...Object.keys(CLIQUE_ANUNCIO)];
+
+/** Selo "veio de anúncio". O token cru fica no title, pra quem precisar copiar. */
+function SeloAnuncio({ utms }: { utms: Record<string, string> }) {
+  // Percorre as entradas (não as chaves) pra não indexar o mapa de volta —
+  // o TS não garantiria que o índice existe.
+  const presentes = Object.entries(CLIQUE_ANUNCIO).filter(([chave]) => utms[chave]);
+  if (!presentes.length) return null;
+
+  return (
+    <Dado
+      rotulo="Anúncio"
+      valor={
+        <span className="flex flex-wrap gap-1.5">
+          {presentes.map(([chave, { rotulo, classe }]) => (
+            <span
+              key={chave}
+              title={`${chave}: ${utms[chave]}`}
+              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${classe}`}
+            >
+              {rotulo}
+            </span>
+          ))}
+        </span>
+      }
+    />
+  );
+}
+
 function Dado({ rotulo, valor }: { rotulo: string; valor: React.ReactNode }) {
   return (
     <div className="min-w-0">
