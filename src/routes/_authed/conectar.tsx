@@ -36,7 +36,7 @@ function Conectar() {
   const { projeto, setProjetoId } = usePainel();
   const qc = useQueryClient();
 
-  const { data: podeConectar } = useQuery(podeConectarQuery());
+  const { data: podeConectar, isLoading: verificandoAcesso } = useQuery(podeConectarQuery());
   // Só as páginas que o usuário administra — e é esta consulta que traz a
   // chave de captura, fechada no select comum pelo 16_conectar_admin.sql.
   const { data: projetos = [], isLoading } = useQuery(projetosGerenciaveisQuery());
@@ -123,17 +123,20 @@ function Conectar() {
         )
       : null;
 
-  // A aba some do menu para quem não é admin, mas a URL é digitável — e
-  // sem isto a tela apareceria vazia e cheia de erro em vez de explicada.
-  // Quem insistir na API esbarra no banco do mesmo jeito.
-  if (podeConectar === false) {
+  // A aba some do menu para quem não é admin, mas a URL é digitável.
+  //
+  // A condição é `!podeConectar` (e não `=== false`) de propósito: enquanto a
+  // resposta não chega — ou se a chamada falhar — o valor é undefined, e o
+  // certo é NÃO abrir a tela. Portão que falha aberto não é portão.
+  if (!podeConectar) {
     return (
       <>
         <Cabecalho titulo="Conectar página" />
         <Card>
           <Vazio>
-            Esta área é só de quem administra as páginas. Fale com o responsável pelo painel
-            para cadastrar, editar ou remover um cliente.
+            {verificandoAcesso
+              ? "Verificando seu acesso…"
+              : "Esta área é só de quem administra as páginas. Fale com o responsável pelo painel para cadastrar, editar ou remover um cliente."}
           </Vazio>
         </Card>
       </>
