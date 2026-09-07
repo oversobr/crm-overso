@@ -284,19 +284,66 @@ export const contarLeadsQuery = (projectId: string | undefined) =>
     },
   });
 
+/**
+ * Escrita barrada por RLS NÃO devolve erro: a policy simplesmente tira a linha
+ * do alcance, o comando casa com zero linhas e volta como sucesso. Por isso
+ * todas as escritas daqui pedem as linhas de volta (`.select("id")`) e conferem
+ * quantas vieram — sem isso o painel comemora uma exclusão que não aconteceu,
+ * que foi exatamente o sintoma do bug corrigido no 17_super_admin_escrita.sql.
+ */
+const RECUSADO = "O banco recusou: sua conta não tem permissão sobre os leads desta página.";
+
 export async function atualizarStatus(leadId: string, status: string) {
-  const { error } = await getSupabaseBrowserClient()
+  const { data, error } = await getSupabaseBrowserClient()
     .from("leads")
     .update({ status })
-    .eq("id", leadId);
+    .eq("id", leadId)
+    .select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error(RECUSADO);
 }
 
 /**
- * Exclui um lead. Só admin do projeto consegue (a policy leads_delete no
- * banco garante isso — o botão no painel é só a interface).
+ * Exclui um lead. Só admin do projeto (ou super-admin) consegue — a policy
+ * leads_delete garante; o botão no painel é só a interface.
  */
 export async function excluirLead(leadId: string) {
-  const { error } = await getSupabaseBrowserClient().from("leads").delete().eq("id", leadId);
+  const { data, error } = await getSupabaseBrowserClient()
+    .from("leads")
+    .delete()
+    .eq("id", leadId)
+    .select("id");
   if (error) throw error;
+  if (!data?.length) throw new Error(RECUSADO);
+}
+
+/** Quantas linhas a operação realmente pegou, contra quantas foram pedidas. */
+export type ResultadoMassa = { feitos: number; pedidos: number };
+
+/**
+ * Ações em massa. Devolvem a contagem em vez de lançar quando o número não
+ * bate: numa seleção grande é normal a permissão valer para umas linhas e não
+ * para outras, e a tela precisa poder dizer "12 de 15" em vez de "falhou".
+ */
+export async function atualizarStatusEmMassa(
+  ids: string[],
+  status: string,
+): Promise<ResultadoMassa> {
+  const { data, error } = await getSupabaseBrowserClient()
+    .from("leads")
+    .update({ status })
+    .in("id", ids)
+    .select("id");
+  if (error) throw error;
+  return { feitos: data?.length ?? 0, pedidos: ids.length };
+}
+
+export async function excluirLeadsEmMassa(ids: string[]): Promise<ResultadoMassa> {
+  const { data, error } = await getSupabaseBrowserClient()
+    .from("leads")
+    .delete()
+    .in("id", ids)
+    .select("id");
+  if (error) throw error;
+  return { feitos: data?.length ?? 0, pedidos: ids.length };
 }

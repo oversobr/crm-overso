@@ -1,15 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Download, Search, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { StatusBadge, Vazio } from "@/components/ui";
 import { Dropdown } from "@/components/dropdown";
 import { IconeWhatsApp } from "@/components/icons";
 import { Modal } from "@/components/modal";
 import { DadosBlur } from "@/components/dados-blur";
-import { atualizarStatus, excluirLead, leadsQuery, POR_PAGINA } from "@/lib/queries";
+import type { ResultadoMassa } from "@/lib/queries";
+import {
+  atualizarStatus,
+  atualizarStatusEmMassa,
+  excluirLead,
+  excluirLeadsEmMassa,
+  leadsQuery,
+  POR_PAGINA,
+} from "@/lib/queries";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/toast";
 import type { Lead, Status } from "@/lib/types";
 import { STATUS_LABEL } from "@/lib/types";
 
@@ -53,6 +62,9 @@ function Leads() {
   const [aberto, setAberto] = useState<Lead | null>(null);
   // Confirmação de exclusão em dois passos, pra não apagar lead sem querer.
   const [confirmandoExcluir, setConfirmandoExcluir] = useState(false);
+  // Ações em massa: ids marcados e a confirmação da exclusão do lote.
+  const [selecionados, setSelecionados] = useState<Set<string>>(new Set());
+  const [confirmandoMassa, setConfirmandoMassa] = useState(false);
 
   const { data, isLoading } = useQuery(
     leadsQuery({
@@ -69,12 +81,56 @@ function Leads() {
   const total = data?.total ?? 0;
   const paginas = Math.max(1, Math.ceil(total / POR_PAGINA));
 
+  // Trocar de filtro, página ou cliente zera a seleção: manter ids que não
+  // estão mais na tela levaria a apagar lead que o usuário nem enxerga.
+  useEffect(() => {
+    setSelecionados(new Set());
+  }, [busca, status, tipo, pagina, projeto?.id, campanha?.id]);
+
+  const idsDaPagina = linhas.map((l) => l.id);
+  const todosMarcados = idsDaPagina.length > 0 && idsDaPagina.every((id) => selecionados.has(id));
+
+  function alternar(id: string) {
+    setSelecionados((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(id)) novo.delete(id);
+      else novo.add(id);
+      return novo;
+    });
+  }
+
+  /** O checkbox do cabeçalho vale só para a página atual, não para o filtro inteiro. */
+  function alternarPagina() {
+    setSelecionados((atual) => {
+      if (todosMarcados) {
+        const novo = new Set(atual);
+        idsDaPagina.forEach((id) => novo.delete(id));
+        return novo;
+      }
+      return new Set([...atual, ...idsDaPagina]);
+    });
+  }
+
+  /** Conta quantas linhas a RLS deixou passar e conta a verdade ao usuário. */
+  function avisar({ feitos, pedidos }: ResultadoMassa, participio: string) {
+    if (feitos === 0) {
+      toast(`Nenhum lead ${participio}: sua conta não tem permissão nesta página.`, "error");
+    } else if (feitos < pedidos) {
+      toast(`${feitos} de ${pedidos} ${participio}s — nos outros faltou permissão.`, "info");
+    } else {
+      toast(`${feitos} lead(s) ${participio}s.`, "success");
+    }
+  }
+
   const mudarStatus = useMutation({
     mutationFn: ({ id, novo }: { id: string; novo: Status }) => atualizarStatus(id, novo),
     onSuccess: (_, { id, novo }) => {
       setAberto((a) => (a && a.id === id ? { ...a, status: novo } : a));
       void qc.invalidateQueries({ queryKey: ["leads"] });
     },
+    // Sem isto, uma recusa da RLS não aparecia em lugar nenhum: o botão de
+    // status apenas não mudava, e ninguém sabia por quê.
+    onError: (e) => toast((e as Error).message, "error"),
   });
 
   const excluir = useMutation({
@@ -85,6 +141,29 @@ function Leads() {
       void qc.invalidateQueries({ queryKey: ["leads"] });
       void qc.invalidateQueries({ queryKey: ["funil"] });
     },
+  });
+
+  const statusEmMassa = useMutation({
+    mutationFn: ({ ids, novo }: { ids: string[]; novo: string }) =>
+      atualizarStatusEmMassa(ids, novo),
+    onSuccess: (r) => {
+      avisar(r, "atualizado");
+      setSelecionados(new Set());
+      void qc.invalidateQueries({ queryKey: ["leads"] });
+    },
+    onError: (e) => toast((e as Error).message, "error"),
+  });
+
+  const excluirEmMassa = useMutation({
+    mutationFn: (ids: string[]) => excluirLeadsEmMassa(ids),
+    onSuccess: (r) => {
+      avisar(r, "excluído");
+      setSelecionados(new Set());
+      setConfirmandoMassa(false);
+      void qc.invalidateQueries({ queryKey: ["leads"] });
+      void qc.invalidateQueries({ queryKey: ["funil"] });
+    },
+    onError: (e) => toast((e as Error).message, "error"),
   });
 
   // Fecha o drawer zerando o estado de confirmação, senão ele reabre "armado".
@@ -202,6 +281,40 @@ function Leads() {
         </button>
       </div>
 
+      {selecionados.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-gold/40 bg-gold/5 px-4 py-3">
+          <span className="text-sm font-medium text-ink">
+            {selecionados.size} selecionado{selecionados.size > 1 ? "s" : ""}
+          </span>
+
+          <Dropdown
+            value=""
+            onChange={(novo) => {
+              if (novo) statusEmMassa.mutate({ ids: [...selecionados], novo });
+            }}
+            options={[
+              { value: "", label: "Mudar status para…" },
+              ...Object.entries(STATUS_LABEL).map(([k, v]) => ({ value: k, label: v })),
+            ]}
+            triggerClassName="rounded-xl border border-line/70 bg-surface px-3 py-2 text-sm text-ink hover:border-gold/40"
+          />
+
+          <button
+            onClick={() => setConfirmandoMassa(true)}
+            className="flex items-center gap-2 rounded-xl border border-rose-500/30 px-3 py-2 text-sm text-rose-500 transition hover:bg-rose-500/10"
+          >
+            <Trash2 size={14} /> Excluir selecionados
+          </button>
+
+          <button
+            onClick={() => setSelecionados(new Set())}
+            className="ml-auto text-sm text-muted transition hover:text-ink"
+          >
+            Limpar seleção
+          </button>
+        </div>
+      )}
+
       {/* overflow-x-auto é só a rede de segurança: com as colunas escondidas a
           tabela cabe na tela, mas se algum nome muito longo esticar, a rolagem
           fica na tabela em vez de entortar a página inteira. Sem min-w de
@@ -212,6 +325,15 @@ function Leads() {
             <tr className="border-b border-line/70 bg-base/40 text-left text-[11px] uppercase tracking-wider text-muted">
               {/* Nome e Status ficam sempre; o resto reaparece conforme a tela
                  cresce. Nada se perde: tocar na linha abre o detalhe completo. */}
+              <th className="w-10 px-4 py-3">
+                <input
+                  type="checkbox"
+                  aria-label="Selecionar os leads desta página"
+                  checked={todosMarcados}
+                  onChange={alternarPagina}
+                  className="h-4 w-4 cursor-pointer accent-gold"
+                />
+              </th>
               <th className="px-4 py-3 font-medium">Nome</th>
               <th className="hidden px-4 py-3 font-medium sm:table-cell">WhatsApp</th>
               <th className="hidden px-4 py-3 font-medium xl:table-cell">Perfil</th>
@@ -228,6 +350,16 @@ function Leads() {
                 onClick={() => setAberto(l)}
                 className="cursor-pointer border-b border-line/25 transition last:border-0 hover:bg-surface-2/60"
               >
+                {/* stopPropagation: marcar não pode abrir o detalhe do lead. */}
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Selecionar ${l.nome ?? "lead"}`}
+                    checked={selecionados.has(l.id)}
+                    onChange={() => alternar(l.id)}
+                    className="h-4 w-4 cursor-pointer accent-gold"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <span className={l.completo ? "" : "italic text-muted"}>
                     {l.nome ?? (l.completo ? "(sem nome)" : "Lead parcial")}
@@ -404,6 +536,33 @@ function Leads() {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        aberto={confirmandoMassa}
+        onFechar={() => setConfirmandoMassa(false)}
+        titulo="Excluir leads selecionados"
+      >
+        <p className="text-sm text-ink">
+          Excluir <span className="font-semibold">{selecionados.size} lead(s)</span>{" "}
+          permanentemente?
+        </p>
+        <p className="mt-0.5 text-xs text-muted">Não dá para desfazer.</p>
+        <div className="mt-5 flex gap-2">
+          <button
+            onClick={() => excluirEmMassa.mutate([...selecionados])}
+            disabled={excluirEmMassa.isPending}
+            className="flex-1 rounded-xl bg-rose-600 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-60"
+          >
+            {excluirEmMassa.isPending ? "Excluindo…" : `Sim, excluir ${selecionados.size}`}
+          </button>
+          <button
+            onClick={() => setConfirmandoMassa(false)}
+            className="flex-1 rounded-xl border border-line/70 py-2.5 text-sm text-muted transition hover:text-ink"
+          >
+            Cancelar
+          </button>
+        </div>
       </Modal>
 
       {/* Confirmação de exclusão do lead em popup (sem digitar nome: lead
