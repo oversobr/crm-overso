@@ -153,6 +153,42 @@ body {
 .modal-backdrop { animation: overso-fade 0.18s ease-out; }
 .modal-panel { animation: overso-modal-in 0.2s ease-out; }
 
+/* Cortina da troca de cliente (CortinaDeTroca em routes/_authed.tsx).
+   A barra enche em 1s — o mesmo TROCA_VISIVEL_MS do componente. */
+.cortina-troca { animation: overso-fade 0.2s ease-out; }
+.cortina-saindo { opacity: 0; transition: opacity 0.25s ease-in; }
+.cortina-nome { animation: overso-toast-in 0.35s ease-out both; }
+@keyframes overso-progresso {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.cortina-progresso { transform-origin: left; animation: overso-progresso 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+/* Card do cliente na sidebar: um anel do acento que acende e apaga. */
+@keyframes overso-destaque {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-gold) 65%, transparent); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+.cliente-destaque { border-radius: 0.75rem; animation: overso-destaque 0.9s ease-out 2; }
+
+/* Rola sem mostrar barra: pra áreas que devem parecer fixas (a coluna da
+   arte no formulário de conteúdo) mas não podem cortar nada em tela baixa. */
+.sem-barra { scrollbar-width: none; }
+.sem-barra::-webkit-scrollbar { display: none; }
+
+/* Barra de rolagem discreta pra listas que rolam dentro de um card. */
+.rolagem-fina { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+.rolagem-fina::-webkit-scrollbar { width: 6px; }
+.rolagem-fina::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cortina-troca,
+  .cortina-nome,
+  .cliente-destaque { animation: none; }
+  /* A barra fica cheia desde o início em vez de animar. */
+  .cortina-progresso { animation: none; transform: none; }
+}
+
 /* Conteúdo sendo atualizado: desfoca e apaga um pouco, mostrando que os
    dados na tela estão sendo trocados. Volta suave quando termina. */
 .conteudo-atualizando {

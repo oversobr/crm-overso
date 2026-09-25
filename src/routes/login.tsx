@@ -165,13 +165,13 @@ function PainelMarca() {
 
       <div className="relative max-w-md">
         <h2 className="display text-5xl font-bold leading-[1.08] tracking-tight text-brand-100">
-          Seus leads,
+          Leads e conteúdo,
           <br />
-          <span className="text-brand-400">sob controle.</span>
+          <span className="text-brand-400">num portal só.</span>
         </h2>
         <p className="mt-6 text-[15px] leading-relaxed text-brand-300">
-          Todas as suas landing pages em um painel só. Acompanhe cada lead do primeiro clique à
-          conversão e veja de onde vem o resultado.
+          Acompanhe cada lead das suas landing pages e organize o calendário de posts, stories,
+          reels e vídeos de cada cliente — tudo no mesmo lugar.
         </p>
       </div>
 

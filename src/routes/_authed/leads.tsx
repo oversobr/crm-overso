@@ -24,6 +24,8 @@ import type { Lead, Status } from "@/lib/types";
 import { STATUS_LABEL } from "@/lib/types";
 
 import { Cabecalho, usePainel } from "@/components/painel";
+import { ModuloDesativado } from "@/components/modulo";
+import { modulosDe } from "@/lib/types";
 
 export const Route = createFileRoute("/_authed/leads")({ component: Leads });
 
@@ -52,7 +54,24 @@ const perfilDe = (l: Lead): string => {
   return String(extras(l)[0]?.[1] ?? "—");
 };
 
+/**
+ * Portão do módulo: se o cliente não usa CRM, a tela mostra o aviso
+ * (e o botão de ativar) em vez de consultar dados que ele não tem.
+ */
 function Leads() {
+  const { projeto } = usePainel();
+  if (!modulosDe(projeto).crm) {
+    return (
+      <>
+        <Cabecalho titulo="Leads" comCampanha={false} />
+        <ModuloDesativado modulo="crm" />
+      </>
+    );
+  }
+  return <LeadsTela />;
+}
+
+function LeadsTela() {
   const { projeto, campanha } = usePainel();
   const qc = useQueryClient();
 

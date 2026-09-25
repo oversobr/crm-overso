@@ -12,10 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedCalendarioRouteImport } from './routes/_authed/calendario'
+import { Route as AuthedClientesRouteImport } from './routes/_authed/clientes'
 import { Route as AuthedConectarRouteImport } from './routes/_authed/conectar'
 import { Route as AuthedConfiguracaoRouteImport } from './routes/_authed/configuracao'
 import { Route as AuthedFunilRouteImport } from './routes/_authed/funil'
 import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
+import { Route as AuthedPostagensRouteImport } from './routes/_authed/postagens'
+import { Route as AuthedEventosIndexRouteImport } from './routes/_authed/eventos/index'
+import { Route as AuthedEventosEventoIdRouteImport } from './routes/_authed/eventos/$eventoId'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -29,6 +34,16 @@ const LoginRoute = LoginRouteImport.update({
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedCalendarioRoute = AuthedCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedClientesRoute = AuthedClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedConectarRoute = AuthedConectarRouteImport.update({
@@ -51,48 +66,104 @@ const AuthedLeadsRoute = AuthedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedPostagensRoute = AuthedPostagensRouteImport.update({
+  id: '/postagens',
+  path: '/postagens',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedEventosIndexRoute = AuthedEventosIndexRouteImport.update({
+  id: '/eventos/',
+  path: '/eventos/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedEventosEventoIdRoute = AuthedEventosEventoIdRouteImport.update({
+  id: '/eventos/$eventoId',
+  path: '/eventos/$eventoId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
+  '/calendario': typeof AuthedCalendarioRoute
+  '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
   '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/postagens': typeof AuthedPostagensRoute
+  '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
+  '/eventos/': typeof AuthedEventosIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/calendario': typeof AuthedCalendarioRoute
+  '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
   '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/postagens': typeof AuthedPostagensRoute
   '/': typeof AuthedIndexRoute
+  '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
+  '/eventos': typeof AuthedEventosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/calendario': typeof AuthedCalendarioRoute
+  '/_authed/clientes': typeof AuthedClientesRoute
   '/_authed/conectar': typeof AuthedConectarRoute
   '/_authed/configuracao': typeof AuthedConfiguracaoRoute
   '/_authed/funil': typeof AuthedFunilRoute
   '/_authed/leads': typeof AuthedLeadsRoute
+  '/_authed/postagens': typeof AuthedPostagensRoute
   '/_authed/': typeof AuthedIndexRoute
+  '/_authed/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
+  '/_authed/eventos/': typeof AuthedEventosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/conectar' | '/configuracao' | '/funil' | '/leads'
+    | '/'
+    | '/login'
+    | '/calendario'
+    | '/clientes'
+    | '/conectar'
+    | '/configuracao'
+    | '/funil'
+    | '/leads'
+    | '/postagens'
+    | '/eventos/$eventoId'
+    | '/eventos/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/conectar' | '/configuracao' | '/funil' | '/leads' | '/'
+  to:
+    | '/login'
+    | '/calendario'
+    | '/clientes'
+    | '/conectar'
+    | '/configuracao'
+    | '/funil'
+    | '/leads'
+    | '/postagens'
+    | '/'
+    | '/eventos/$eventoId'
+    | '/eventos'
   id:
     | '__root__'
     | '/_authed'
     | '/login'
+    | '/_authed/calendario'
+    | '/_authed/clientes'
     | '/_authed/conectar'
     | '/_authed/configuracao'
     | '/_authed/funil'
     | '/_authed/leads'
+    | '/_authed/postagens'
     | '/_authed/'
+    | '/_authed/eventos/$eventoId'
+    | '/_authed/eventos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -123,6 +194,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/calendario': {
+      id: '/_authed/calendario'
+      path: '/calendario'
+      fullPath: '/calendario'
+      preLoaderRoute: typeof AuthedCalendarioRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/clientes': {
+      id: '/_authed/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof AuthedClientesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/conectar': {
       id: '/_authed/conectar'
       path: '/conectar'
@@ -151,23 +236,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedLeadsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/postagens': {
+      id: '/_authed/postagens'
+      path: '/postagens'
+      fullPath: '/postagens'
+      preLoaderRoute: typeof AuthedPostagensRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/eventos/': {
+      id: '/_authed/eventos/'
+      path: '/eventos'
+      fullPath: '/eventos/'
+      preLoaderRoute: typeof AuthedEventosIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/eventos/$eventoId': {
+      id: '/_authed/eventos/$eventoId'
+      path: '/eventos/$eventoId'
+      fullPath: '/eventos/$eventoId'
+      preLoaderRoute: typeof AuthedEventosEventoIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
+  AuthedCalendarioRoute: typeof AuthedCalendarioRoute
+  AuthedClientesRoute: typeof AuthedClientesRoute
   AuthedConectarRoute: typeof AuthedConectarRoute
   AuthedConfiguracaoRoute: typeof AuthedConfiguracaoRoute
   AuthedFunilRoute: typeof AuthedFunilRoute
   AuthedLeadsRoute: typeof AuthedLeadsRoute
+  AuthedPostagensRoute: typeof AuthedPostagensRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
+  AuthedEventosEventoIdRoute: typeof AuthedEventosEventoIdRoute
+  AuthedEventosIndexRoute: typeof AuthedEventosIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCalendarioRoute: AuthedCalendarioRoute,
+  AuthedClientesRoute: AuthedClientesRoute,
   AuthedConectarRoute: AuthedConectarRoute,
   AuthedConfiguracaoRoute: AuthedConfiguracaoRoute,
   AuthedFunilRoute: AuthedFunilRoute,
   AuthedLeadsRoute: AuthedLeadsRoute,
+  AuthedPostagensRoute: AuthedPostagensRoute,
   AuthedIndexRoute: AuthedIndexRoute,
+  AuthedEventosEventoIdRoute: AuthedEventosEventoIdRoute,
+  AuthedEventosIndexRoute: AuthedEventosIndexRoute,
 }
 
 const AuthedRouteWithChildren =

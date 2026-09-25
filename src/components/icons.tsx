@@ -98,3 +98,19 @@ export function IconeSair({ className = "" }: Props) {
     </svg>
   );
 }
+
+/** Calendário no mesmo traço dos ícones da marca (linha 1.5, cantos redondos). */
+export function IconeCalendario({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={`${base} ${className}`} aria-hidden>
+      <rect x="1.75" y="3.25" width="16.5" height="15" rx="3.25" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M1.75 8.25H18.25" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6 1.25V4.75M14 1.25V4.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="6.25" cy="12" r="1" fill="currentColor" />
+      <circle cx="10" cy="12" r="1" fill="currentColor" />
+      <circle cx="13.75" cy="12" r="1" fill="currentColor" />
+      <circle cx="6.25" cy="15.25" r="1" fill="currentColor" />
+      <circle cx="10" cy="15.25" r="1" fill="currentColor" />
+    </svg>
+  );
+}

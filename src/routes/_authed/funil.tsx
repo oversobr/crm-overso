@@ -7,6 +7,8 @@ import { DadosBlur } from "@/components/dados-blur";
 import { funilQuery } from "@/lib/queries";
 
 import { Cabecalho, usePainel } from "@/components/painel";
+import { ModuloDesativado } from "@/components/modulo";
+import { modulosDe } from "@/lib/types";
 
 export const Route = createFileRoute("/_authed/funil")({ component: FunilPage });
 
@@ -52,7 +54,24 @@ function Passagem({ texto }: { texto: string }) {
   );
 }
 
+/**
+ * Portão do módulo: se o cliente não usa CRM, a tela mostra o aviso
+ * (e o botão de ativar) em vez de consultar dados que ele não tem.
+ */
 function FunilPage() {
+  const { projeto } = usePainel();
+  if (!modulosDe(projeto).crm) {
+    return (
+      <>
+        <Cabecalho titulo="Funil" comCampanha={false} />
+        <ModuloDesativado modulo="crm" />
+      </>
+    );
+  }
+  return <FunilPageTela />;
+}
+
+function FunilPageTela() {
   const { projeto, campanha } = usePainel();
   const { data: f, isLoading, error } = useQuery(funilQuery(projeto?.id, campanha?.id ?? null));
 

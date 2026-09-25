@@ -1,7 +1,7 @@
-# CRM OVERSO
+# Portal OVERSO
 
-Um CRM central para todas as landing pages. Cada página é um **projeto**; os
-leads de todas caem no mesmo painel, com UTMs, respostas do formulário e leads
+O portal da OVERSO: CRM das landing pages e calendário de conteúdo dos clientes.
+No CRM, cada página é um **projeto**; os leads de todas caem no mesmo painel, com UTMs, respostas do formulário e leads
 parciais.
 
 ## Como está montado
@@ -27,6 +27,16 @@ no SQL Editor, na ordem:
 | `supabase/03_ingest.sql` | a função de captura |
 | `supabase/04_views.sql` | funil e métricas |
 | `supabase/05_seed.sql` | cadastra a 1ª página — **devolve a `ingest_key`** |
+| `supabase/06…17_*.sql` | evoluções (equipe, super-admin, fuso…), na ordem do número |
+| `supabase/18_calendario.sql` | tabela `conteudos` do calendário de conteúdo |
+| `supabase/19_calendario_midias.sql` | imagens do calendário (bucket privado `conteudos` no Storage) |
+| `supabase/20_modulos_cliente.sql` | módulos por cliente (CRM / Conteúdo) |
+| `supabase/21_definir_modulos.sql` | função que liga/desliga os módulos de um cliente |
+| `supabase/22_comentarios_conteudo.sql` | comentários (conversa) em cada conteúdo do calendário |
+| `supabase/23_conteudo_autor.sql` | grava o nome de quem criou cada conteúdo |
+| `supabase/24_eventos.sql` | módulo Eventos: eventos, demandas (Kanban), materiais (arquivos e links) e posts ligados ao evento |
+| `supabase/25_pode_conectar.sql` | garante a função pode_conectar() (vinha do 16) usada por Clientes e módulos |
+| `supabase/26_tarefas.sql` | tarefas avulsas do Calendário |
 
 **2. Painel**
 
@@ -70,6 +80,10 @@ companhia sobreviverem ao F5 — sem ele o Apache devolve 404 nas rotas internas
 - **Dashboard** — meta da campanha, total, hoje, 7 dias, fonte principal, gráfico e leads recentes
 - **Leads** — busca, filtro por status e por completo/parcial, CSV, detalhe com UTMs e todas as respostas, mudança de status, atalho de WhatsApp
 - **Funil** — aberturas → começaram a preencher → completos, e onde você perde lead
+- **Clientes** — cadastro em 3 passos (nome, módulos, script da LP) e ficha de cada cliente com os módulos liga/desliga; o que o cliente não usa aparece desativado no portal
+- **Eventos** — cada evento do cliente com visão geral, quadro Kanban de demandas, materiais (upload e links por categoria) e os posts de divulgação ligados a ele
+- **Calendário** — visão geral do cliente: eventos, posts programados e tarefas avulsas no mesmo lugar, por mês, semana ou dia
+- **Programação de Postagem** — posts, carrosséis, stories, reels, vídeos do YouTube e afins de cada cliente, por mês ou em lista; formato, redes, horário, status (ideia → publicado), legenda, link e imagens (carrossel); arrastar para remarcar
 
 ## Duas decisões que explicam o resto
 

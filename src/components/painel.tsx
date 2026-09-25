@@ -22,7 +22,18 @@ import type { Campaign, Project } from "@/lib/types";
 type Painel = {
   projeto: Project | undefined;
   projetos: Project[];
+  /** Só seleciona o cliente, sem transição — é o que a tela Conectar usa. */
   setProjetoId: (id: string) => void;
+  /**
+   * Troca de cliente "de verdade" (seletor da sidebar): além de selecionar,
+   * avisa, dispara a transição com loading e volta pro Dashboard.
+   */
+  trocarCliente: (id: string) => void;
+  /**
+   * Quantas trocas completas houve. Serve de `key` pra reanimar a tela a cada
+   * troca — e começa em 0 pra carga inicial não animar à toa.
+   */
+  trocas: number;
   campanha: Campaign | null;
   campanhas: Campaign[];
   setCampanhaId: (id: string | null) => void;
@@ -45,11 +56,24 @@ export function PainelProvider({ children }: { children: ReactNode }) {
   const projeto = projetos.find((p) => p.id === projetoId) ?? projetos[0];
   const { data: campanhas = [] } = useQuery(campaignsQuery(projeto?.id));
   const campanha = campanhas.find((c) => c.id === campanhaId) ?? null;
+  const [trocas, setTrocas] = useState(0);
 
-  const valor = useMemo<Painel>(
-    () => ({ projeto, projetos, setProjetoId, campanha, campanhas, setCampanhaId }),
-    [projeto, projetos, campanha, campanhas],
-  );
+  const valor = useMemo<Painel>(() => {
+    function selecionar(id: string) {
+      setProjetoId(id);
+      // A campanha é do cliente anterior; levá-la adiante filtraria por nada.
+      if (id !== projeto?.id) setCampanhaId(null);
+    }
+    function trocarCliente(id: string) {
+      // Escolher o mesmo cliente de novo não é troca: nada de cortina.
+      if (id === projeto?.id) return;
+      selecionar(id);
+      // O aviso da troca é a CortinaDeTroca (routes/_authed.tsx), que já
+      // mostra o nome — um toast junto só repetiria por cima dela.
+      setTrocas((n) => n + 1);
+    }
+    return { projeto, projetos, setProjetoId: selecionar, trocarCliente, trocas, campanha, campanhas, setCampanhaId };
+  }, [projeto, projetos, trocas, campanha, campanhas]);
 
   return <PainelCtx.Provider value={valor}>{children}</PainelCtx.Provider>;
 }
@@ -58,7 +82,22 @@ export function PainelProvider({ children }: { children: ReactNode }) {
  * Título da página + seletor de campanha. `atualizavel` liga o botão de
  * buscar leads novos — só nas telas de dados (Dashboard, Leads, Funil).
  */
-export function Cabecalho({ titulo, atualizavel = false }: { titulo: string; atualizavel?: boolean }) {
+export function Cabecalho({
+  titulo,
+  atualizavel = false,
+  oQueAtualiza = "Leads",
+  comCampanha = true,
+  children,
+}: {
+  titulo: string;
+  atualizavel?: boolean;
+  /** Complemento do botão e do aviso ("Atualizar Leads"); "" deixa só "Atualizar". */
+  oQueAtualiza?: string;
+  /** Campanha é recorte de leads; telas como o Calendário não usam. */
+  comCampanha?: boolean;
+  /** Ações próprias da tela, alinhadas à direita do título. */
+  children?: ReactNode;
+}) {
   const { campanha, campanhas, setCampanhaId } = usePainel();
   const qc = useQueryClient();
   // >0 enquanto qualquer query está buscando — anima o ícone e a barra.
@@ -70,7 +109,7 @@ export function Cabecalho({ titulo, atualizavel = false }: { titulo: string; atu
     setAtualizando(true);
     try {
       await qc.invalidateQueries();
-      toast("Leads atualizados com os dados mais recentes.", "success");
+      toast(`${oQueAtualiza || "Dados"} atualizados com as informações mais recentes.`, "success");
     } finally {
       setAtualizando(false);
     }
@@ -83,7 +122,7 @@ export function Cabecalho({ titulo, atualizavel = false }: { titulo: string; atu
       <header className="flex flex-wrap items-center gap-3 sm:h-10 sm:gap-4">
         <h1 className="display text-xl font-bold text-ink sm:text-2xl">{titulo}</h1>
 
-        {campanhas.length > 0 && (
+        {comCampanha && campanhas.length > 0 && (
           <Dropdown
             value={campanha?.id ?? ""}
             onChange={(v) => setCampanhaId(v || null)}
@@ -100,13 +139,15 @@ export function Cabecalho({ titulo, atualizavel = false }: { titulo: string; atu
           <button
             onClick={atualizar}
             disabled={buscando}
-            title="Busca os leads mais recentes do servidor, sem recarregar a página"
+            title="Busca os dados mais recentes do servidor, sem recarregar a página"
             className="ml-auto flex items-center gap-2 rounded-full border border-line/70 bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-gold/50 disabled:opacity-70"
           >
             <RefreshCw size={14} className={buscando ? "animate-spin" : ""} />
-            {buscando ? "Atualizando…" : "Atualizar Leads"}
+            {buscando ? "Atualizando…" : oQueAtualiza ? `Atualizar ${oQueAtualiza}` : "Atualizar"}
           </button>
         )}
+
+        {children && <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>}
       </header>
 
       {/* Barra indeterminada: sinaliza que os dados estão sendo atualizados. */}
