@@ -114,3 +114,25 @@ export function IconeCalendario({ className = "" }: Props) {
     </svg>
   );
 }
+
+/** Eventos: calendário com a quina aberta e uma estrela (ícone fornecido pela OVERSO). */
+export function IconeEventos({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={`${base} ${className}`} aria-hidden>
+      <path
+        d="M12 20.5H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5M3 9h18M7 3v3M17 3v3"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18 14.2l.88 2.19 2.35.16-1.8 1.51.57 2.29L18 19.1l-2 1.25.57-2.29-1.8-1.51 2.35-.16z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

@@ -18,6 +18,7 @@ import { Route as AuthedConectarRouteImport } from './routes/_authed/conectar'
 import { Route as AuthedConfiguracaoRouteImport } from './routes/_authed/configuracao'
 import { Route as AuthedFunilRouteImport } from './routes/_authed/funil'
 import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
+import { Route as AuthedPerfilRouteImport } from './routes/_authed/perfil'
 import { Route as AuthedPostagensRouteImport } from './routes/_authed/postagens'
 import { Route as AuthedEventosIndexRouteImport } from './routes/_authed/eventos/index'
 import { Route as AuthedEventosEventoIdRouteImport } from './routes/_authed/eventos/$eventoId'
@@ -66,6 +67,11 @@ const AuthedLeadsRoute = AuthedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedPerfilRoute = AuthedPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedPostagensRoute = AuthedPostagensRouteImport.update({
   id: '/postagens',
   path: '/postagens',
@@ -91,6 +97,7 @@ export interface FileRoutesByFullPath {
   '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos/': typeof AuthedEventosIndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/configuracao': typeof AuthedConfiguracaoRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
   '/': typeof AuthedIndexRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/_authed/configuracao': typeof AuthedConfiguracaoRoute
   '/_authed/funil': typeof AuthedFunilRoute
   '/_authed/leads': typeof AuthedLeadsRoute
+  '/_authed/perfil': typeof AuthedPerfilRoute
   '/_authed/postagens': typeof AuthedPostagensRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/configuracao'
     | '/funil'
     | '/leads'
+    | '/perfil'
     | '/postagens'
     | '/eventos/$eventoId'
     | '/eventos/'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/configuracao'
     | '/funil'
     | '/leads'
+    | '/perfil'
     | '/postagens'
     | '/'
     | '/eventos/$eventoId'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_authed/configuracao'
     | '/_authed/funil'
     | '/_authed/leads'
+    | '/_authed/perfil'
     | '/_authed/postagens'
     | '/_authed/'
     | '/_authed/eventos/$eventoId'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedLeadsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/perfil': {
+      id: '/_authed/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof AuthedPerfilRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/postagens': {
       id: '/_authed/postagens'
       path: '/postagens'
@@ -267,6 +286,7 @@ interface AuthedRouteChildren {
   AuthedConfiguracaoRoute: typeof AuthedConfiguracaoRoute
   AuthedFunilRoute: typeof AuthedFunilRoute
   AuthedLeadsRoute: typeof AuthedLeadsRoute
+  AuthedPerfilRoute: typeof AuthedPerfilRoute
   AuthedPostagensRoute: typeof AuthedPostagensRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedEventosEventoIdRoute: typeof AuthedEventosEventoIdRoute
@@ -280,6 +300,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedConfiguracaoRoute: AuthedConfiguracaoRoute,
   AuthedFunilRoute: AuthedFunilRoute,
   AuthedLeadsRoute: AuthedLeadsRoute,
+  AuthedPerfilRoute: AuthedPerfilRoute,
   AuthedPostagensRoute: AuthedPostagensRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedEventosEventoIdRoute: AuthedEventosEventoIdRoute,

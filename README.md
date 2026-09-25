@@ -37,6 +37,7 @@ no SQL Editor, na ordem:
 | `supabase/24_eventos.sql` | módulo Eventos: eventos, demandas (Kanban), materiais (arquivos e links) e posts ligados ao evento |
 | `supabase/25_pode_conectar.sql` | garante a função pode_conectar() (vinha do 16) usada por Clientes e módulos |
 | `supabase/26_tarefas.sql` | tarefas avulsas do Calendário |
+| `supabase/27_avatares.sql` | fotos de perfil (bucket público `avatares`) |
 
 **2. Painel**
 

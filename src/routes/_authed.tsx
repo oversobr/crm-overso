@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { Lock, Megaphone, Menu, Moon, PartyPopper, Sun, X } from "lucide-react";
+import { Lock, Megaphone, Menu, Moon, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import {
   IconeCalendario,
+  IconeEventos,
   IconeConectar,
   IconeConfiguracao,
   IconeDashboard,
@@ -64,16 +65,18 @@ const CONTEUDO: { to: string; rotulo: string; Icone: IconeNav; modulo: Modulo }[
   { to: "/eventos", rotulo: "Eventos", Icone: IconeEventos, modulo: "eventos" },
 ];
 
-/** Idem, pra Eventos. */
-function IconeEventos({ className = "" }: { className?: string }) {
-  return <PartyPopper size={18} strokeWidth={1.6} className={`shrink-0 ${className}`} />;
-}
 
 
 // `somenteAdmin` esconde o item de quem não administra nenhuma página. É só a
 // interface: quem chamar a API direto esbarra no banco do mesmo jeito
 // (16_conectar_admin.sql).
+/** Ícone do lucide no mesmo tamanho e traço dos ícones da marca. */
+function IconePerfil({ className = "" }: { className?: string }) {
+  return <UserRound size={18} strokeWidth={1.6} className={`shrink-0 ${className}`} />;
+}
+
 const PREFERENCIAS: { to: string; rotulo: string; Icone: IconeNav; somenteAdmin?: boolean }[] = [
+  { to: "/perfil", rotulo: "Meu perfil", Icone: IconePerfil },
   { to: "/configuracao", rotulo: "Configuração", Icone: IconeConfiguracao },
   { to: "/clientes", rotulo: "Clientes", Icone: IconeConectar, somenteAdmin: true },
 ];
@@ -364,7 +367,7 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
       </nav>
 
       <div className="mt-auto">
-        <Usuario />
+        <Usuario onNavegar={onFechar} />
         <div className="flex flex-col gap-1">
           <BotaoTema />
           <button
@@ -385,7 +388,7 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
 }
 
 /** Bloco de identidade: avatar (imagem ou inicial do nome), nome e email. */
-function Usuario() {
+function Usuario({ onNavegar }: { onNavegar?: () => void }) {
   const { data: user } = useQuery({
     queryKey: ["auth-user"],
     queryFn: async () => {
@@ -401,7 +404,13 @@ function Usuario() {
   const inicial = (nome.trim()[0] ?? "?").toUpperCase();
 
   return (
-    <div className="mb-2 mt-6 flex items-center gap-3 border-t border-line/50 px-2 pt-4">
+    // Clicar no próprio nome/foto leva a Meu perfil.
+    <Link
+      to="/perfil"
+      onClick={onNavegar}
+      title="Meu perfil"
+      className="mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/50 px-2 pt-4 transition hover:opacity-80"
+    >
       {meta.avatar_url ? (
         <img
           src={meta.avatar_url}
@@ -417,7 +426,7 @@ function Usuario() {
         <p className="truncate text-sm font-medium text-ink">{nome}</p>
         <p className="truncate text-xs text-muted">{email}</p>
       </div>
-    </div>
+    </Link>
   );
 }
 
