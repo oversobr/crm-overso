@@ -57,6 +57,7 @@ function Dashboard() {
       busca: "",
       status: "",
       tipo: "",
+      origem: "",
       pagina: 0,
     }),
   );

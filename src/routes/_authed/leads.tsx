@@ -14,6 +14,7 @@ import {
   atualizarStatusEmMassa,
   excluirLead,
   excluirLeadsEmMassa,
+  fonteQuery,
   leadsQuery,
   POR_PAGINA,
 } from "@/lib/queries";
@@ -58,6 +59,7 @@ function Leads() {
   const [busca, setBusca] = useState("");
   const [status, setStatus] = useState("");
   const [tipo, setTipo] = useState("");
+  const [origem, setOrigem] = useState("");
   const [pagina, setPagina] = useState(0);
   const [aberto, setAberto] = useState<Lead | null>(null);
   // Confirmação de exclusão em dois passos, pra não apagar lead sem querer.
@@ -73,9 +75,13 @@ function Leads() {
       busca,
       status,
       tipo,
+      origem,
       pagina,
     }),
   );
+  // As opções vêm dos próprios leads (a mesma view do card "Principal
+  // Fonte"), já que cada cliente usa utm_source diferentes.
+  const { data: fontes } = useQuery(fonteQuery(projeto?.id, campanha?.id ?? null));
 
   const linhas = data?.linhas ?? [];
   const total = data?.total ?? 0;
@@ -85,7 +91,12 @@ function Leads() {
   // estão mais na tela levaria a apagar lead que o usuário nem enxerga.
   useEffect(() => {
     setSelecionados(new Set());
-  }, [busca, status, tipo, pagina, projeto?.id, campanha?.id]);
+  }, [busca, status, tipo, origem, pagina, projeto?.id, campanha?.id]);
+
+  // A origem escolhida pode não existir no cliente ou campanha seguinte.
+  useEffect(() => {
+    setOrigem("");
+  }, [projeto?.id, campanha?.id]);
 
   const idsDaPagina = linhas.map((l) => l.id);
   const todosMarcados = idsDaPagina.length > 0 && idsDaPagina.every((id) => selecionados.has(id));
@@ -269,6 +280,19 @@ function Leads() {
           options={[
             { value: "", label: "Status: Todos" },
             ...Object.entries(STATUS_LABEL).map(([k, v]) => ({ value: k, label: v })),
+          ]}
+          triggerClassName="rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-gold/40"
+        />
+
+        <Dropdown
+          value={origem}
+          onChange={(v) => {
+            setOrigem(v);
+            setPagina(0);
+          }}
+          options={[
+            { value: "", label: "Origem: Todas" },
+            ...(fontes ?? []).map((f) => ({ value: f.fonte, label: `${f.fonte} (${f.total})` })),
           ]}
           triggerClassName="rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-gold/40"
         />

@@ -102,6 +102,8 @@ export type FiltroLeads = {
   status: string;
   /** "" = todos, "completo" = enviados, "parcial" = abandonados */
   tipo: string;
+  /** "" = todas; senão o utm_source, com "direto" para quem chegou sem UTM. */
+  origem: string;
   pagina: number;
 };
 
@@ -121,6 +123,14 @@ export const leadsQuery = (f: FiltroLeads) =>
       if (f.status) q = q.eq("status", f.status);
       if (f.tipo === "completo") q = q.eq("completo", true);
       if (f.tipo === "parcial") q = q.eq("completo", false);
+
+      // "direto" não existe no banco: é o rótulo que a view leads_por_fonte
+      // dá a utm_source vazio ou ausente, então o filtro repete essa regra.
+      if (f.origem === "direto") {
+        q = q.or('utms->>utm_source.is.null,utms->>utm_source.eq.""');
+      } else if (f.origem) {
+        q = q.eq("utms->>utm_source", f.origem);
+      }
 
       // Busca em nome/email/whatsapp de uma vez. As aspas evitam que uma
       // vírgula digitada pelo usuário quebre a sintaxe do filtro `or`.
