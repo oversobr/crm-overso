@@ -49,7 +49,7 @@ export function StatCard({
     >
       <p
         className={`text-[11px] font-medium uppercase tracking-wider ${
-          destaque ? "text-white/70" : "text-muted"
+          destaque ? "text-white" : "text-muted"
         }`}
       >
         {rotulo}

@@ -4,8 +4,8 @@ import { useToasts } from "@/lib/toast";
 
 const ICONE = {
   success: <Check size={16} className="text-emerald-500" />,
-  info: <Info size={16} className="text-gold" />,
-  error: <AlertTriangle size={16} className="text-rose-500" />,
+  info: <Info size={16} className="text-accent" />,
+  error: <AlertTriangle size={16} className="text-rose-600 dark:text-rose-400" />,
 };
 
 /** Renderizado uma vez no layout; empilha as notificações no canto. */

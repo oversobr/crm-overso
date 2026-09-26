@@ -175,7 +175,7 @@ function PainelMarca() {
         </p>
       </div>
 
-      <p className="relative text-xs text-brand-300/60">© {new Date().getFullYear()} OVERSO</p>
+      <p className="relative text-xs text-brand-300/75">© {new Date().getFullYear()} OVERSO</p>
     </section>
   );
 }
@@ -213,7 +213,7 @@ function Campo({
           required
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl border border-line/70 bg-surface-2 py-4 pl-12 text-[15px] text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/60 focus:ring-2 focus:ring-gold/20 ${
+          className={`w-full rounded-xl border border-line/70 bg-surface-2 py-4 pl-12 text-[15px] text-ink outline-none transition placeholder:text-muted focus:border-accent/70 focus:ring-2 focus:ring-accent/30 ${
             acao ? "pr-12" : "pr-4"
           }`}
           {...props}

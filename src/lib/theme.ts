@@ -39,6 +39,10 @@ export function useTema(): Tema {
  */
 export function coresGrafico(tema: Tema) {
   return tema === "light"
-    ? { fill: "#1c62c9", fill2: "#b7c3cc", grade: "#d3dbe1", eixo: "#5c6f83", tooltipBg: "#ffffff", tooltipLinha: "#d3dbe1", ink: "#161f2b" }
-    : { fill: "#2a6ee0", fill2: "#7d93ab", grade: "#2f4d74", eixo: "#9fb0c0", tooltipBg: "#1b2d47", tooltipLinha: "#2f4d74", ink: "#eef1f3" };
+    ? { fill: "#1c62c9", fill2: "#b7c3cc", grade: "#d3dbe1", eixo: "#556878", tooltipBg: "#ffffff", tooltipLinha: "#a3b2bf", ink: "#161f2b" }
+    // Os hex do escuro acompanham os tokens do styles.css: surface #1e3450 e
+    // line #72a0d8. `grade` é mais fraca que a borda de propósito — linha de
+    // grade é guia, não deve competir com a barra; `eixo` é TEXTO e usa o
+    // muted cheio (5.68:1 sobre o card).
+    : { fill: "#2a6ee0", fill2: "#7d93ab", grade: "#3a5f8d", eixo: "#9fb0c0", tooltipBg: "#1e3450", tooltipLinha: "#72a0d8", ink: "#eef1f3" };
 }

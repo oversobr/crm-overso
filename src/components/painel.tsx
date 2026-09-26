@@ -130,7 +130,7 @@ export function Cabecalho({
               { value: "", label: "Todo o período" },
               ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
             ]}
-            leading={<BarChart3 size={14} className="shrink-0 text-gold" />}
+            leading={<BarChart3 size={14} className="shrink-0 text-accent" />}
             triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-2 text-sm text-ink hover:border-gold/40"
           />
         )}

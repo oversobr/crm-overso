@@ -272,7 +272,7 @@ function LeadsTela() {
               setPagina(0);
             }}
             placeholder="Buscar por nome, email ou WhatsApp…"
-            className="w-full rounded-xl border border-line/70 bg-surface py-2.5 pl-9 pr-3 text-sm outline-none focus:border-gold/50"
+            className="w-full rounded-xl border border-line/70 bg-surface py-2.5 pl-9 pr-3 text-sm outline-none focus:border-accent/70"
           />
         </div>
 
@@ -344,7 +344,7 @@ function LeadsTela() {
 
           <button
             onClick={() => setConfirmandoMassa(true)}
-            className="flex items-center gap-2 rounded-xl border border-rose-500/30 px-3 py-2 text-sm text-rose-500 transition hover:bg-rose-500/10"
+            className="flex items-center gap-2 rounded-xl border border-rose-500/30 px-3 py-2 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
           >
             <Trash2 size={14} /> Excluir selecionados
           </button>
@@ -391,7 +391,7 @@ function LeadsTela() {
               <tr
                 key={l.id}
                 onClick={() => setAberto(l)}
-                className="cursor-pointer border-b border-line/25 transition last:border-0 hover:bg-surface-2/60"
+                className="cursor-pointer border-b border-line/40 transition last:border-0 hover:bg-surface-2/60"
               >
                 {/* stopPropagation: marcar não pode abrir o detalhe do lead. */}
                 <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
@@ -489,7 +489,7 @@ function LeadsTela() {
                         href={`https://wa.me/${aberto.whatsapp}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-emerald-600 hover:underline dark:text-emerald-400"
+                        className="inline-flex items-center gap-1.5 text-emerald-700 hover:underline dark:text-emerald-400"
                       >
                         <IconeWhatsApp className="h-4 w-4" /> {aberto.whatsapp}
                       </a>
@@ -572,7 +572,7 @@ function LeadsTela() {
             <div className="border-t border-line/70 pt-4">
               <button
                 onClick={() => setConfirmandoExcluir(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 py-2.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 py-2.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
                 <Trash2 size={15} /> Excluir lead
               </button>
@@ -621,7 +621,7 @@ function LeadsTela() {
         </p>
         <p className="mt-0.5 text-xs text-muted">Não dá para desfazer.</p>
         {excluir.isError && (
-          <p className="mt-2 text-xs text-rose-500">{(excluir.error as Error).message}</p>
+          <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(excluir.error as Error).message}</p>
         )}
         <div className="mt-5 flex gap-2">
           <button

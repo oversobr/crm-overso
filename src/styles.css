@@ -40,13 +40,17 @@
   /* ---- 2. SEMÂNTICAS (default = ESCURO) ---- */
   --color-base: #161f2b;
   --color-sidebar: #10161f; /* menu: levemente mais escuro que a base */
-  --color-surface: #1b2d47;
+  --color-surface: #1e3450;
   --color-surface-2: #223a5c;
-  --color-line: #2f4d74;
+  --color-line: #72a0d8;
   --color-ink: #eef1f3;
   --color-muted: #9fb0c0;
 
-  --color-gold: #2a6ee0; /* acento (azul, levemente clareado p/ fundo escuro) */
+  --color-gold: #2a6ee0; /* acento SÓLIDO: fundo de botão, com texto branco */
+  /* Acento como TEXTO/ícone. Existe separado porque as duas exigências são
+     opostas: #2a6ee0 tem 4.77:1 com branco em cima (ótimo botão) e só
+     2.91:1 como texto sobre o card (ilegível). Este passa nos dois fundos. */
+  --color-accent: #7fb0f5;
   --color-gold-dim: #1850a6; /* acento hover */
   --color-fill: #2a6ee0; /* preenchimento vivo (gráfico) */
   --color-fill-2: #7d93ab; /* segunda série do gráfico */
@@ -62,11 +66,12 @@
   --color-sidebar: #e4e9ed; /* menu: levemente mais escuro que a base */
   --color-surface: #ffffff;
   --color-surface-2: #e4e9ed;
-  --color-line: #d3dbe1;
+  --color-line: #a3b2bf; /* era #d3dbe1: a borda do card sumia no branco */
   --color-ink: #161f2b; /* col 1 */
-  --color-muted: #5c6f83;
+  --color-muted: #556878; /* era #5c6f83: 4.23:1 sobre os campos, abaixo do mínimo */
 
   --color-gold: #1c62c9; /* col 3 — azul da marca */
+  --color-accent: #1c62c9; /* no claro o mesmo azul já tem contraste de sobra */
   --color-gold-dim: #1850a6;
   --color-fill: #1c62c9;
   --color-fill-2: #b7c3cc; /* col 4 */
@@ -76,12 +81,13 @@
 :root[data-theme="dark"] {
   --color-base: #161f2b;
   --color-sidebar: #10161f;
-  --color-surface: #1b2d47;
+  --color-surface: #1e3450;
   --color-surface-2: #223a5c;
-  --color-line: #2f4d74;
+  --color-line: #72a0d8;
   --color-ink: #eef1f3;
   --color-muted: #9fb0c0;
   --color-gold: #2a6ee0;
+  --color-accent: #7fb0f5;
   --color-gold-dim: #1850a6;
   --color-fill: #2a6ee0;
   --color-fill-2: #7d93ab;

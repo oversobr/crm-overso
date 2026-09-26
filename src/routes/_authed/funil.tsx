@@ -84,7 +84,7 @@ function FunilPageTela() {
         <Cabecalho titulo="Funil" atualizavel />
         <Card>
           <div className="py-8 text-center">
-            <p className="text-sm text-rose-400">Não consegui carregar o funil.</p>
+            <p className="text-sm text-rose-600 dark:text-rose-400">Não consegui carregar o funil.</p>
             <p className="mt-1 text-xs text-muted">{(error as Error).message}</p>
           </div>
         </Card>

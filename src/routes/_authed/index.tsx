@@ -237,7 +237,7 @@ function Dashboard() {
         <div className="mb-4 rounded-2xl border border-line/70 bg-surface px-5 py-4">
           <div className="flex items-center justify-between gap-3">
             <p className="flex items-center gap-2 text-sm font-medium text-ink">
-              <Target size={16} className="text-gold" />
+              <Target size={16} className="text-accent" />
               Meta da Campanha ({campanha.nome})
             </p>
             <div className="flex items-center gap-3">
@@ -269,7 +269,7 @@ function Dashboard() {
           ) : (
             <p className="mt-2 text-sm text-muted">
               Nenhuma meta definida.{" "}
-              <button onClick={abrirMeta} className="font-medium text-gold hover:underline">
+              <button onClick={abrirMeta} className="font-medium text-accent hover:underline">
                 Definir meta
               </button>
             </p>
@@ -423,10 +423,10 @@ function Dashboard() {
             }
           }}
           placeholder="Ex.: 500"
-          className="mt-3 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="mt-3 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-accent/70"
         />
         {salvarMeta.isError && (
-          <p className="mt-2 text-xs text-rose-500">{(salvarMeta.error as Error).message}</p>
+          <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(salvarMeta.error as Error).message}</p>
         )}
         <div className="mt-5 flex gap-2">
           <button
@@ -648,7 +648,7 @@ function Kpi({
     >
       <p
         className={`text-[11px] font-medium uppercase tracking-wider ${
-          destaque ? "text-white/70" : "text-muted"
+          destaque ? "text-white" : "text-muted"
         }`}
       >
         {rotulo}
@@ -663,7 +663,7 @@ function Kpi({
         </p>
         {delta != null && <Delta v={delta} />}
       </div>
-      {sub && <p className={`mt-1 text-xs ${destaque ? "text-white/70" : "text-muted"}`}>{sub}</p>}
+      {sub && <p className={`mt-1 text-xs ${destaque ? "text-white" : "text-muted"}`}>{sub}</p>}
     </div>
   );
 }
@@ -674,7 +674,7 @@ function Delta({ v }: { v: number }) {
   return (
     <span
       className={`flex items-center gap-0.5 text-xs font-medium ${
-        subiu ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+        subiu ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
       }`}
     >
       {subiu ? <ArrowUp size={12} /> : <ArrowDown size={12} />}

@@ -84,11 +84,11 @@ export function Dropdown({
                   setAberto(false);
                 }}
                 className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left text-sm transition ${
-                  ativo ? "bg-gold/10 font-medium text-gold" : "text-ink hover:bg-surface-2"
+                  ativo ? "bg-gold/10 font-medium text-accent" : "text-ink hover:bg-surface-2"
                 }`}
               >
                 <span className="truncate">{o.label}</span>
-                {ativo && <Check size={15} className="shrink-0 text-gold" />}
+                {ativo && <Check size={15} className="shrink-0 text-accent" />}
               </button>
             );
           })}
