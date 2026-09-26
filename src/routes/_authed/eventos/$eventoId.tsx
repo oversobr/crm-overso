@@ -132,7 +132,7 @@ function EventoTela() {
           </span>
         )}
         <StatusEventoBadge status={evento.status} />
-        <span className="inline-flex h-6 items-center rounded-full bg-gold/10 px-2.5 text-xs font-medium leading-none text-gold">
+        <span className="inline-flex h-6 items-center rounded-full bg-gold/10 px-2.5 text-xs font-medium leading-none text-accent">
           {contagem(evento)}
         </span>
         {evento.criado_por_nome && (
@@ -235,7 +235,7 @@ function VisaoGeral({ evento, onEditar, irPara }: { evento: Evento; onEditar: ()
             );
           })}
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-line/50 pt-4 text-center">
+        <div className="mt-4 grid grid-cols-2 gap-2 border-t border-line/70 pt-4 text-center">
           <button onClick={() => irPara("materiais")} className="rounded-xl bg-surface-2/60 py-2 transition hover:bg-surface-2">
             <p className="text-lg font-semibold text-ink">{materiais.length}</p>
             <p className="text-[11px] text-muted">materiais</p>
@@ -418,7 +418,7 @@ function Kanban({ evento }: { evento: Evento }) {
                       {d.descricao && <span className="line-clamp-2 text-xs text-muted">{d.descricao}</span>}
                       <span className="flex flex-wrap items-center gap-1.5">
                         {d.responsavel && (
-                          <span className="inline-flex h-6 items-center gap-1 rounded-full bg-gold/10 px-2 text-[11px] font-medium leading-none text-gold">
+                          <span className="inline-flex h-6 items-center gap-1 rounded-full bg-gold/10 px-2 text-[11px] font-medium leading-none text-accent">
                             <UserRound size={11} /> {d.responsavel}
                           </span>
                         )}
@@ -533,7 +533,7 @@ function NovaDemanda({
 }
 
 const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/50 dark:[color-scheme:dark]";
+  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70 dark:[color-scheme:dark]";
 
 function FormDemanda({ demanda, onFechar, onSalvo }: { demanda: Demanda; onFechar: () => void; onSalvo: () => void }) {
   const [f, setF] = useState<DemandaEntrada>({
@@ -600,7 +600,7 @@ function FormDemanda({ demanda, onFechar, onSalvo }: { demanda: Demanda; onFecha
                 aria-pressed={f.status === s}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
                   f.status === s
-                    ? "border-gold bg-gold/10 font-medium text-gold"
+                    ? "border-gold bg-gold/10 font-medium text-accent"
                     : "border-line/70 text-muted hover:border-gold/40 hover:text-ink"
                 }`}
               >
@@ -645,7 +645,7 @@ function FormDemanda({ demanda, onFechar, onSalvo }: { demanda: Demanda; onFecha
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-line/50 pt-4">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
           {confirmando ? (
             <>
               <span className="text-sm text-muted">Excluir de vez?</span>
@@ -665,7 +665,7 @@ function FormDemanda({ demanda, onFechar, onSalvo }: { demanda: Demanda; onFecha
             <button
               type="button"
               onClick={() => setConfirmando(true)}
-              className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+              className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
             >
               <Trash2 size={14} /> Excluir
             </button>
@@ -702,7 +702,7 @@ const tamanho = (b: number | null) =>
 function IconeMaterial({ m }: { m: Material }) {
   const Icone = m.tipo === "link" ? Link2 : m.mime?.startsWith("image/") ? ImageIcon : FileText;
   return (
-    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-gold">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-accent">
       <Icone size={17} />
     </div>
   );
@@ -803,7 +803,7 @@ function Materiais({ evento }: { evento: Evento }) {
               aria-pressed={categoria === c}
               className={`rounded-full border px-3 py-1.5 text-xs transition ${
                 categoria === c
-                  ? "border-gold bg-gold/10 font-medium text-gold"
+                  ? "border-gold bg-gold/10 font-medium text-accent"
                   : "border-line/70 text-muted hover:border-gold/40 hover:text-ink"
               }`}
             >
@@ -826,7 +826,7 @@ function Materiais({ evento }: { evento: Evento }) {
             void enviar(e.dataTransfer.files);
           }}
           className={`flex w-full flex-col items-center gap-1.5 rounded-xl border border-dashed px-4 py-6 text-center text-sm transition ${
-            arrastando ? "border-gold bg-gold/10 text-gold" : "border-line text-muted hover:border-gold/50 hover:text-ink"
+            arrastando ? "border-gold bg-gold/10 text-accent" : "border-line text-muted hover:border-gold/50 hover:text-ink"
           }`}
         >
           {enviando > 0 ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
@@ -847,7 +847,7 @@ function Materiais({ evento }: { evento: Evento }) {
         />
 
         <form
-          className="mt-4 space-y-2 border-t border-line/50 pt-4"
+          className="mt-4 space-y-2 border-t border-line/70 pt-4"
           onSubmit={(e) => {
             e.preventDefault();
             if (linkValido) addLink.mutate();

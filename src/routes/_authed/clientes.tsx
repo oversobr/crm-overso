@@ -155,7 +155,7 @@ function Clientes() {
                   <p className="truncate font-medium text-ink">
                     {c.nome}
                     {c.id === projeto?.id && (
-                      <span className="ml-2 text-xs font-normal text-gold">no painel</span>
+                      <span className="ml-2 text-xs font-normal text-accent">no painel</span>
                     )}
                   </p>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -188,7 +188,7 @@ function Clientes() {
 function Avatar({ nome, grande = false }: { nome: string; grande?: boolean }) {
   return (
     <div
-      className={`flex shrink-0 items-center justify-center rounded-xl bg-gold/15 font-semibold text-gold ${
+      className={`flex shrink-0 items-center justify-center rounded-xl bg-gold/15 font-semibold text-accent ${
         grande ? "h-12 w-12 text-base" : "h-10 w-10 text-sm"
       }`}
     >
@@ -267,7 +267,7 @@ function NovoClienteModal({ onFechar, onAbrirFicha }: { onFechar: () => void; on
             value={nome}
             onChange={(e) => setNome(e.target.value)}
             placeholder="Ex.: Clínica Delmo Sakabe"
-            className="w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50"
+            className="w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-accent/70"
           />
           <Rodape>
             <button type="button" onClick={onFechar} className={BOTAO_SECUNDARIO}>
@@ -305,14 +305,14 @@ function NovoClienteModal({ onFechar, onAbrirFicha }: { onFechar: () => void; on
                   >
                     {ligado && <Check size={12} strokeWidth={3} />}
                   </span>
-                  <m.Icone size={20} className={ligado ? "text-gold" : "text-muted"} />
+                  <m.Icone size={20} className={ligado ? "text-accent" : "text-muted"} />
                   <span className="font-semibold text-ink">{MODULO_LABEL[m.id]}</span>
                   <span className="text-xs leading-relaxed text-muted">{m.descricao}</span>
                 </button>
               );
             })}
           </div>
-          {!algumModulo && <p className="mt-3 text-xs text-rose-500">Escolha ao menos um módulo.</p>}
+          {!algumModulo && <p className="mt-3 text-xs text-rose-600 dark:text-rose-400">Escolha ao menos um módulo.</p>}
           <Rodape>
             <button type="button" onClick={() => setPasso(1)} className={BOTAO_SECUNDARIO}>
               <ArrowLeft size={14} /> Voltar
@@ -332,7 +332,7 @@ function NovoClienteModal({ onFechar, onAbrirFicha }: { onFechar: () => void; on
       {passo === 3 && criado && (
         <>
           <div className="flex items-center gap-3 rounded-xl bg-emerald-500/10 px-4 py-3">
-            <Check size={18} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+            <Check size={18} className="shrink-0 text-emerald-700 dark:text-emerald-400" />
             <p className="text-sm text-ink">
               <span className="font-semibold">{criado.nome}</span> foi cadastrado.
             </p>
@@ -394,7 +394,7 @@ function Passos({ atual }: { atual: 1 | 2 | 3 }) {
           <li key={n} className="flex items-center gap-2">
             <span
               className={`flex h-6 w-6 items-center justify-center rounded-full font-semibold ${
-                aqui ? "bg-gold text-white" : feito ? "bg-gold/15 text-gold" : "bg-surface-2 text-muted"
+                aqui ? "bg-gold text-white" : feito ? "bg-gold/15 text-accent" : "bg-surface-2 text-muted"
               }`}
             >
               {feito ? <Check size={12} strokeWidth={3} /> : num}
@@ -535,7 +535,7 @@ function FichaCliente({ cliente, onFechar }: { cliente: ProjetoGerenciavel; onFe
           <input
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            className="min-w-0 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50"
+            className="min-w-0 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-accent/70"
           />
           <button
             type="submit"
@@ -555,7 +555,7 @@ function FichaCliente({ cliente, onFechar }: { cliente: ProjetoGerenciavel; onFe
             const ultimo = ligado && ligados === 1;
             return (
               <div key={m.id} className="flex items-center gap-3 rounded-xl border border-line/70 p-3">
-                <m.Icone size={18} className={`shrink-0 ${ligado ? "text-gold" : "text-muted"}`} />
+                <m.Icone size={18} className={`shrink-0 ${ligado ? "text-accent" : "text-muted"}`} />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-ink">{MODULO_LABEL[m.id]}</p>
                   <p className="text-xs text-muted">{ultimo ? "O cliente precisa de ao menos um módulo." : m.descricao}</p>
@@ -584,7 +584,7 @@ function FichaCliente({ cliente, onFechar }: { cliente: ProjetoGerenciavel; onFe
         </p>
         <button
           onClick={() => setExcluindo(true)}
-          className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+          className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
         >
           <Trash2 size={14} /> Remover
         </button>
@@ -683,7 +683,7 @@ function ConfirmarRemocao({
           <>
             {" "}
             e apaga{" "}
-            <span className="font-semibold text-rose-500">
+            <span className="font-semibold text-rose-600 dark:text-rose-400">
               {qtdLeads} lead{qtdLeads === 1 ? "" : "s"}
             </span>
           </>
@@ -703,7 +703,7 @@ function ConfirmarRemocao({
         placeholder="Digite o nome exatamente"
         className="mt-2 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-rose-500/60"
       />
-      {remover.isError && <p className="mt-2 text-xs text-rose-500">{(remover.error as Error).message}</p>}
+      {remover.isError && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(remover.error as Error).message}</p>}
       <Rodape>
         <button type="button" onClick={onVoltar} className={BOTAO_SECUNDARIO}>
           <ArrowLeft size={14} /> Voltar
@@ -734,7 +734,7 @@ function Copiar({ texto, rotulo = "Copiar" }: { texto: string; rotulo?: string }
       }}
       className="flex shrink-0 items-center gap-1.5 rounded-xl border border-line/70 px-2.5 py-1.5 text-xs text-ink transition hover:border-gold/50"
     >
-      {copiado ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+      {copiado ? <Check size={12} className="text-emerald-700 dark:text-emerald-400" /> : <Copy size={12} />}
       {copiado ? "Copiado" : rotulo}
     </button>
   );
@@ -814,5 +814,5 @@ const BOTAO_SECUNDARIO =
   "flex items-center justify-center gap-1.5 rounded-full border border-line/70 px-4 py-2 text-sm text-ink transition hover:border-gold/50";
 
 function Rodape({ children }: { children: ReactNode }) {
-  return <div className="mt-6 flex justify-end gap-2 border-t border-line/50 pt-4">{children}</div>;
+  return <div className="mt-6 flex justify-end gap-2 border-t border-line/70 pt-4">{children}</div>;
 }

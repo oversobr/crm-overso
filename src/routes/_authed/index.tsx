@@ -205,7 +205,7 @@ function Dashboard() {
                 { value: "", label: "Todo o período" },
                 ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
               ]}
-              leading={<BarChart3 size={13} className="shrink-0 text-gold" />}
+              leading={<BarChart3 size={13} className="shrink-0 text-accent" />}
               triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-1.5 text-xs text-ink hover:border-gold/40"
             />
           )}
@@ -458,7 +458,7 @@ function Dashboard() {
 /** Divisória entre as áreas da Dashboard (Conteúdo, Leads). */
 function Secao({ titulo, acao, primeira = false }: { titulo: string; acao?: ReactNode; primeira?: boolean }) {
   return (
-    <div className={`mb-3 ${primeira ? "" : "mt-8"} flex flex-wrap items-center justify-between gap-3 border-b border-line/50 pb-2`}>
+    <div className={`mb-3 ${primeira ? "" : "mt-8"} flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-2`}>
       <h2 className="display text-lg font-semibold text-ink">{titulo}</h2>
       {acao}
     </div>
@@ -507,7 +507,7 @@ function SemanaResumo({ dias, conteudos, hoje }: { dias: string[]; conteudos: Co
               </span>
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              {doDia.length === 0 && <span className="text-[11px] text-muted/60 sm:mt-1">—</span>}
+              {doDia.length === 0 && <span className="text-[11px] text-muted sm:mt-1">—</span>}
               {doDia.slice(0, POR_DIA).map((c) => (
                 <span
                   key={c.id}
@@ -537,7 +537,7 @@ function StatusDoMes({ conteudos, atrasados }: { conteudos: Conteudo[]; atrasado
   const nomeMes = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(new Date());
 
   return (
-    <div className="mt-5 border-t border-line/50 pt-4">
+    <div className="mt-5 border-t border-line/70 pt-4">
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-medium text-ink">
           Em {nomeMes}: {total} {total === 1 ? "conteúdo" : "conteúdos"}

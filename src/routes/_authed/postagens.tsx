@@ -287,7 +287,7 @@ function CalendarioTela() {
               </>
             ) : (
               <>
-                <p className="text-sm text-rose-400">Não consegui carregar o calendário.</p>
+                <p className="text-sm text-rose-600 dark:text-rose-400">Não consegui carregar o calendário.</p>
                 <p className="mt-1 text-xs text-muted">{(error as Error).message}</p>
               </>
             )}
@@ -407,7 +407,7 @@ function CalendarioTela() {
                     onDragLeave={arraste.saiu(dia)}
                     onDrop={(e) => soltar(e, dia)}
                     onDoubleClick={(e) => noVazio(e) && novo(dia)}
-                    className={`group relative min-h-32 border-line/50 p-1.5 transition-colors ${
+                    className={`group relative min-h-32 border-line/70 p-1.5 transition-colors ${
                       i % 7 !== 6 ? "border-r" : ""
                     } ${i < periodo.length - 7 ? "border-b" : ""} ${foraDoMes ? "bg-surface-2/40" : ""} ${
                       alvo === dia ? "bg-gold/10 ring-2 ring-inset ring-gold/50" : ""
@@ -626,7 +626,7 @@ function MenuConteudo({
         {duplicar.isPending ? "Duplicando…" : "Duplicar"}
       </button>
 
-      <div className="my-1 border-t border-line/50" />
+      <div className="my-1 border-t border-line/70" />
       <p className="px-2.5 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-wider text-muted">Status</p>
       {(Object.keys(STATUS_CONTEUDO_LABEL) as StatusConteudo[]).map((s) => (
         <button
@@ -638,11 +638,11 @@ function MenuConteudo({
         >
           <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${COR_STATUS_CAL[s].ponto}`} />
           <span className="flex-1">{STATUS_CONTEUDO_LABEL[s]}</span>
-          {c.status === s && <Check size={14} className="text-gold" />}
+          {c.status === s && <Check size={14} className="text-accent" />}
         </button>
       ))}
 
-      <div className="my-1 border-t border-line/50" />
+      <div className="my-1 border-t border-line/70" />
       {confirmando ? (
         <div className="flex items-center gap-2 px-2.5 py-1.5">
           <span className="flex-1 text-sm text-muted">Excluir de vez?</span>
@@ -660,7 +660,7 @@ function MenuConteudo({
       ) : (
         <button
           role="menuitem"
-          className={`${item} text-rose-500 hover:bg-rose-500/10`}
+          className={`${item} text-rose-600 dark:text-rose-400 hover:bg-rose-500/10`}
           onClick={() => setConfirmando(true)}
         >
           <Trash2 size={15} /> Excluir
@@ -698,7 +698,7 @@ function NumeroDia({
         dia === hoje
           ? "bg-gold font-semibold text-white"
           : apagado
-            ? "text-muted/60 hover:bg-surface-2"
+            ? "text-muted hover:bg-surface-2"
             : "font-medium text-ink hover:bg-surface-2"
       }`}
     >
@@ -776,7 +776,7 @@ function GradeHorarios({
               key={dia}
               onClick={() => onAbrirDia?.(dia)}
               title="Abrir o dia"
-              className="flex items-center gap-2 border-l border-line/50 px-3 py-2 text-left transition hover:bg-surface-2/60"
+              className="flex items-center gap-2 border-l border-line/70 px-3 py-2 text-left transition hover:bg-surface-2/60"
             >
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                 {SEMANA[deYmd(dia).getDay()]}
@@ -806,7 +806,7 @@ function GradeHorarios({
           >
             <div
               className={`px-3 py-2 text-right text-[11px] tabular-nums ${
-                agoraAqui ? "font-semibold text-gold" : "text-muted"
+                agoraAqui ? "font-semibold text-accent" : "text-muted"
               }`}
             >
               {rotuloHora ?? "Sem horário"}
@@ -851,7 +851,7 @@ function GradeHorarios({
           </div>
         );
       })}
-      <p className="border-t border-line/50 px-4 py-2.5 text-xs text-muted">
+      <p className="border-t border-line/70 px-4 py-2.5 text-xs text-muted">
         Dica: arraste um conteúdo para outro {detalhado ? "horário" : "dia ou horário"} para remarcar. Dê dois cliques
         numa faixa vazia (ou use o +) para criar já com a hora marcada.
       </p>
@@ -1246,7 +1246,7 @@ const VAZIO: Omit<ConteudoEntrada, "data"> = {
 };
 
 const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/50 dark:[color-scheme:dark]";
+  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70 dark:[color-scheme:dark]";
 
 function Formulario({
   edicao,
@@ -1450,7 +1450,7 @@ function Formulario({
                   resumo={
                     f.evento_id ? (
                       <span className="flex min-w-0 items-center gap-2">
-                        <PartyPopper size={14} className="shrink-0 text-gold" />
+                        <PartyPopper size={14} className="shrink-0 text-accent" />
                         <span className="truncate">
                           {eventos.find((e) => e.id === f.evento_id)?.nome ?? "Evento"}
                         </span>
@@ -1585,7 +1585,7 @@ function Formulario({
               <button
                 type="button"
                 onClick={() => setConfirmandoExcluir(true)}
-                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
                 <Trash2 size={14} /> Excluir
               </button>
@@ -1715,7 +1715,7 @@ function Sanfona<T extends string>({
       </button>
 
       {aberta && (
-        <div className="border-t border-line/50 p-1">
+        <div className="border-t border-line/70 p-1">
           {valores.map((v) => {
             const marcado = ativo(v);
             return (
@@ -1729,7 +1729,7 @@ function Sanfona<T extends string>({
                   if (!multiplo) setAberta(false);
                 }}
                 className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm transition ${
-                  marcado ? "bg-gold/10 font-medium text-gold" : "text-ink hover:bg-surface"
+                  marcado ? "bg-gold/10 font-medium text-accent" : "text-ink hover:bg-surface"
                 }`}
               >
                 {/* Quadrado = pode marcar vários; círculo = só um. */}
@@ -1778,7 +1778,7 @@ function Opcoes<T extends string>({
           aria-pressed={ativo(v)}
           className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
             ativo(v)
-              ? `font-medium ${corAtiva?.(v) ?? "border-gold bg-gold/10 text-gold"}`
+              ? `font-medium ${corAtiva?.(v) ?? "border-gold bg-gold/10 text-accent"}`
               : "border-line/70 text-muted hover:border-gold/40 hover:text-ink"
           }`}
         >

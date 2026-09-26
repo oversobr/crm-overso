@@ -200,7 +200,7 @@ function CortinaDeTroca() {
 /** Barra de topo do celular: só ela dá acesso ao menu quando a gaveta fecha. */
 function BarraMobile({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line/50 bg-sidebar px-4 lg:hidden">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line/70 bg-sidebar px-4 lg:hidden">
       <button
         onClick={onAbrirMenu}
         aria-label="Abrir menu"
@@ -297,7 +297,7 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
       {/* Abaixo de lg a sidebar é uma gaveta que desliza por cima; a partir de
           lg volta a ser coluna fixa do layout (static), e o translate não vale. */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto border-r border-line/50 bg-sidebar px-3 pb-4 pt-6 transition-transform duration-200 lg:static lg:z-auto lg:w-60 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-transform duration-200 lg:static lg:z-auto lg:w-60 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -409,7 +409,7 @@ function Usuario({ onNavegar }: { onNavegar?: () => void }) {
       to="/perfil"
       onClick={onNavegar}
       title="Meu perfil"
-      className="mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/50 px-2 pt-4 transition hover:opacity-80"
+      className="mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/70 px-2 pt-4 transition hover:opacity-80"
     >
       {meta.avatar_url ? (
         <img

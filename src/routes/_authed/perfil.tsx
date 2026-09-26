@@ -214,7 +214,7 @@ function Capa({
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="display truncate text-xl font-bold text-ink">{nome}</h2>
             {equipe && (
-              <span className="inline-flex h-5 items-center gap-1 rounded-full bg-gold/10 px-2 text-[10px] font-medium leading-none text-gold">
+              <span className="inline-flex h-5 items-center gap-1 rounded-full bg-gold/10 px-2 text-[10px] font-medium leading-none text-accent">
                 <ShieldCheck size={10} /> Equipe OVERSO
               </span>
             )}
@@ -245,7 +245,7 @@ function Capa({
       </div>
 
       {/* Dados da conta: dão contexto e ocupam a faixa com o que importa. */}
-      <dl className="grid grid-cols-1 divide-y divide-line/50 border-t border-line/50 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+      <dl className="grid grid-cols-1 divide-y divide-line/50 border-t border-line/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <Dado icone={<Building2 size={15} />} rotulo="Clientes com acesso" valor={String(projetos.length)} />
         <Dado icone={<CalendarDays size={15} />} rotulo="Membro desde" valor={data(criadoEm)} />
         <Dado icone={<Clock size={15} />} rotulo="Último acesso" valor={data(ultimoAcesso, true)} />
@@ -280,7 +280,7 @@ function Dado({ icone, rotulo, valor }: { icone: ReactNode; rotulo: string; valo
 /* ── Nome ───────────────────────────────────────────────────────── */
 
 const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/50";
+  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70";
 
 function Rotulo({ texto, children, dica }: { texto: string; children: ReactNode; dica?: string }) {
   return (
@@ -424,7 +424,7 @@ function Senha() {
           </Rotulo>
         </div>
         {(curta || diferente) && (
-          <p className="text-xs text-rose-500">
+          <p className="text-xs text-rose-600 dark:text-rose-400">
             {curta ? `A senha precisa ter ao menos ${MIN_SENHA} caracteres.` : "As duas senhas não são iguais."}
           </p>
         )}

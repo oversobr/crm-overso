@@ -183,7 +183,7 @@ function FormCampanha({
 
   const rotulo = "mb-1 block text-[11px] font-medium uppercase tracking-wider text-muted";
   const campo =
-    "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-gold/50 dark:[color-scheme:dark]";
+    "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none focus:border-accent/70 dark:[color-scheme:dark]";
 
   return (
     <form
@@ -225,7 +225,7 @@ function FormCampanha({
         />
       </div>
 
-      {erro && <p className="text-xs text-rose-500">{erro}</p>}
+      {erro && <p className="text-xs text-rose-600 dark:text-rose-400">{erro}</p>}
 
       <div className="flex justify-end gap-2 pt-1">
         <button

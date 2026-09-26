@@ -276,7 +276,7 @@ function Calendario() {
                   <div
                     key={dia}
                     {...soltavel(dia)}
-                    className={`group relative min-h-32 border-line/50 p-1.5 transition-colors ${
+                    className={`group relative min-h-32 border-line/70 p-1.5 transition-colors ${
                       i % 7 !== 6 ? "border-r" : ""
                     } ${i < periodo.length - 7 ? "border-b" : ""} ${fora ? "bg-surface-2/40" : ""} ${
                       alvo === dia ? "bg-gold/10 ring-2 ring-inset ring-gold/50" : ""
@@ -318,11 +318,11 @@ function Calendario() {
               <div
                 key={dia}
                 {...soltavel(dia)}
-                className={`group flex min-h-[28rem] flex-col ${i < 6 ? "border-r border-line/50" : ""} ${
+                className={`group flex min-h-[28rem] flex-col ${i < 6 ? "border-r border-line/70" : ""} ${
                   dia === hoje ? "bg-gold/[0.04]" : ""
                 } ${alvo === dia ? "bg-gold/10 ring-2 ring-inset ring-gold/50" : ""}`}
               >
-                <div className="flex items-center justify-between border-b border-line/50 px-2 py-2">
+                <div className="flex items-center justify-between border-b border-line/70 px-2 py-2">
                   <button
                     onClick={() => {
                       setRef(dia);
@@ -462,7 +462,7 @@ function NumeroDia({ dia, hoje, apagado, onClick }: { dia: string; hoje: string;
         dia === hoje
           ? "bg-gold font-semibold text-white"
           : apagado
-            ? "text-muted/60 hover:bg-surface-2"
+            ? "text-muted hover:bg-surface-2"
             : "font-medium text-ink hover:bg-surface-2"
       }`}
     >
@@ -590,7 +590,7 @@ function Lista({
             }`}
           >
             <div className="mb-3 flex items-center justify-between">
-              <h3 className={`text-sm font-semibold ${dia === hoje ? "text-gold" : "text-ink"}`}>
+              <h3 className={`text-sm font-semibold ${dia === hoje ? "text-accent" : "text-ink"}`}>
                 {dia === hoje ? "Hoje · " : ""}
                 {diaExtenso(dia)}
               </h3>
@@ -620,7 +620,7 @@ function Lista({
 /* ── Tarefa: criar / editar ─────────────────────────────────────── */
 
 const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/50 dark:[color-scheme:dark]";
+  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70 dark:[color-scheme:dark]";
 
 function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; projectId: string; onFechar: () => void }) {
   const qc = useQueryClient();
@@ -719,7 +719,7 @@ function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; pro
                 aria-pressed={f.status === s}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition ${
                   f.status === s
-                    ? "border-gold bg-gold/10 font-medium text-gold"
+                    ? "border-gold bg-gold/10 font-medium text-accent"
                     : "border-line/70 text-muted hover:border-gold/40 hover:text-ink"
                 }`}
               >
@@ -758,7 +758,7 @@ function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; pro
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2 border-t border-line/50 pt-4">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
           {editando &&
             (confirmando ? (
               <>
@@ -779,7 +779,7 @@ function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; pro
               <button
                 type="button"
                 onClick={() => setConfirmando(true)}
-                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
                 <Trash2 size={14} /> Excluir
               </button>

@@ -59,7 +59,7 @@ export function periodoEvento(e: Pick<Evento, "data_inicio" | "data_fim">) {
 }
 
 const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted/60 focus:border-gold/50 dark:[color-scheme:dark]";
+  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70 dark:[color-scheme:dark]";
 
 function Campo({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   return (
@@ -223,7 +223,7 @@ export function FormEvento({
           />
         </Campo>
 
-        <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-line/50 pt-4">
+        <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-line/70 pt-4">
           {evento &&
             (confirmando ? (
               <>
@@ -248,7 +248,7 @@ export function FormEvento({
               <button
                 type="button"
                 onClick={() => setConfirmando(true)}
-                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-500 transition hover:bg-rose-500/10"
+                className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
                 <Trash2 size={14} /> Excluir
               </button>

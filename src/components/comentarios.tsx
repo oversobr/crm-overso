@@ -159,7 +159,7 @@ export function Comentarios({
                 <div
                   title={c.autor_email}
                   className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
-                    meu ? "bg-gold text-white" : "bg-gold/15 text-gold"
+                    meu ? "bg-gold text-white" : "bg-gold/15 text-accent"
                   }`}
                 >
                   {iniciais(c.autor_nome || c.autor_email)}
@@ -203,7 +203,7 @@ export function Comentarios({
             }
           }}
           placeholder="Escreva um comentário…"
-          className="min-w-0 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm text-ink outline-none placeholder:text-muted/60 disabled:cursor-not-allowed"
+          className="min-w-0 flex-1 resize-none bg-transparent px-1.5 py-1 text-sm text-ink outline-none placeholder:text-muted disabled:cursor-not-allowed"
         />
         <button
           type="button"

@@ -129,7 +129,7 @@ function CardEvento({ e, demandas, apagado = false }: { e: Evento; demandas: Res
     >
       <div className="flex items-start gap-3">
         {/* Bloco da data, como um calendário de mesa. */}
-        <div className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-gold/10 py-2 text-gold">
+        <div className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-gold/10 py-2 text-accent">
           <span className="text-[10px] font-semibold uppercase">
             {fmt(e.data_inicio, { month: "short" }).replace(".", "")}
           </span>

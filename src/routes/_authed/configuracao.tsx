@@ -81,7 +81,7 @@ function AcessoGlobal() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email@daequipe.com"
-          className="min-w-56 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="min-w-56 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-accent/70"
         />
         <button
           onClick={() => email.trim() && definir.mutate({ email: email.trim(), ativar: true })}
@@ -92,7 +92,7 @@ function AcessoGlobal() {
         </button>
       </div>
       {definir.isError && (
-        <p className="mt-2 text-xs text-rose-500">{(definir.error as Error).message}</p>
+        <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(definir.error as Error).message}</p>
       )}
 
       <div className="mt-4 space-y-2">
@@ -103,7 +103,7 @@ function AcessoGlobal() {
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-ink">{g.email}</p>
-              <p className="text-xs text-gold">Vê todos os clientes</p>
+              <p className="text-xs text-accent">Vê todos os clientes</p>
             </div>
             <button
               onClick={() => definir.mutate({ email: g.email, ativar: false })}
@@ -192,7 +192,7 @@ function Equipe() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="email@dapessoa.com"
-          className="min-w-56 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-gold/50"
+          className="min-w-56 flex-1 rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-accent/70"
         />
         <Dropdown
           value={papel}
@@ -212,7 +212,7 @@ function Equipe() {
         </button>
       </div>
       {conceder.isError && (
-        <p className="mt-2 text-xs text-rose-500">{(conceder.error as Error).message}</p>
+        <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(conceder.error as Error).message}</p>
       )}
 
       <div className="mt-4 space-y-2">
@@ -258,7 +258,7 @@ function Aparencia() {
             onClick={() => trocarTema(id)}
             className={`flex flex-1 items-center justify-center gap-2 rounded-xl border py-4 text-sm transition ${
               tema === id
-                ? "border-gold/50 bg-gold/10 font-semibold text-gold"
+                ? "border-gold/50 bg-gold/10 font-semibold text-accent"
                 : "border-line/70 text-muted hover:text-ink"
             }`}
           >
