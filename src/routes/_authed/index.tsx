@@ -24,7 +24,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { coresGrafico, useTema } from "@/lib/theme";
 import { toast } from "@/lib/toast";
 import type { Conteudo, Funil, StatusConteudo } from "@/lib/types";
-import { STATUS_CONTEUDO_LABEL } from "@/lib/types";
+import { PARADOS, STATUS_CONTEUDO_LABEL } from "@/lib/types";
 import { ModuloDesativado } from "@/components/modulo";
 import { modulosDe } from "@/lib/types";
 
@@ -33,8 +33,6 @@ export const Route = createFileRoute("/_authed/")({ component: Dashboard });
 const diaCurto = (iso: string) =>
   new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
 
-/** O que ainda não saiu do lugar: passou do dia e não está agendado nem publicado. */
-const PARADOS: StatusConteudo[] = ["ideia", "producao", "aprovacao"];
 
 function Dashboard() {
   const { projeto, campanha, campanhas, setCampanhaId } = usePainel();

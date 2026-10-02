@@ -221,3 +221,48 @@ input:-webkit-autofill:focus {
   caret-color: var(--color-ink);
   transition: background-color 9999s ease-in-out 0s;
 }
+
+/* ── Impressão (Relatórios → PDF pelo navegador) ────────────────────
+   O painel é uma moldura de tela: sidebar fixa, h-dvh e só o <main>
+   rolando. Impresso assim, sai uma página com o menu e o resto cortado.
+   Aqui a moldura vira documento: tudo em altura automática, navegação e
+   controles fora, e fundo branco com texto escuro — tinta é cara e o
+   tema escuro imprime um retângulo navy. */
+@media print {
+  .nao-imprime,
+  aside,
+  header button {
+    display: none !important;
+  }
+
+  html,
+  body,
+  #root {
+    height: auto !important;
+    overflow: visible !important;
+    background: #fff !important;
+    color: #161f2b !important;
+  }
+
+  /* Desfaz o h-dvh + overflow-hidden da moldura e o scroll do <main>. */
+  #root * {
+    overflow: visible !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+
+  /* Cards: a borda some no papel, então vira contorno cinza de verdade. */
+  [class*="bg-surface"],
+  [class*="bg-base"] {
+    background: #fff !important;
+    border-color: #c9d2db !important;
+  }
+
+  /* Um indicador ou uma tabela não deve ser partido entre páginas. */
+  table,
+  section,
+  .quebra-evitar {
+    break-inside: avoid;
+  }
+}

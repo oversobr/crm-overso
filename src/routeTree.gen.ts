@@ -20,6 +20,7 @@ import { Route as AuthedFunilRouteImport } from './routes/_authed/funil'
 import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
 import { Route as AuthedPerfilRouteImport } from './routes/_authed/perfil'
 import { Route as AuthedPostagensRouteImport } from './routes/_authed/postagens'
+import { Route as AuthedRelatoriosRouteImport } from './routes/_authed/relatorios'
 import { Route as AuthedEventosIndexRouteImport } from './routes/_authed/eventos/index'
 import { Route as AuthedEventosEventoIdRouteImport } from './routes/_authed/eventos/$eventoId'
 
@@ -77,6 +78,11 @@ const AuthedPostagensRoute = AuthedPostagensRouteImport.update({
   path: '/postagens',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedRelatoriosRoute = AuthedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedEventosIndexRoute = AuthedEventosIndexRouteImport.update({
   id: '/eventos/',
   path: '/eventos/',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/leads': typeof AuthedLeadsRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
+  '/relatorios': typeof AuthedRelatoriosRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos/': typeof AuthedEventosIndexRoute
 }
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/leads': typeof AuthedLeadsRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
+  '/relatorios': typeof AuthedRelatoriosRoute
   '/': typeof AuthedIndexRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos': typeof AuthedEventosIndexRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/_authed/leads': typeof AuthedLeadsRoute
   '/_authed/perfil': typeof AuthedPerfilRoute
   '/_authed/postagens': typeof AuthedPostagensRoute
+  '/_authed/relatorios': typeof AuthedRelatoriosRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/_authed/eventos/': typeof AuthedEventosIndexRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/perfil'
     | '/postagens'
+    | '/relatorios'
     | '/eventos/$eventoId'
     | '/eventos/'
   fileRoutesByTo: FileRoutesByTo
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/leads'
     | '/perfil'
     | '/postagens'
+    | '/relatorios'
     | '/'
     | '/eventos/$eventoId'
     | '/eventos'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/_authed/leads'
     | '/_authed/perfil'
     | '/_authed/postagens'
+    | '/_authed/relatorios'
     | '/_authed/'
     | '/_authed/eventos/$eventoId'
     | '/_authed/eventos/'
@@ -262,6 +274,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPostagensRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/relatorios': {
+      id: '/_authed/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthedRelatoriosRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/eventos/': {
       id: '/_authed/eventos/'
       path: '/eventos'
@@ -288,6 +307,7 @@ interface AuthedRouteChildren {
   AuthedLeadsRoute: typeof AuthedLeadsRoute
   AuthedPerfilRoute: typeof AuthedPerfilRoute
   AuthedPostagensRoute: typeof AuthedPostagensRoute
+  AuthedRelatoriosRoute: typeof AuthedRelatoriosRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedEventosEventoIdRoute: typeof AuthedEventosEventoIdRoute
   AuthedEventosIndexRoute: typeof AuthedEventosIndexRoute
@@ -302,6 +322,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedLeadsRoute: AuthedLeadsRoute,
   AuthedPerfilRoute: AuthedPerfilRoute,
   AuthedPostagensRoute: AuthedPostagensRoute,
+  AuthedRelatoriosRoute: AuthedRelatoriosRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedEventosEventoIdRoute: AuthedEventosEventoIdRoute,
   AuthedEventosIndexRoute: AuthedEventosIndexRoute,

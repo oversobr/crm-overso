@@ -119,6 +119,13 @@ export const STATUS_CONTEUDO_LABEL: Record<StatusConteudo, string> = {
   publicado: "Publicado",
 };
 
+/**
+ * Status que ainda não saíram do lugar. Um conteúdo nesses, com a data já
+ * passada, é um ATRASADO. Mora aqui porque Dashboard e Relatórios precisam
+ * da mesma régua — definições duplicadas divergem e os números param de bater.
+ */
+export const PARADOS: StatusConteudo[] = ["ideia", "producao", "aprovacao"];
+
 export type Conteudo = {
   id: string;
   project_id: string;

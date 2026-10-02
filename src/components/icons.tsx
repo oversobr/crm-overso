@@ -136,3 +136,23 @@ export function IconeEventos({ className = "" }: Props) {
     </svg>
   );
 }
+
+/** Relatórios: barras + eixo. Desenhado no mesmo traço dos demais (1.5, currentColor). */
+export function IconeRelatorios({ className = "" }: Props) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={`${base} ${className}`} aria-hidden>
+      <path
+        d="M2.5 1.25v14.5a2.5 2.5 0 0 0 2.5 2.5h12.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <path
+        d="M6.75 14.5V9.5M10.75 14.5V4.75M14.75 14.5v-7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
