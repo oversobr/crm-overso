@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BarChart3, Pencil, Target } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BarChart3, ChevronRight, Pencil, Target } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -101,6 +101,19 @@ function Dashboard() {
   const publicadosSemana = daSemana.filter((c) => c.status === "publicado").length;
   const emAprovacao = conteudos.filter((c) => c.data >= hoje && c.status === "aprovacao").length;
 
+  // ── "Precisa de você": o que está parado esperando alguém agir.
+  // `atualizado_em` é a última vez que o conteúdo mudou; num que está em
+  // aprovação, é há quanto tempo ele espera o cliente responder. Não é o
+  // instante exato em que entrou nesse status (o banco não guarda histórico),
+  // mas é a melhor aproximação sem migration — e erra para o lado seguro:
+  // qualquer mexida reinicia a contagem, então nada aparece como parado à toa.
+  const DIAS_PARADO = 3;
+  const limiteParado = somarDias(hoje, -DIAS_PARADO);
+  const paradosAprovacao = conteudos.filter(
+    (c) => c.status === "aprovacao" && (c.atualizado_em ?? "").slice(0, 10) <= limiteParado,
+  );
+  const pendencias = atrasados.length + paradosAprovacao.length;
+
   const leads = recentes?.linhas ?? [];
   const total = funil?.completos ?? 0;
   const leadsHoje = serie.at(-1)?.total ?? 0;
@@ -138,17 +151,16 @@ function Dashboard() {
         </Card>
       ) : (
         <>
-        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Kpi rotulo="Na Semana" valor={daSemana.length} sub={`${publicadosSemana} publicado${publicadosSemana === 1 ? "" : "s"}`} destaque />
-          <Kpi rotulo="No Mês" valor={doMes.length} sub="conteúdos planejados" />
-          <Kpi rotulo="Em Aprovação" valor={emAprovacao} sub="aguardando o cliente" />
-          <Kpi
-            rotulo="Atrasados"
-            valor={atrasados.length}
-            sub={atrasados.length ? "passaram do dia sem agendar" : "tudo em dia"}
-            alerta={atrasados.length > 0}
-          />
-        </div>
+        {/* Quatro cards de peso igual viraram uma tira: os números continuam
+            todos aqui, mas param de competir com o topo da página. */}
+        <TiraKpi
+          itens={[
+            { rotulo: "Na semana", valor: daSemana.length },
+            { rotulo: "No mês", valor: doMes.length },
+            { rotulo: "Em aprovação", valor: emAprovacao },
+            { rotulo: "Atrasados", valor: atrasados.length, alerta: atrasados.length > 0 },
+          ]}
+        />
         <div className="grid gap-4 lg:grid-cols-3">
           <Card
             className="lg:col-span-2"
@@ -221,15 +233,18 @@ function Dashboard() {
         <ModuloDesativado modulo="crm" compacto />
       ) : (
       <>
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">
-        <Kpi rotulo="Total de Leads" valor={total} destaque />
-        <Kpi rotulo="Leads Hoje" valor={leadsHoje} delta={leadsHoje - leadsOntem} />
-        <Kpi
-          rotulo="Taxa de Conversão"
-          valor={funil?.tx_conversao != null ? `${funil.tx_conversao}%` : "—"}
-          sub="de abertura até completo"
-        />
-      </div>
+      {/* "Leads hoje" subiu pro topo da página; repetir aqui só ocuparia
+          espaço dizendo a mesma coisa duas vezes. */}
+      <TiraKpi
+        itens={[
+          { rotulo: "Total de leads", valor: total },
+          {
+            rotulo: "Taxa de conversão",
+            valor: funil?.tx_conversao != null ? `${funil.tx_conversao}%` : "—",
+          },
+          { rotulo: "Aberturas do form", valor: funil?.aberturas ?? 0 },
+        ]}
+      />
 
       {campanha && (
         <div className="mb-4 rounded-2xl border border-line/70 bg-surface px-5 py-4">
@@ -338,7 +353,20 @@ function Dashboard() {
         </Card>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      {/* Fontes e Leads Recentes existem inteiros em /relatorios e /leads.
+          Em vez de remover (você pode usar no dia a dia), ficam recolhidos:
+          a página encurta e eles continuam a um clique. O <details> guarda o
+          estado enquanto a tela não é remontada. */}
+      <details className="group mt-4">
+        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-1 py-2 text-sm text-muted transition hover:text-ink">
+          <ChevronRight
+            size={15}
+            className="shrink-0 transition-transform group-open:rotate-90"
+          />
+          Fontes e leads recentes
+        </summary>
+
+        <div className="mt-2 grid gap-4 lg:grid-cols-2">
         <Card titulo="Fontes">
           {fontes.length === 0 ? (
             <Vazio>Sem leads ainda.</Vazio>
@@ -375,7 +403,8 @@ function Dashboard() {
             </div>
           )}
         </Card>
-      </div>
+        </div>
+      </details>
       </>
       )}
     </>
@@ -390,6 +419,33 @@ function Dashboard() {
       <Cabecalho titulo="Dashboard" atualizavel comCampanha={false} oQueAtualiza="" />
 
       <DadosBlur>
+      {/* Antes era "aqui está tudo", com 7 KPIs de peso igual misturando
+          escalas de tempo. Agora o topo responde duas perguntas: o que
+          preciso fazer, e como foi hoje. O resto desce de hierarquia. */}
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <Kpi
+          rotulo="Precisa de você"
+          valor={pendencias}
+          sub={pendencias ? "itens parados" : "nada parado"}
+          alerta={pendencias > 0}
+          destaque={pendencias === 0}
+        />
+        {mods.conteudo && (
+          <Kpi
+            rotulo="Publicados na semana"
+            valor={publicadosSemana}
+            sub={`de ${daSemana.length} programado${daSemana.length === 1 ? "" : "s"}`}
+          />
+        )}
+        {mods.crm && (
+          <Kpi rotulo="Leads hoje" valor={leadsHoje} delta={leadsHoje - leadsOntem} />
+        )}
+      </div>
+
+      {mods.conteudo && pendencias > 0 && (
+        <PrecisaDeVoce atrasados={atrasados} parados={paradosAprovacao} hoje={hoje} />
+      )}
+
       {conteudoPrimeiro ? (
         <>
           {areaConteudo(true)}
@@ -615,6 +671,91 @@ function ItemProximo({ c, hoje }: { c: Conteudo; hoje: string }) {
         </div>
       </div>
     </Link>
+  );
+}
+
+/**
+ * Números de apoio numa tira só, em vez de um card por número. Mesma
+ * informação, uma fração do peso visual — é o que tira o topo da página da
+ * competição com quatro caixas do mesmo tamanho.
+ */
+function TiraKpi({
+  itens,
+}: {
+  itens: { rotulo: string; valor: React.ReactNode; alerta?: boolean }[];
+}) {
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-line/70 bg-surface px-5 py-3.5">
+      {itens.map(({ rotulo, valor, alerta }) => (
+        <div key={rotulo}>
+          <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{rotulo}</p>
+          <p
+            className={`text-lg font-semibold ${
+              alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
+            }`}
+          >
+            {valor}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * O que está parado esperando alguém agir. É a única parte da Dashboard que
+ * pede ação em vez de informar estado — por isso fica no topo, e cada linha
+ * leva direto pra programação, onde o problema se resolve.
+ */
+function PrecisaDeVoce({
+  atrasados,
+  parados,
+  hoje,
+}: {
+  atrasados: Conteudo[];
+  parados: Conteudo[];
+  hoje: string;
+}) {
+  const diasDesde = (dia: string) =>
+    Math.round((deYmd(hoje).getTime() - deYmd(dia).getTime()) / 864e5);
+
+  const itens = [
+    ...atrasados.map((c) => ({
+      c,
+      motivo: `atrasado há ${diasDesde(c.data)} dia${diasDesde(c.data) === 1 ? "" : "s"}`,
+    })),
+    ...parados.map((c) => ({ c, motivo: "parado em aprovação" })),
+  ];
+
+  return (
+    <Card
+      className="mb-5 border-rose-500/30 bg-rose-500/5"
+      titulo="Precisa de você"
+      acao={
+        <Link
+          to="/postagens"
+          className="flex items-center gap-1.5 text-xs text-muted transition hover:text-ink"
+        >
+          Ver tudo <ArrowRight size={13} />
+        </Link>
+      }
+    >
+      <div className="space-y-1">
+        {itens.slice(0, 5).map(({ c, motivo }) => (
+          <Link
+            key={c.id}
+            to="/postagens"
+            className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm transition hover:bg-surface-2/60"
+          >
+            <span className="min-w-0 truncate text-ink">{c.titulo}</span>
+            <span className="shrink-0 text-xs text-rose-600 dark:text-rose-400">{motivo}</span>
+          </Link>
+        ))}
+        {itens.length > 5 && (
+          <p className="px-2 pt-1 text-xs text-muted">e mais {itens.length - 5}…</p>
+        )}
+      </div>
+    </Card>
   );
 }
 
