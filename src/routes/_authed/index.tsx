@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BarChart3, ChevronRight, Pencil, Target } from "lucide-react";
+import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BarChart3, CheckCircle2, ChevronRight, Pencil, Send, Target, Users } from "lucide-react";
 import type { ReactNode } from "react";
+import type { ComponentType } from "react";
 import { useState } from "react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { COR_STATUS_CAL, PilulasConteudo, StatusConteudoBadge } from "@/components/conteudo";
 import { Dropdown } from "@/components/dropdown";
@@ -86,7 +87,10 @@ function Dashboard() {
   const inicioMes = `${hoje.slice(0, 7)}-01`;
   const fimMes = ymd(new Date(deYmd(hoje).getFullYear(), deYmd(hoje).getMonth() + 1, 0));
   const daqui30 = somarDias(hoje, 30);
-  const de = [semana[0]!, inicioMes].sort()[0]!;
+  // A semana anterior entra na janela porque o KPI do topo compara com ela —
+  // sem isso o "Semana passada: N" leria sempre zero, por falta de dado.
+  const semanaAnterior = semanaDe(somarDias(hoje, -7));
+  const de = [semanaAnterior[0]!, semana[0]!, inicioMes].sort()[0]!;
   const ate = [semana[6]!, fimMes, daqui30].sort().at(-1)!;
   const { data: conteudos = [], error: erroConteudo, isLoading: carregandoConteudo } = useQuery(
     conteudosQuery(projeto?.id, de, ate),
@@ -99,6 +103,10 @@ function Dashboard() {
   const proximos = conteudos.filter((c) => c.data >= hoje).slice(0, 15);
   const atrasados = conteudos.filter((c) => c.data < hoje && PARADOS.includes(c.status));
   const publicadosSemana = daSemana.filter((c) => c.status === "publicado").length;
+  const publicadosSemanaAnterior = conteudos.filter(
+    (c) =>
+      c.data >= semanaAnterior[0]! && c.data <= semanaAnterior[6]! && c.status === "publicado",
+  ).length;
   const emAprovacao = conteudos.filter((c) => c.data >= hoje && c.status === "aprovacao").length;
 
   // ── "Precisa de você": o que está parado esperando alguém agir.
@@ -113,6 +121,31 @@ function Dashboard() {
     (c) => c.status === "aprovacao" && (c.atualizado_em ?? "").slice(0, 10) <= limiteParado,
   );
   const pendencias = atrasados.length + paradosAprovacao.length;
+
+  // Mesma queryKey do bloco de usuário na sidebar: o react-query devolve do
+  // cache, sem uma segunda ida ao servidor.
+  const { data: usuario } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => {
+      const { data } = await getSupabaseBrowserClient().auth.getUser();
+      return data.user;
+    },
+  });
+  const metaUsuario = (usuario?.user_metadata ?? {}) as { full_name?: string; name?: string };
+  const nomeUsuario =
+    metaUsuario.full_name || metaUsuario.name || usuario?.email?.split("@")[0] || "";
+
+  // Saudação pela hora do dia, como nas referências — o painel cumprimenta
+  // quem abriu em vez de anunciar "Dashboard", que a pessoa já sabe.
+  const hora = new Date().getHours();
+  const primeiroNome = (nomeUsuario ?? "").trim().split(" ")[0] ?? "";
+  const saudacao =
+    (hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite") +
+    (primeiroNome ? `, ${primeiroNome}` : "");
+
+  // Dia de pico da série — é a barra que fica cheia no gráfico. Empate fica
+  // com o mais recente, que é o que interessa olhar.
+  const iPico = serie.reduce((melhor, d, i) => (d.total >= (serie[melhor]?.total ?? -1) ? i : melhor), 0);
 
   const leads = recentes?.linhas ?? [];
   const total = funil?.completos ?? 0;
@@ -339,8 +372,29 @@ function Dashboard() {
                     color: cor.ink,
                   }}
                 />
-                <Bar dataKey="completos" name="Completos" stackId="a" fill={cor.fill} />
-                <Bar dataKey="parciais" name="Parciais" stackId="a" fill={cor.fill2} radius={[4, 4, 0, 0]} />
+                {/* O dia de melhor resultado fica cheio e o resto esmaecido,
+                    como nas referências: a leitura vira "qual foi o pico"
+                    em vez de 30 barras de peso igual. O rótulo só aparece
+                    nele, e só quando houve algum lead. */}
+                <Bar dataKey="completos" name="Completos" stackId="a">
+                  {serie.map((d, i) => (
+                    <Cell
+                      key={d.dia}
+                      fill={cor.fill}
+                      fillOpacity={i === iPico ? 1 : 0.35}
+                    />
+                  ))}
+                </Bar>
+                <Bar dataKey="parciais" name="Parciais" stackId="a" radius={[4, 4, 0, 0]}>
+                  {serie.map((d, i) => (
+                    <Cell
+                      key={d.dia}
+                      fill={cor.fill2}
+                      fillOpacity={i === iPico ? 1 : 0.35}
+                    />
+                  ))}
+                  <LabelList dataKey="total" content={<RotuloPico indice={iPico} cor={cor} />} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -416,29 +470,56 @@ function Dashboard() {
     <>
       {/* Topo neutro: a Dashboard junta Conteúdo e CRM, então período e
           atualização de leads ficam na área do CRM, não aqui. */}
-      <Cabecalho titulo="Dashboard" atualizavel comCampanha={false} oQueAtualiza="" />
+      <Cabecalho
+        titulo={saudacao}
+        subtitulo={
+          projeto
+            ? `Veja o que está acontecendo com ${projeto.nome} hoje.`
+            : "Escolha um cliente no menu para ver os números dele."
+        }
+        atualizavel
+        comCampanha={false}
+        oQueAtualiza=""
+      />
 
       <DadosBlur>
       {/* Antes era "aqui está tudo", com 7 KPIs de peso igual misturando
           escalas de tempo. Agora o topo responde duas perguntas: o que
           preciso fazer, e como foi hoje. O resto desce de hierarquia. */}
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Kpi
           rotulo="Precisa de você"
           valor={pendencias}
-          sub={pendencias ? "itens parados" : "nada parado"}
+          sub={pendencias ? "itens parados esperando ação" : "nada parado"}
           alerta={pendencias > 0}
           destaque={pendencias === 0}
+          Icone={pendencias > 0 ? AlertTriangle : CheckCircle2}
+          chip="rosa"
+          comparacao={
+            pendencias > 0
+              ? `${atrasados.length} atrasado${atrasados.length === 1 ? "" : "s"} · ${paradosAprovacao.length} em aprovação`
+              : "Tudo em dia"
+          }
         />
         {mods.conteudo && (
           <Kpi
             rotulo="Publicados na semana"
             valor={publicadosSemana}
             sub={`de ${daSemana.length} programado${daSemana.length === 1 ? "" : "s"}`}
+            Icone={Send}
+            chip="verde"
+            comparacao={`Semana passada: ${publicadosSemanaAnterior}`}
           />
         )}
         {mods.crm && (
-          <Kpi rotulo="Leads hoje" valor={leadsHoje} delta={leadsHoje - leadsOntem} />
+          <Kpi
+            rotulo="Leads hoje"
+            valor={leadsHoje}
+            delta={leadsHoje - leadsOntem}
+            Icone={Users}
+            chip="acento"
+            comparacao={`Ontem: ${leadsOntem}`}
+          />
         )}
       </div>
 
@@ -759,6 +840,53 @@ function PrecisaDeVoce({
   );
 }
 
+/**
+ * Etiqueta flutuante sobre a barra de pico — o detalhe que as referências
+ * usam pra dizer "foi aqui". Só desenha no índice do pico e só se houve
+ * lead; em série zerada não há pico nenhum a apontar.
+ */
+function RotuloPico({
+  indice,
+  cor,
+  x,
+  y,
+  width,
+  value,
+  index,
+}: {
+  indice: number;
+  cor: { fill: string };
+  x?: number;
+  y?: number;
+  width?: number;
+  value?: number;
+  index?: number;
+}) {
+  if (index !== indice || !value || x == null || y == null || width == null) return null;
+
+  const texto = String(value);
+  const largura = texto.length * 8 + 16;
+
+  return (
+    <g transform={`translate(${x + width / 2}, ${y - 10})`}>
+      <rect x={-largura / 2} y={-18} width={largura} height={20} rx={10} fill={cor.fill} />
+      <text textAnchor="middle" y={-4} fontSize={11} fontWeight={600} fill="#fff">
+        {texto}
+      </text>
+    </g>
+  );
+}
+
+/* Cada KPI tem seu chip de cor, como nas referências — é o que dá identidade
+   a cada número de relance, sem precisar ler o rótulo. Os pares são
+   claro/escuro porque um `bg-rose-500/12` que funciona no navy some no branco. */
+const CHIPS = {
+  acento: "bg-gold/12 text-accent ring-gold/20",
+  verde: "bg-emerald-500/12 text-emerald-700 ring-emerald-600/20 dark:text-emerald-400",
+  rosa: "bg-rose-500/12 text-rose-600 ring-rose-600/20 dark:text-rose-400",
+  ambar: "bg-amber-500/12 text-amber-700 ring-amber-600/20 dark:text-amber-400",
+} as const;
+
 function Kpi({
   rotulo,
   valor,
@@ -766,6 +894,9 @@ function Kpi({
   delta,
   destaque = false,
   alerta = false,
+  Icone,
+  chip = "acento",
+  comparacao,
 }: {
   rotulo: string;
   valor: React.ReactNode;
@@ -774,27 +905,44 @@ function Kpi({
   destaque?: boolean;
   /** Pinta de vermelho quando o número pede atenção (ex.: atrasados). */
   alerta?: boolean;
+  /** Ícone do chip colorido no canto. */
+  Icone?: ComponentType<{ size?: number; className?: string }>;
+  chip?: keyof typeof CHIPS;
+  /** Linha de referência embaixo ("Semana passada: 12"), como nas refs. */
+  comparacao?: string;
 }) {
   return (
     <div
       className={
         destaque
-          ? "rounded-2xl bg-gold px-5 py-4 text-white"
+          ? "rounded-3xl bg-gold px-5 py-5 text-white"
           : alerta
-            ? "rounded-2xl border border-rose-500/40 bg-rose-500/5 px-5 py-4"
-            : "rounded-2xl border border-line/70 bg-surface px-5 py-4"
+            ? "rounded-3xl border border-rose-500/40 bg-rose-500/5 px-5 py-5"
+            : "rounded-3xl border border-line/70 bg-surface px-5 py-5 shadow-sm shadow-black/5"
       }
     >
-      <p
-        className={`text-[11px] font-medium uppercase tracking-wider ${
-          destaque ? "text-white" : "text-muted"
-        }`}
-      >
-        {rotulo}
-      </p>
-      <div className="mt-1.5 flex items-baseline gap-2">
+      <div className="flex items-start justify-between gap-3">
         <p
-          className={`text-3xl font-semibold ${
+          className={`text-[11px] font-medium uppercase tracking-wider ${
+            destaque ? "text-white" : "text-muted"
+          }`}
+        >
+          {rotulo}
+        </p>
+        {Icone && (
+          <span
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ${
+              destaque ? "bg-white/15 text-white ring-white/25" : CHIPS[chip]
+            }`}
+          >
+            <Icone size={16} />
+          </span>
+        )}
+      </div>
+
+      <div className="mt-2 flex items-baseline gap-2">
+        <p
+          className={`text-4xl font-semibold tracking-tight ${
             destaque ? "text-white" : alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
           }`}
         >
@@ -802,7 +950,20 @@ function Kpi({
         </p>
         {delta != null && <Delta v={delta} />}
       </div>
+
       {sub && <p className={`mt-1 text-xs ${destaque ? "text-white" : "text-muted"}`}>{sub}</p>}
+
+      {/* Linha de referência separada por um fio, como nos cards das refs:
+          o número sozinho não diz se está bom — o de antes diz. */}
+      {comparacao && (
+        <p
+          className={`mt-3 border-t pt-2.5 text-xs ${
+            destaque ? "border-white/20 text-white" : "border-line/70 text-muted"
+          }`}
+        >
+          {comparacao}
+        </p>
+      )}
     </div>
   );
 }

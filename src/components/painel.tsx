@@ -84,12 +84,15 @@ export function PainelProvider({ children }: { children: ReactNode }) {
  */
 export function Cabecalho({
   titulo,
+  subtitulo,
   atualizavel = false,
   oQueAtualiza = "Leads",
   comCampanha = true,
   children,
 }: {
   titulo: string;
+  /** Linha de contexto abaixo do título. Usada na saudação da Dashboard. */
+  subtitulo?: string;
   atualizavel?: boolean;
   /** Complemento do botão e do aviso ("Atualizar Leads"); "" deixa só "Atualizar". */
   oQueAtualiza?: string;
@@ -149,6 +152,8 @@ export function Cabecalho({
 
         {children && <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>}
       </header>
+
+      {subtitulo && <p className="mt-1 text-sm text-muted">{subtitulo}</p>}
 
       {/* Barra indeterminada: sinaliza que os dados estão sendo atualizados. */}
       {atualizavel && (

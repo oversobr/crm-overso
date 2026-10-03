@@ -12,7 +12,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Portal OVERSO" },
     ],
-    links: [{ rel: "stylesheet", href: styles }],
+    links: [
+      // A Inter vem por <link>, não por @import no CSS. O @import ficava
+      // DEPOIS das regras que o `@import "tailwindcss"` expande, e @import
+      // fora do topo é inválido: o bundler descartava a linha e o portal
+      // caía na fonte do sistema sem avisar. Por <link> também carrega em
+      // paralelo com o CSS, em vez de esperar ele ser baixado e analisado.
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+      },
+      { rel: "stylesheet", href: styles },
+    ],
   }),
   shellComponent: RootDocument,
   component: () => <Outlet />,

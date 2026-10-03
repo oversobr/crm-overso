@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Fonte da marca: Inter em todo o sistema. */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+/* A Inter é carregada por <link> no __root.tsx — aqui ela seria um @import
+   depois das regras do Tailwind, que é inválido e acabava descartado. */
 
 /* Faz o variante `dark:` responder ao NOSSO data-theme (não ao sistema),
    pra bater com o botão de troca. Ex.: `text-slate-700 dark:text-slate-300`. */
