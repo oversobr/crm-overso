@@ -273,33 +273,68 @@ input:-webkit-autofill:focus {
    Esconder rótulo direto no JSX esconderia também no celular. Com a
    classe `menu-compacto` + @media, o recolhimento vale só no desktop.
 
-   No celular nada disso roda: a gaveta continua como era. */
+   Sobre a suavidade: `display: none` NÃO anima — é o que fazia o texto
+   piscar enquanto a barra deslizava. Então a régua aqui é:
+
+     • o que ocupa espaço HORIZONTAL (rótulo dos itens) só desaparece de
+       vista — fica no fluxo, com opacidade 0, e a própria barra o corta
+       (overflow-x-hidden). Isso anima;
+     • o que ocupa espaço VERTICAL (título de seção, seletor de cliente)
+       precisa mesmo sair do fluxo, senão sobra um rombo no trilho. Esse
+       continua com `display: none`, e quem entra no lugar surge com
+       `animation` — que, ao contrário de `transition`, roda quando o
+       elemento aparece vindo de display:none. */
+
+/* Rótulo: some desvanecendo, e a barra o corta enquanto encolhe. */
+.rotulo-menu {
+  white-space: nowrap;
+  transition: opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes menu-surge {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (min-width: 1024px) {
-  /* Some tudo que é texto: rótulo do item, nome/email do usuário,
-     título da seção e o seletor de cliente inteiro. */
-  .menu-compacto .rotulo-menu,
+  .menu-compacto .rotulo-menu {
+    opacity: 0;
+    /* Sem isto, o rótulo invisível ainda receberia o clique e o tooltip. */
+    pointer-events: none;
+  }
+
+  /* Estes saem do fluxo mesmo: manter altura vazia deixaria buracos. */
   .menu-compacto .secao-menu,
   .menu-compacto .seletor-cliente {
     display: none;
   }
 
-  /* E entram os substitutos do trilho. */
+  /* E os substitutos entram desvanecendo, no mesmo tempo da barra. */
   .menu-compacto .traco-secao {
     display: block;
+    animation: menu-surge 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   .menu-compacto .marca-cliente {
     display: flex;
+    animation: menu-surge 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
 
-  /* Ícone sozinho fica centrado, sem o vão do rótulo que sumiu. */
+  /* O ícone fica centrado no trilho sem `justify-center` — que puxaria o
+     ícone junto com o rótulo que ainda está no fluxo. 19px é o que centra
+     um ícone de 18px nos 56px úteis (72 do trilho menos 8+8 de padding). */
   .menu-compacto .item-menu {
-    justify-content: center;
+    padding-left: 1.1875rem;
+    padding-right: 0;
     gap: 0;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
   }
 
-  /* O logo e o botão de recolher empilham: lado a lado não cabem em 4.5rem. */
+  /* Logo e botão de recolher empilham: lado a lado não cabem em 4.5rem. */
   .menu-compacto .topo-menu {
     flex-direction: column;
     gap: 0.25rem;
@@ -316,5 +351,17 @@ input:-webkit-autofill:focus {
   }
   .menu-compacto::-webkit-scrollbar {
     width: 0;
+  }
+}
+
+/* Quem pediu menos movimento no sistema não quer a barra deslizando. */
+@media (prefers-reduced-motion: reduce) {
+  /* A largura da barra é a maior movimentação da tela; some junto. */
+  .barra-lateral,
+  .rotulo-menu,
+  .menu-compacto .traco-secao,
+  .menu-compacto .marca-cliente {
+    transition: none;
+    animation: none;
   }
 }
