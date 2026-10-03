@@ -266,3 +266,55 @@ input:-webkit-autofill:focus {
     break-inside: avoid;
   }
 }
+
+/* ── Menu recolhido (trilho de ícones) ──────────────────────────────
+   O estado mora no React, mas o que ele muda está aqui, e não no JSX,
+   por um motivo: abaixo de lg a sidebar é uma GAVETA, sempre larga.
+   Esconder rótulo direto no JSX esconderia também no celular. Com a
+   classe `menu-compacto` + @media, o recolhimento vale só no desktop.
+
+   No celular nada disso roda: a gaveta continua como era. */
+@media (min-width: 1024px) {
+  /* Some tudo que é texto: rótulo do item, nome/email do usuário,
+     título da seção e o seletor de cliente inteiro. */
+  .menu-compacto .rotulo-menu,
+  .menu-compacto .secao-menu,
+  .menu-compacto .seletor-cliente {
+    display: none;
+  }
+
+  /* E entram os substitutos do trilho. */
+  .menu-compacto .traco-secao {
+    display: block;
+  }
+  .menu-compacto .marca-cliente {
+    display: flex;
+  }
+
+  /* Ícone sozinho fica centrado, sem o vão do rótulo que sumiu. */
+  .menu-compacto .item-menu {
+    justify-content: center;
+    gap: 0;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* O logo e o botão de recolher empilham: lado a lado não cabem em 4.5rem. */
+  .menu-compacto .topo-menu {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .menu-compacto .topo-menu > div {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* A barra de rolagem roubaria largura do trilho e desalinharia os
+     ícones; com tão pouca coisa visível, ela não faz falta. */
+  .menu-compacto {
+    scrollbar-width: none;
+  }
+  .menu-compacto::-webkit-scrollbar {
+    width: 0;
+  }
+}

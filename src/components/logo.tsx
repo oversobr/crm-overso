@@ -3,10 +3,21 @@
  * quem o usa — navy no claro, claro no escuro, branco sobre o painel da marca.
  * Fica aqui (e não dentro de uma tela) porque sidebar e login usam o mesmo SVG.
  */
-export function LogoOverso({ className = "h-5 w-auto" }: { className?: string }) {
+export function LogoOverso({
+  className = "h-5 w-auto",
+  apenasMarca = false,
+}: {
+  className?: string;
+  /**
+   * Só o símbolo, sem a palavra "OVERSO" — é o que cabe no menu recolhido.
+   * As duas primeiras paths são a marca (vão até x≈26.5); o lettering começa
+   * em x≈38. Recortar o viewBox deixa a marca sozinha sem SVG duplicado.
+   */
+  apenasMarca?: boolean;
+}) {
   return (
     <svg
-      viewBox="0 0 163 24"
+      viewBox={apenasMarca ? "0 0 26.57 24" : "0 0 163 24"}
       fill="currentColor"
       className={className}
       xmlns="http://www.w3.org/2000/svg"

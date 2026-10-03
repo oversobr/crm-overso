@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { Lock, Megaphone, Menu, Moon, Sun, UserRound, X } from "lucide-react";
+import { Lock, Megaphone, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -83,10 +83,34 @@ const PREFERENCIAS: { to: string; rotulo: string; Icone: IconeNav; somenteAdmin?
   { to: "/clientes", rotulo: "Clientes", Icone: IconeConectar, somenteAdmin: true },
 ];
 
+/** Preferência de menu recolhido, por navegador. */
+const CHAVE_MENU = "overso:menu-recolhido";
+
 function Layout() {
   // Gaveta do menu no celular. No desktop (lg+) a sidebar é fixa e este
   // estado não é usado pra nada.
   const [menuAberto, setMenuAberto] = useState(false);
+
+  // Trilho só com ícones. Fica no Layout (e não na Sidebar) porque o
+  // espaçador ao lado precisa da mesma medida.
+  const [recolhido, setRecolhido] = useState(() => {
+    try {
+      return localStorage.getItem(CHAVE_MENU) === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  function alternarRecolhido() {
+    setRecolhido((v) => {
+      try {
+        localStorage.setItem(CHAVE_MENU, v ? "0" : "1");
+      } catch {
+        // localStorage indisponível — vale só nesta sessão
+      }
+      return !v;
+    });
+  }
 
   return (
     <PainelProvider>
@@ -94,7 +118,23 @@ function Layout() {
           sai: com 100vh o rodapé do painel fica escondido atrás dela.
           overflow-hidden trava a moldura; só o <main> rola. */}
       <div className="flex h-dvh overflow-hidden">
-        <Sidebar aberto={menuAberto} onFechar={() => setMenuAberto(false)} />
+        <Sidebar
+          aberto={menuAberto}
+          onFechar={() => setMenuAberto(false)}
+          recolhido={recolhido}
+          onAlternarRecolhido={alternarRecolhido}
+        />
+
+        {/* Espaçador. No desktop a sidebar é `fixed` para poder crescer POR
+            CIMA do conteúdo quando o mouse chega perto — se ela empurrasse a
+            tela, todo passe de mouse reflowaria o painel inteiro. Este div
+            guarda o lugar dela no fluxo, e segue `recolhido` (a preferência),
+            não o estado de hover: a largura reservada não muda ao pairar. */}
+        <div
+          className={`hidden shrink-0 transition-[width] duration-200 lg:block ${
+            recolhido ? "w-[4.5rem]" : "w-60"
+          }`}
+        />
 
         {/* min-w-0 é o que impede uma tabela larga de esticar a coluna inteira
             e empurrar o layout — sem isso o flex-1 cresce além da tela. */}
@@ -218,10 +258,11 @@ function BarraMobile({ onAbrirMenu }: { onAbrirMenu: () => void }) {
 }
 
 /** Wordmark da marca no topo da sidebar: navy no claro, claro no escuro. */
-function Logo() {
+function Logo({ compacto = false }: { compacto?: boolean }) {
   return (
     <div className="flex h-10 items-center px-3 text-[#012b43] dark:text-ink">
-      <LogoOverso />
+      {/* A marca sozinha é um SVG com viewBox recortado — o mesmo arquivo. */}
+      <LogoOverso apenasMarca={compacto} className={compacto ? "h-5 w-auto" : "h-5 w-auto"} />
     </div>
   );
 }
@@ -251,29 +292,50 @@ function ItemNav({
       activeOptions={{ exact: to === "/" }}
       // hover:bg-surface/70 clareia o fundo do item pra destacar a opção sob o
       // cursor — antes só a cor do ícone/texto mudava.
-      title={desativado ? "Módulo não ativado para este cliente" : undefined}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink ${
+      // Sempre com title: no menu recolhido só o ícone aparece, e sem ele o
+      // trilho vira adivinhação. O aviso de módulo desativado tem prioridade.
+      title={desativado ? "Módulo não ativado para este cliente" : rotulo}
+      className={`item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink ${
         desativado ? "opacity-45" : ""
       }`}
       // Ativo = card cheio com sombra, como na referência.
       activeProps={{ className: "!bg-surface !text-ink shadow-sm shadow-black/5" }}
     >
       <Icone />
-      {rotulo}
-      {desativado && <Lock size={13} className="ml-auto shrink-0" />}
+      <span className="rotulo-menu">{rotulo}</span>
+      {desativado && <Lock size={13} className="ml-auto shrink-0 rotulo-menu" />}
     </Link>
   );
 }
 
 function Secao({ children }: { children: string }) {
   return (
-    <p className="px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-wider text-muted">
-      {children}
-    </p>
+    <>
+      <p className="secao-menu px-3 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-wider text-muted">
+        {children}
+      </p>
+      {/* No trilho o rótulo da seção não cabe; um traço curto mantém a
+          separação entre os grupos, que é o que ele realmente faz ali. */}
+      <span aria-hidden className="traco-secao mx-auto my-3 hidden h-px w-6 bg-line/50" />
+    </>
   );
 }
 
-function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }) {
+function Sidebar({
+  aberto,
+  onFechar,
+  recolhido,
+  onAlternarRecolhido,
+}: {
+  aberto: boolean;
+  onFechar: () => void;
+  recolhido: boolean;
+  onAlternarRecolhido: () => void;
+}) {
+  // Pairar sobre o trilho expande sem desfazer a preferência: tira o mouse e
+  // ele volta a encolher.
+  const [pairando, setPairando] = useState(false);
+  const compacto = recolhido && !pairando;
   const router = useRouter();
   const { projeto, projetos, trocarCliente, trocas } = usePainel();
   const mods = modulosDe(projeto);
@@ -298,15 +360,22 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
 
       {/* Abaixo de lg a sidebar é uma gaveta que desliza por cima; a partir de
           lg volta a ser coluna fixa do layout (static), e o translate não vale. */}
+      {/* `menu-compacto` é só um gancho de CSS: esconder rótulo em JSX
+          esconderia também no celular, onde a gaveta é sempre larga. As
+          regras no styles.css valem a partir de lg. */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-transform duration-200 lg:static lg:z-auto lg:w-60 lg:translate-x-0 ${
+        onMouseEnter={() => recolhido && setPairando(true)}
+        onMouseLeave={() => setPairando(false)}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-[width,transform] duration-200 lg:z-40 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
+        } ${compacto ? "menu-compacto lg:w-[4.5rem] lg:px-2" : "lg:w-60"} ${
+          recolhido && pairando ? "lg:shadow-2xl lg:shadow-black/30" : ""
         }`}
       >
         {/* No celular o logo do topo já está na barra; aqui vira o botão de
             fechar, que é o que a mão procura com a gaveta aberta. */}
-        <div className="flex items-center justify-between">
-          <Logo />
+        <div className="topo-menu flex items-center justify-between">
+          <Logo compacto={compacto} />
           <button
             onClick={onFechar}
             aria-label="Fechar menu"
@@ -314,12 +383,31 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
           >
             <X size={18} strokeWidth={1.75} />
           </button>
+          <button
+            onClick={onAlternarRecolhido}
+            aria-label={recolhido ? "Expandir menu" : "Recolher menu"}
+            title={recolhido ? "Expandir menu" : "Recolher menu"}
+            className="hidden rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:block"
+          >
+            {recolhido ? (
+              <PanelLeftOpen size={18} strokeWidth={1.75} />
+            ) : (
+              <PanelLeftClose size={18} strokeWidth={1.75} />
+            )}
+          </button>
         </div>
 
       {/* CLIENTES — seletor de página como card com bolinha, fiel à ref. */}
       <Secao>Clientes</Secao>
       {/* O anel acende no card a cada troca, ligando o aviso ao seletor. */}
-      <div key={trocas} className={`mx-1 ${trocas > 0 ? "cliente-destaque" : ""}`}>
+      {/* No trilho o seletor inteiro não cabe; fica a inicial do cliente, e o
+          dropdown real reaparece assim que o mouse chega e a barra expande. */}
+      <div className="marca-cliente mx-auto hidden h-10 w-10 items-center justify-center rounded-xl border border-line/70 bg-surface text-sm font-semibold text-ink">
+        <span title={projeto?.nome ?? "Nenhum cliente"}>
+          {(projeto?.nome?.trim()[0] ?? "—").toUpperCase()}
+        </span>
+      </div>
+      <div key={trocas} className={`seletor-cliente mx-1 ${trocas > 0 ? "cliente-destaque" : ""}`}>
         <Dropdown
           value={projeto?.id ?? ""}
           onChange={(id) => {
@@ -377,10 +465,11 @@ function Sidebar({ aberto, onFechar }: { aberto: boolean; onFechar: () => void }
               onFechar();
               void sair();
             }}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
+            title="Sair"
+            className="item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
           >
             <IconeSair />
-            Sair
+            <span className="rotulo-menu">Sair</span>
           </button>
         </div>
       </div>
@@ -411,7 +500,7 @@ function Usuario({ onNavegar }: { onNavegar?: () => void }) {
       to="/perfil"
       onClick={onNavegar}
       title="Meu perfil"
-      className="mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/70 px-2 pt-4 transition hover:opacity-80"
+      className="item-menu mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/70 px-2 pt-4 transition hover:opacity-80"
     >
       {meta.avatar_url ? (
         <img
@@ -424,7 +513,7 @@ function Usuario({ onNavegar }: { onNavegar?: () => void }) {
           {inicial}
         </div>
       )}
-      <div className="min-w-0">
+      <div className="rotulo-menu min-w-0">
         <p className="truncate text-sm font-medium text-ink">{nome}</p>
         <p className="truncate text-xs text-muted">{email}</p>
       </div>
@@ -438,10 +527,11 @@ function BotaoTema() {
   return (
     <button
       onClick={() => trocarTema()}
-      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
+      title={escuro ? "Tema claro" : "Tema escuro"}
+      className="item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
     >
       {escuro ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
-      {escuro ? "Tema claro" : "Tema escuro"}
+      <span className="rotulo-menu">{escuro ? "Tema claro" : "Tema escuro"}</span>
     </button>
   );
 }
