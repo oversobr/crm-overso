@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowDown, ArrowRight, ArrowUp, CaretRight, ChartBar, CheckCircle, PaperPlaneTilt, PencilSimple, Target, Users, Warning } from "@phosphor-icons/react";
+import { ArrowRight, ChartBar, PencilSimple, Target, Warning } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import type { ComponentType } from "react";
 import { useState } from "react";
@@ -154,24 +154,14 @@ function Dashboard() {
   const meta = campanha?.meta_leads ?? null;
   const pctMeta = meta ? Math.min(100, Math.round((1000 * total) / meta) / 10) : null;
 
+  // O recorte que vale pros números de lead: a campanha escolhida no
+  // cabeçalho, ou tudo desde o começo quando nenhuma está selecionada.
+  const periodoDoKpi = campanha ? `Campanha ${campanha.nome}` : "Desde o início";
+
   // As duas áreas viram blocos pra poder trocar a ordem: a de módulo
   // ativo vem primeiro, e a desativada desce pro fim da página.
   const areaConteudo = (primeira: boolean) => (
     <>
-      {/* ── CONTEÚDO ── */}
-      <Secao
-        primeira={primeira}
-        titulo="Conteúdo"
-        acao={
-          <Link
-            to="/postagens"
-            className="flex items-center gap-1.5 rounded-full border border-line/70 bg-surface px-3 py-1.5 text-xs text-ink transition hover:border-gold/50"
-          >
-            Abrir programação <ArrowRight size={13} />
-          </Link>
-        }
-      />
-
       {!mods.conteudo ? (
         <ModuloDesativado modulo="conteudo" compacto />
       ) : erroConteudo ? (
@@ -184,16 +174,6 @@ function Dashboard() {
         </Card>
       ) : (
         <>
-        {/* Quatro cards de peso igual viraram uma tira: os números continuam
-            todos aqui, mas param de competir com o topo da página. */}
-        <TiraKpi
-          itens={[
-            { rotulo: "Na semana", valor: daSemana.length },
-            { rotulo: "No mês", valor: doMes.length },
-            { rotulo: "Em aprovação", valor: emAprovacao },
-            { rotulo: "Atrasados", valor: atrasados.length, alerta: atrasados.length > 0 },
-          ]}
-        />
         <div className="grid gap-4 lg:grid-cols-3">
           <Card
             className="lg:col-span-2"
@@ -233,52 +213,10 @@ function Dashboard() {
 
   const areaCrm = (primeira: boolean) => (
     <>
-      {/* ── CRM ── */}
-      <Secao
-        primeira={primeira}
-        titulo="CRM"
-        acao={
-          <div className="flex flex-wrap items-center gap-2">
-          {/* O período vale só para os números de leads — por isso mora aqui. */}
-          {mods.crm && campanhas.length > 0 && (
-            <Dropdown
-              value={campanha?.id ?? ""}
-              onChange={(v) => setCampanhaId(v || null)}
-              options={[
-                { value: "", label: "Todo o período" },
-                ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
-              ]}
-              leading={<ChartBar size={13} className="shrink-0 text-accent" />}
-              triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-1.5 text-xs text-ink hover:border-gold/40"
-            />
-          )}
-          <Link
-            to="/leads"
-            className="flex items-center gap-1.5 rounded-full border border-line/70 bg-surface px-3 py-1.5 text-xs text-ink transition hover:border-gold/50"
-          >
-            Ver todos os leads <ArrowRight size={13} />
-          </Link>
-          </div>
-        }
-      />
-
       {!mods.crm ? (
         <ModuloDesativado modulo="crm" compacto />
       ) : (
       <>
-      {/* "Leads hoje" subiu pro topo da página; repetir aqui só ocuparia
-          espaço dizendo a mesma coisa duas vezes. */}
-      <TiraKpi
-        itens={[
-          { rotulo: "Total de leads", valor: total },
-          {
-            rotulo: "Taxa de conversão",
-            valor: funil?.tx_conversao != null ? `${funil.tx_conversao}%` : "—",
-          },
-          { rotulo: "Aberturas do form", valor: funil?.aberturas ?? 0 },
-        ]}
-      />
-
       {campanha && (
         <div className="mb-4 rounded-2xl border border-line/70 bg-surface px-5 py-4">
           <div className="flex items-center justify-between gap-3">
@@ -407,20 +345,9 @@ function Dashboard() {
         </Card>
       </div>
 
-      {/* Fontes e Leads Recentes existem inteiros em /leads e no Funil.
-          Em vez de remover (você pode usar no dia a dia), ficam recolhidos:
-          a página encurta e eles continuam a um clique. O <details> guarda o
-          estado enquanto a tela não é remontada. */}
-      <details className="group mt-4">
-        <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-1 py-2 text-sm text-muted transition hover:text-ink">
-          <CaretRight
-            size={15}
-            className="shrink-0 transition-transform group-open:rotate-90"
-          />
-          Fontes e leads recentes
-        </summary>
-
-        <div className="mt-2 grid gap-4 lg:grid-cols-2">
+      {/* Dashboard não esconde dado atrás de "ver mais": ou o número
+          merece a tela, ou não merece a dashboard. Estes merecem. */}
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card titulo="Fontes">
           {fontes.length === 0 ? (
             <Vazio>Sem leads ainda.</Vazio>
@@ -457,8 +384,7 @@ function Dashboard() {
             </div>
           )}
         </Card>
-        </div>
-      </details>
+      </div>
       </>
       )}
     </>
@@ -468,8 +394,8 @@ function Dashboard() {
 
   return (
     <>
-      {/* Topo neutro: a Dashboard junta Conteúdo e CRM, então período e
-          atualização de leads ficam na área do CRM, não aqui. */}
+      {/* O seletor de campanha mora aqui, e não dentro de um bloco: com as
+          seções fora, ele recorta a tela toda. */}
       <Cabecalho
         titulo={saudacao}
         subtitulo={
@@ -478,53 +404,48 @@ function Dashboard() {
             : "Escolha um cliente no menu para ver os números dele."
         }
         atualizavel
-        comCampanha={false}
+        comCampanha={mods.crm}
         oQueAtualiza=""
       />
 
       <DadosBlur>
-      {/* Antes era "aqui está tudo", com 7 KPIs de peso igual misturando
-          escalas de tempo. Agora o topo responde duas perguntas: o que
-          preciso fazer, e como foi hoje. O resto desce de hierarquia. */}
-      <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Kpi
-          rotulo="Precisa de você"
-          valor={pendencias}
-          sub={pendencias ? "itens parados esperando ação" : "nada parado"}
-          alerta={pendencias > 0}
-          destaque={pendencias === 0}
-          Icone={pendencias > 0 ? Warning : CheckCircle}
-          chip="rosa"
-          comparacao={
-            pendencias > 0
-              ? `${atrasados.length} atrasado${atrasados.length === 1 ? "" : "s"} · ${paradosAprovacao.length} em aprovação`
-              : "Tudo em dia"
-          }
-        />
-        {mods.conteudo && (
-          <Kpi
-            rotulo="Publicados na semana"
-            valor={publicadosSemana}
-            sub={`de ${daSemana.length} programado${daSemana.length === 1 ? "" : "s"}`}
-            Icone={PaperPlaneTilt}
-            chip="verde"
-            comparacao={`Semana passada: ${publicadosSemanaAnterior}`}
-          />
-        )}
+      {/* UMA linha de KPIs, cards idênticos. Antes eram três com chips de
+          cores diferentes (rosa, verde, azul) — cor que não significava
+          nada, só decorava, e três decorações diferentes numa linha é o
+          que faz a tela parecer montada aos pedaços. Nas referências o
+          KPI não tem ícone nenhum: rótulo, número, variação. */}
+      <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {mods.crm && (
           <Kpi
             rotulo="Leads hoje"
             valor={leadsHoje}
             delta={leadsHoje - leadsOntem}
-            Icone={Users}
-            chip="acento"
             comparacao={`Ontem: ${leadsOntem}`}
+          />
+        )}
+        {mods.crm && (
+          <Kpi rotulo="Total de leads" valor={total} comparacao={periodoDoKpi} />
+        )}
+        {mods.crm && (
+          <Kpi
+            rotulo="Taxa de conversão"
+            valor={funil?.tx_conversao != null ? `${funil.tx_conversao}%` : "—"}
+            comparacao={`${funil?.aberturas ?? 0} aberturas do formulário`}
+          />
+        )}
+        {mods.conteudo && (
+          <Kpi
+            rotulo="Publicados na semana"
+            valor={publicadosSemana}
+            comparacao={`de ${daSemana.length} programados · semana passada: ${publicadosSemanaAnterior}`}
           />
         )}
       </div>
 
       {mods.conteudo && pendencias > 0 && (
-        <PrecisaDeVoce atrasados={atrasados} parados={paradosAprovacao} hoje={hoje} />
+        <div className="mb-4">
+          <PrecisaDeVoce atrasados={atrasados} parados={paradosAprovacao} hoje={hoje} />
+        </div>
       )}
 
       {conteudoPrimeiro ? (
@@ -756,34 +677,6 @@ function ItemProximo({ c, hoje }: { c: Conteudo; hoje: string }) {
 }
 
 /**
- * Números de apoio numa tira só, em vez de um card por número. Mesma
- * informação, uma fração do peso visual — é o que tira o topo da página da
- * competição com quatro caixas do mesmo tamanho.
- */
-function TiraKpi({
-  itens,
-}: {
-  itens: { rotulo: string; valor: React.ReactNode; alerta?: boolean }[];
-}) {
-  return (
-    <div className="mb-4 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-2xl border border-line/70 bg-surface px-5 py-3.5">
-      {itens.map(({ rotulo, valor, alerta }) => (
-        <div key={rotulo}>
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted">{rotulo}</p>
-          <p
-            className={`text-lg font-semibold ${
-              alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
-            }`}
-          >
-            {valor}
-          </p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/**
  * O que está parado esperando alguém agir. É a única parte da Dashboard que
  * pede ação em vez de informar estado — por isso fica no topo, e cada linha
  * leva direto pra programação, onde o problema se resolve.
@@ -810,8 +703,7 @@ function PrecisaDeVoce({
 
   return (
     <Card
-      className="mb-5 border-rose-500/30 bg-rose-500/5"
-      titulo="Precisa de você"
+      titulo={`Precisa de você (${itens.length})`}
       acao={
         <Link
           to="/postagens"
