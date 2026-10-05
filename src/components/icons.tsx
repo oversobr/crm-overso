@@ -9,7 +9,7 @@ import {
   Megaphone,
   Settings,
   Ticket,
-  Users,
+  UsersRound,
 } from "lucide-react";
 
 /**
@@ -38,8 +38,13 @@ export function IconeDashboard({ className = "" }: Props) {
   return <LayoutDashboard size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
 }
 
+/**
+ * `UsersRound` e não `Users`: o segundo desenha duas figuras sobrepostas
+ * com ombro, cabeça e recorte entre elas — detalhe demais para 18px, onde
+ * vira um borrão. As formas arredondadas se separam melhor nesse tamanho.
+ */
 export function IconeLeads({ className = "" }: Props) {
-  return <Users size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
+  return <UsersRound size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
 }
 
 export function IconeFunil({ className = "" }: Props) {
