@@ -128,7 +128,7 @@ function Layout() {
 
         {/* min-w-0 é o que impede uma tabela larga de esticar a coluna inteira
             e empurrar o layout — sem isso o flex-1 cresce além da tela. */}
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="relative flex min-w-0 flex-1 flex-col">
           <BarraTopo onAbrirMenu={() => setMenuAberto(true)} />
           <AreaDoCliente />
         </div>
@@ -154,7 +154,7 @@ function AreaDoCliente() {
   }, [trocas]);
 
   return (
-    <main ref={main} className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
+    <main ref={main} className="flex-1 overflow-y-auto px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-6">
       <div key={trocas}>
         <Outlet />
       </div>
@@ -239,7 +239,7 @@ function CortinaDeTroca() {
  */
 function BarraTopo({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 bg-sidebar px-4 sm:px-6">
+    <header className="absolute inset-x-0 top-0 z-30 flex h-20 items-center gap-3 bg-sidebar/85 px-4 backdrop-blur-xl sm:px-6">
       <button
         onClick={onAbrirMenu}
         aria-label="Abrir menu"
@@ -471,7 +471,7 @@ function Sidebar({
       >
         {/* No celular o logo do topo já está na barra; aqui vira o botão de
             fechar, que é o que a mão procura com a gaveta aberta. */}
-        <div className="topo-menu mb-4 flex h-14 shrink-0 items-center justify-between">
+        <div className="topo-menu mb-4 flex h-20 shrink-0 items-center justify-between">
           <Logo compacto={compacto} />
           <button
             onClick={onFechar}
