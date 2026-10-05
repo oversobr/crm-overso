@@ -131,7 +131,7 @@ function Layout() {
             guarda o lugar dela no fluxo, e segue `recolhido` (a preferência),
             não o estado de hover: a largura reservada não muda ao pairar. */}
         <div
-          className={`hidden shrink-0 transition-[width] duration-[320ms] ease-[cubic-bezier(0.32,0.72,0,1)] lg:block ${
+          className={`hidden shrink-0 transition-[width] duration-[320ms] ease-[var(--ease-gaveta)] lg:block ${
             recolhido ? "w-[4.5rem]" : "w-60"
           }`}
         />
@@ -344,7 +344,7 @@ function MenuPerfil() {
       {aberto && (
         <div
           role="menu"
-          className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-line/70 bg-surface p-1.5 shadow-xl shadow-black/20"
+          className="menu-in absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-line/70 bg-surface p-1.5 shadow-xl shadow-black/20"
         >
           <div className="border-b border-line/70 px-3 pb-2.5 pt-1.5">
             <p className="truncate text-sm font-medium text-ink">{nome}</p>
@@ -473,7 +473,7 @@ function Sidebar({
       <aside
         onMouseEnter={() => recolhido && setPairando(true)}
         onMouseLeave={() => setPairando(false)}
-        className={`barra-lateral fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-[width,transform] duration-[320ms] ease-[cubic-bezier(0.32,0.72,0,1)] lg:z-40 lg:translate-x-0 ${
+        className={`barra-lateral fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-[width,transform] duration-[320ms] ease-[var(--ease-gaveta)] lg:z-40 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         } ${compacto ? "menu-compacto lg:w-[4.5rem] lg:px-2" : "lg:w-60"} ${
           recolhido && pairando ? "lg:shadow-2xl lg:shadow-black/30" : ""

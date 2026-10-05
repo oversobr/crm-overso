@@ -68,7 +68,7 @@ export function Dropdown({
 
       {aberto && (
         <div
-          className={`absolute z-50 mt-2 max-h-72 min-w-full overflow-auto rounded-xl border border-line/70 bg-surface p-1 shadow-lg shadow-black/20 ${menuClassName}`}
+          className={`menu-in absolute z-50 mt-2 max-h-72 min-w-full overflow-auto rounded-xl border border-line/70 bg-surface p-1 shadow-lg shadow-black/20 ${menuClassName}`}
         >
           {options.length === 0 && (
             <p className="px-3 py-2 text-sm text-muted">Nenhuma opção</p>

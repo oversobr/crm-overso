@@ -58,6 +58,20 @@
   /* Inter em tudo — texto e títulos. */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- 3. MOVIMENTO ----
+     Duas curvas, e só. `suave` desacelera no fim e serve pra quase tudo
+     (cor, fundo, opacidade); `gaveta` tem a saída mais longa, pra coisa
+     que percorre distância — sidebar, painel, modal.
+
+     As duas primeiras linhas são o pulo do gato: o Tailwind lê
+     `--default-transition-*` e aplica em TODA utility `transition`. São
+     centenas de usos no portal, e o padrão dele (150ms, curva do Material)
+     é o que fazia tudo parecer seco. Mexer aqui vale para o app inteiro. */
+  --ease-suave: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --ease-gaveta: cubic-bezier(0.32, 0.72, 0, 1);
+  --default-transition-duration: 220ms;
+  --default-transition-timing-function: var(--ease-suave);
 }
 
 /* ── TEMA CLARO (branco + azul da marca) ───────────────────────────── */
@@ -124,7 +138,7 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.35s var(--ease-suave), color 0.35s var(--ease-suave);
 }
 
 .display { font-family: var(--font-display); letter-spacing: -0.01em; }
@@ -134,7 +148,7 @@ body {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
-.toast-in { animation: overso-toast-in 0.22s ease-out; }
+.toast-in { animation: overso-toast-in 0.34s var(--ease-gaveta); }
 
 /* Barra de progresso indeterminada — mostra que os dados estão atualizando. */
 @keyframes overso-bar {
@@ -144,7 +158,7 @@ body {
 .bar-loading { animation: overso-bar 1.1s ease-in-out infinite; }
 
 /* Dado "respirando" enquanto atualiza, sem sumir da tela. */
-.atualizando { animation: overso-pulse 1.1s ease-in-out infinite; }
+.atualizando { animation: overso-pulse 1.6s ease-in-out infinite; }
 @keyframes overso-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.55; }
@@ -156,19 +170,19 @@ body {
   from { opacity: 0; transform: translateY(8px) scale(0.98); }
   to { opacity: 1; transform: none; }
 }
-.modal-backdrop { animation: overso-fade 0.18s ease-out; }
-.modal-panel { animation: overso-modal-in 0.2s ease-out; }
+.modal-backdrop { animation: overso-fade 0.26s var(--ease-suave); }
+.modal-panel { animation: overso-modal-in 0.34s var(--ease-gaveta); }
 
 /* Cortina da troca de cliente (CortinaDeTroca em routes/_authed.tsx).
    A barra enche em 1s — o mesmo TROCA_VISIVEL_MS do componente. */
-.cortina-troca { animation: overso-fade 0.2s ease-out; }
-.cortina-saindo { opacity: 0; transition: opacity 0.25s ease-in; }
-.cortina-nome { animation: overso-toast-in 0.35s ease-out both; }
+.cortina-troca { animation: overso-fade 0.3s var(--ease-suave); }
+.cortina-saindo { opacity: 0; transition: opacity 0.4s var(--ease-suave); }
+.cortina-nome { animation: overso-toast-in 0.45s var(--ease-gaveta) both; }
 @keyframes overso-progresso {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
-.cortina-progresso { transform-origin: left; animation: overso-progresso 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.cortina-progresso { transform-origin: left; animation: overso-progresso 1s var(--ease-suave) forwards; }
 
 /* Card do cliente na sidebar: um anel do acento que acende e apaga. */
 @keyframes overso-destaque {
@@ -201,7 +215,7 @@ body {
   filter: blur(3px);
   opacity: 0.55;
   pointer-events: none;
-  transition: filter 0.2s ease, opacity 0.2s ease;
+  transition: filter 0.3s var(--ease-suave), opacity 0.3s var(--ease-suave);
 }
 
 /* Barra de rolagem: discreta e coerente com o tema. */
@@ -288,7 +302,7 @@ input:-webkit-autofill:focus {
 /* Rótulo: some desvanecendo, e a barra o corta enquanto encolhe. */
 .rotulo-menu {
   white-space: nowrap;
-  transition: opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+  transition: opacity 240ms var(--ease-suave);
 }
 
 @keyframes menu-surge {
@@ -318,11 +332,11 @@ input:-webkit-autofill:focus {
   /* E os substitutos entram desvanecendo, no mesmo tempo da barra. */
   .menu-compacto .traco-secao {
     display: block;
-    animation: menu-surge 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: menu-surge 280ms var(--ease-gaveta) both;
   }
   .menu-compacto .marca-cliente {
     display: flex;
-    animation: menu-surge 260ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: menu-surge 280ms var(--ease-gaveta) both;
   }
 
   /* O ícone fica centrado no trilho sem `justify-center` — que puxaria o
@@ -363,5 +377,33 @@ input:-webkit-autofill:focus {
   .menu-compacto .marca-cliente {
     transition: none;
     animation: none;
+  }
+}
+
+/* Menus flutuantes (dropdown, menu do avatar) surgem a partir do topo,
+   ancorados em quem os abriu, em vez de piscar na tela. */
+@keyframes overso-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.menu-in {
+  transform-origin: top;
+  animation: overso-menu-in 180ms var(--ease-suave);
+}
+
+/* Quem pediu menos movimento recebe tudo instantâneo, não só o menu. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
