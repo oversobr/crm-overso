@@ -484,7 +484,7 @@ function Sidebar({
             onClick={onAlternarRecolhido}
             aria-label={recolhido ? "Expandir menu" : "Recolher menu"}
             title={recolhido ? "Expandir menu" : "Recolher menu"}
-            className="hidden rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:block"
+            className="alternar-menu hidden rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:block"
           >
             {recolhido ? (
               <PanelLeftOpen size={18} strokeWidth={1.75} />

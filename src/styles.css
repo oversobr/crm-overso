@@ -352,6 +352,14 @@ input:-webkit-autofill:focus {
      lado dele em 4.5rem, e empilhar deixou de ser opção agora que a faixa
      tem a altura da barra do topo (56px). Também não faz falta: pairar já
      expande a barra, e aí o botão reaparece pra fixar a escolha. */
+  /* No trilho fica só a marca. O botão não cabe ao lado dela em 4.5rem, e
+     não faz falta ali: pairar já expande a barra, e aí ele aparece pra
+     fixar a escolha. (Esta regra existia só no comentário até agora — o
+     botão vinha sendo renderizado espremido ao lado do logo.) */
+  .menu-compacto .alternar-menu {
+    display: none;
+  }
+
   .menu-compacto .topo-menu {
     justify-content: center;
     /* A faixa sangra até a borda da barra, e no trilho a barra tem px-2 e
