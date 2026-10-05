@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown } from "@phosphor-icons/react";
 
 import { Card, StatCard, Vazio } from "@/components/ui";
 import { DadosBlur } from "@/components/dados-blur";

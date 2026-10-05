@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Trash } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -250,7 +250,7 @@ export function FormEvento({
                 onClick={() => setConfirmando(true)}
                 className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
-                <Trash2 size={14} /> Excluir
+                <Trash size={14} /> Excluir
               </button>
             ))}
           <div className="ml-auto flex gap-2">

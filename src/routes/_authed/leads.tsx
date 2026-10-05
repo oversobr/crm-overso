@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, Download, Search, Trash2 } from "lucide-react";
+import { CaretLeft, CaretRight, DownloadSimple, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 import { StatusBadge, Vazio } from "@/components/ui";
@@ -264,7 +264,7 @@ function LeadsTela() {
       <DadosBlur>
       <div className="mb-3 flex flex-wrap gap-3">
         <div className="relative w-full min-w-0 flex-1 sm:w-auto sm:min-w-72">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+          <MagnifyingGlass size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input
             value={busca}
             onChange={(e) => {
@@ -320,7 +320,7 @@ function LeadsTela() {
           onClick={exportar}
           className="flex items-center gap-2 rounded-full border border-line/70 bg-surface px-3 py-2 text-sm transition hover:border-gold/50"
         >
-          <Download size={14} /> Exportar CSV
+          <DownloadSimple size={14} /> Exportar CSV
         </button>
       </div>
 
@@ -346,7 +346,7 @@ function LeadsTela() {
             onClick={() => setConfirmandoMassa(true)}
             className="flex items-center gap-2 rounded-xl border border-rose-500/30 px-3 py-2 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
           >
-            <Trash2 size={14} /> Excluir selecionados
+            <Trash size={14} /> Excluir selecionados
           </button>
 
           <button
@@ -448,7 +448,7 @@ function LeadsTela() {
               onClick={() => setPagina((p) => p - 1)}
               className="rounded-md border border-line/70 p-1.5 disabled:opacity-30"
             >
-              <ChevronLeft size={14} />
+              <CaretLeft size={14} />
             </button>
             <span>
               Página {pagina + 1} de {paginas}
@@ -458,7 +458,7 @@ function LeadsTela() {
               onClick={() => setPagina((p) => p + 1)}
               className="rounded-md border border-line/70 p-1.5 disabled:opacity-30"
             >
-              <ChevronRight size={14} />
+              <CaretRight size={14} />
             </button>
           </div>
         </div>
@@ -574,7 +574,7 @@ function LeadsTela() {
                 onClick={() => setConfirmandoExcluir(true)}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-rose-500/30 py-2.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
-                <Trash2 size={15} /> Excluir lead
+                <Trash size={15} /> Excluir lead
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Eye, EyeOff, Loader2, Lock, Mail, Moon, Sun } from "lucide-react";
+import { CircleNotch, Envelope, Eye, EyeSlash, Lock, Moon, Sun } from "@phosphor-icons/react";
 import type { ComponentType, InputHTMLAttributes, ReactNode } from "react";
 import { useState } from "react";
 
@@ -72,7 +72,7 @@ function Login() {
               <Campo
                 id="email"
                 rotulo="Email"
-                Icone={Mail}
+                Icone={Envelope}
                 type="email"
                 autoComplete="email"
                 placeholder="voce@empresa.com"
@@ -98,9 +98,9 @@ function Login() {
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-muted transition hover:text-ink"
                     >
                       {verSenha ? (
-                        <EyeOff size={16} strokeWidth={1.75} />
+                        <EyeSlash size={16} />
                       ) : (
-                        <Eye size={16} strokeWidth={1.75} />
+                        <Eye size={16} />
                       )}
                     </button>
                   }
@@ -121,7 +121,7 @@ function Login() {
                 disabled={carregando}
                 className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl bg-gold py-4 text-sm font-semibold text-white shadow-sm shadow-gold/25 transition hover:bg-gold-dim disabled:opacity-60"
               >
-                {carregando && <Loader2 size={16} className="animate-spin" />}
+                {carregando && <CircleNotch size={16} className="animate-spin" />}
                 {carregando ? "Entrando…" : "Entrar"}
               </button>
             </form>
@@ -205,7 +205,6 @@ function Campo({
       <div className="relative mt-2.5">
         <Icone
           size={16}
-          strokeWidth={1.75}
           className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted"
         />
         <input
@@ -233,7 +232,7 @@ function BotaoTema() {
       aria-label={escuro ? "Tema claro" : "Tema escuro"}
       className="absolute right-6 top-6 rounded-xl border border-line/60 bg-surface p-2.5 text-muted transition hover:text-ink"
     >
-      {escuro ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
+      {escuro ? <Sun size={16} /> : <Moon size={16} />}
     </button>
   );
 }

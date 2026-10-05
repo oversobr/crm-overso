@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { AlertTriangle, MapPin, Plus } from "lucide-react";
+import { MapPin, Plus, Warning } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { contagem, diasAte, FormEvento, periodoEvento, StatusEventoBadge } from "@/components/eventos";
@@ -172,7 +172,7 @@ function CardEvento({ e, demandas, apagado = false }: { e: Evento; demandas: Res
         </span>
         {atrasadas > 0 && (
           <span className="inline-flex h-6 items-center gap-1 rounded-full bg-rose-500/10 px-2.5 text-xs font-medium leading-none text-rose-600 ring-1 ring-inset ring-rose-500/25 dark:text-rose-300">
-            <AlertTriangle size={11} /> {atrasadas} atrasada{atrasadas === 1 ? "" : "s"}
+            <Warning size={11} /> {atrasadas} atrasada{atrasadas === 1 ? "" : "s"}
           </span>
         )}
       </div>

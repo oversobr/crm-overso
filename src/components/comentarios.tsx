@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, MessageSquare, SendHorizontal, Trash2 } from "lucide-react";
+import { ChatCentered, CircleNotch, PaperPlaneRight, Trash } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
 import { apagarComentario, comentar, comentariosQuery, faltaTabelaComentarios } from "@/lib/queries";
@@ -129,7 +129,7 @@ export function Comentarios({
                       title="Remover comentário"
                       className="ml-auto rounded p-0.5 text-muted opacity-0 transition hover:text-rose-500 focus:opacity-100 group-hover:opacity-100"
                     >
-                      <Trash2 size={12} />
+                      <Trash size={12} />
                     </button>
                   </div>
                   <p className="mt-0.5 whitespace-pre-wrap break-words rounded-lg rounded-tl-none border border-dashed border-line bg-surface px-2.5 py-1.5 text-sm text-ink">
@@ -147,7 +147,7 @@ export function Comentarios({
           </Aviso>
         ) : isLoading ? (
           <Aviso>
-            <Loader2 size={16} className="animate-spin" />
+            <CircleNotch size={16} className="animate-spin" />
           </Aviso>
         ) : comentarios.length === 0 && !observacaoAntiga ? (
           <Aviso>Nenhum comentário ainda. Registre aqui pedidos, ajustes e combinados.</Aviso>
@@ -175,7 +175,7 @@ export function Comentarios({
                         title="Apagar comentário"
                         className="ml-auto rounded p-0.5 text-muted opacity-0 transition hover:text-rose-500 focus:opacity-100 group-hover:opacity-100"
                       >
-                        <Trash2 size={12} />
+                        <Trash size={12} />
                       </button>
                     )}
                   </div>
@@ -212,7 +212,7 @@ export function Comentarios({
           title="Enviar (Enter)"
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold text-white transition hover:bg-gold-dim disabled:opacity-40"
         >
-          {enviar.isPending ? <Loader2 size={14} className="animate-spin" /> : <SendHorizontal size={14} />}
+          {enviar.isPending ? <CircleNotch size={14} className="animate-spin" /> : <PaperPlaneRight size={14} />}
         </button>
       </div>
     </div>
@@ -222,7 +222,7 @@ export function Comentarios({
 function Aviso({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-2 px-4 py-6 text-center text-xs text-muted">
-      <MessageSquare size={18} className="opacity-60" />
+      <ChatCentered size={18} className="opacity-60" />
       {children}
     </div>
   );

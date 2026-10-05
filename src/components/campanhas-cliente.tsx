@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { PencilSimple, Plus, Trash } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { Vazio } from "@/components/ui";
@@ -134,14 +134,14 @@ export function CampanhasCliente({ projectId, nome }: { projectId: string; nome:
                   title="Editar"
                   className="rounded-lg p-2 text-muted transition hover:bg-surface-2 hover:text-ink"
                 >
-                  <Pencil size={14} />
+                  <PencilSimple size={14} />
                 </button>
                 <button
                   onClick={() => setExcluindo(c.id)}
                   title="Remover"
                   className="rounded-lg p-2 text-muted transition hover:bg-rose-500/10 hover:text-rose-500"
                 >
-                  <Trash2 size={14} />
+                  <Trash size={14} />
                 </button>
               </div>
             </div>

@@ -1,23 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  CalendarClock,
-  Download,
-  ExternalLink,
-  FileText,
-  FolderOpen,
-  ImageIcon,
-  Link2,
-  Loader2,
-  MapPin,
-  Megaphone,
-  Pencil,
-  Plus,
-  Trash2,
-  Upload,
-  UserRound,
-} from "lucide-react";
+import { ArrowLeft, ArrowSquareOut, CircleNotch, ClockCountdown, DownloadSimple, FileText, FolderOpen, Image, LinkSimple, MapPin, Megaphone, PencilSimple, Plus, Trash, UploadSimple, User } from "@phosphor-icons/react";
 import type { DragEvent, ReactNode } from "react";
 import { useRef, useState } from "react";
 
@@ -117,14 +100,14 @@ function EventoTela() {
           onClick={() => setEditando(true)}
           className="flex items-center gap-2 rounded-full border border-line/70 bg-surface px-4 py-2 text-sm text-ink transition hover:border-gold/50"
         >
-          <Pencil size={14} /> Editar evento
+          <PencilSimple size={14} /> Editar evento
         </button>
       </Cabecalho>
 
       {/* Faixa de identificação: quando, onde, em que pé, quanto falta. */}
       <div className="-mt-3 mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
         <span className="flex items-center gap-1.5">
-          <CalendarClock size={15} /> {periodoEvento(evento)}
+          <ClockCountdown size={15} /> {periodoEvento(evento)}
         </span>
         {evento.local && (
           <span className="flex min-w-0 items-center gap-1.5">
@@ -137,7 +120,7 @@ function EventoTela() {
         </span>
         {evento.criado_por_nome && (
           <span className="flex items-center gap-1.5 text-xs">
-            <UserRound size={13} /> criado por {evento.criado_por_nome}
+            <User size={13} /> criado por {evento.criado_por_nome}
           </span>
         )}
       </div>
@@ -294,7 +277,7 @@ function SeloPrazo({ prazo, hoje, concluida }: { prazo: string | null; hoje: str
             : "bg-surface-2 text-muted"
       }`}
     >
-      <CalendarClock size={11} />
+      <ClockCountdown size={11} />
       {prazo === hoje ? "hoje" : fmt(prazo, { day: "2-digit", month: "2-digit" })}
     </span>
   );
@@ -419,7 +402,7 @@ function Kanban({ evento }: { evento: Evento }) {
                       <span className="flex flex-wrap items-center gap-1.5">
                         {d.responsavel && (
                           <span className="inline-flex h-6 items-center gap-1 rounded-full bg-gold/10 px-2 text-[11px] font-medium leading-none text-accent">
-                            <UserRound size={11} /> {d.responsavel}
+                            <User size={11} /> {d.responsavel}
                           </span>
                         )}
                         {(d.prazo || s !== "concluido") && (
@@ -667,7 +650,7 @@ function FormDemanda({ demanda, onFechar, onSalvo }: { demanda: Demanda; onFecha
               onClick={() => setConfirmando(true)}
               className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
             >
-              <Trash2 size={14} /> Excluir
+              <Trash size={14} /> Excluir
             </button>
           )}
           <div className="ml-auto flex gap-2">
@@ -700,7 +683,7 @@ const tamanho = (b: number | null) =>
   b == null ? "" : b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`;
 
 function IconeMaterial({ m }: { m: Material }) {
-  const Icone = m.tipo === "link" ? Link2 : m.mime?.startsWith("image/") ? ImageIcon : FileText;
+  const Icone = m.tipo === "link" ? LinkSimple : m.mime?.startsWith("image/") ? Image : FileText;
   return (
     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gold/10 text-accent">
       <Icone size={17} />
@@ -829,7 +812,7 @@ function Materiais({ evento }: { evento: Evento }) {
             arrastando ? "border-gold bg-gold/10 text-accent" : "border-line text-muted hover:border-gold/50 hover:text-ink"
           }`}
         >
-          {enviando > 0 ? <Loader2 size={20} className="animate-spin" /> : <Upload size={20} />}
+          {enviando > 0 ? <CircleNotch size={20} className="animate-spin" /> : <UploadSimple size={20} />}
           <span className="font-medium text-ink">
             {enviando > 0 ? `Enviando ${enviando}…` : "Clique ou arraste arquivos"}
           </span>
@@ -945,15 +928,15 @@ function Materiais({ evento }: { evento: Evento }) {
                       ) : (
                         <div className="flex shrink-0 items-center gap-0.5">
                           <BotaoAcao titulo="Abrir" onClick={() => void abrir(m)}>
-                            <ExternalLink size={15} />
+                            <ArrowSquareOut size={15} />
                           </BotaoAcao>
                           {m.tipo === "arquivo" && (
                             <BotaoAcao titulo="Baixar" onClick={() => void abrir(m, true)}>
-                              <Download size={15} />
+                              <DownloadSimple size={15} />
                             </BotaoAcao>
                           )}
                           <BotaoAcao titulo="Remover" perigo onClick={() => setExcluindo(m.id)}>
-                            <Trash2 size={15} />
+                            <Trash size={15} />
                           </BotaoAcao>
                         </div>
                       )}

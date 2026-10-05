@@ -1,19 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  Building2,
-  CalendarDays,
-  Camera,
-  Clock,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Loader2,
-  LogOut,
-  ShieldCheck,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { Buildings, CalendarDots, Camera, CircleNotch, Clock, Eye, EyeSlash, Key, ShieldCheck, SignOut, Trash, User } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -95,7 +82,7 @@ function Sair() {
           disabled={saindo}
           className="flex shrink-0 items-center gap-2 rounded-xl border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-60 dark:text-rose-400"
         >
-          <LogOut size={15} />
+          <SignOut size={15} />
           {saindo ? "Saindo…" : "Sair da conta"}
         </button>
       </div>
@@ -206,7 +193,7 @@ function Capa({
             <span className="flex h-full w-full items-center justify-center">{(nome.trim()[0] ?? "?").toUpperCase()}</span>
           )}
           <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 text-[11px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            {ocupado ? <Loader2 size={20} className="animate-spin" /> : <Camera size={20} />}
+            {ocupado ? <CircleNotch size={20} className="animate-spin" /> : <Camera size={20} />}
             {ocupado ? "Enviando…" : "Trocar foto"}
           </span>
         </button>
@@ -239,7 +226,7 @@ function Capa({
               disabled={ocupado}
               className="flex items-center gap-1.5 rounded-full border border-line/70 px-4 py-2 text-sm text-muted transition hover:border-rose-400/60 hover:text-rose-500 disabled:opacity-60"
             >
-              <Trash2 size={14} /> Remover
+              <Trash size={14} /> Remover
             </button>
           )}
         </div>
@@ -247,8 +234,8 @@ function Capa({
 
       {/* Dados da conta: dão contexto e ocupam a faixa com o que importa. */}
       <dl className="grid grid-cols-1 divide-y divide-line/50 border-t border-line/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        <Dado icone={<Building2 size={15} />} rotulo="Clientes com acesso" valor={String(projetos.length)} />
-        <Dado icone={<CalendarDays size={15} />} rotulo="Membro desde" valor={data(criadoEm)} />
+        <Dado icone={<Buildings size={15} />} rotulo="Clientes com acesso" valor={String(projetos.length)} />
+        <Dado icone={<CalendarDots size={15} />} rotulo="Membro desde" valor={data(criadoEm)} />
         <Dado icone={<Clock size={15} />} rotulo="Último acesso" valor={data(ultimoAcesso, true)} />
       </dl>
       <input
@@ -328,7 +315,7 @@ function Nome({ meta, email, onSalvo }: { meta: Meta; email: string; onSalvo: ()
           dica="É o nome que aparece no menu, nos comentários e em “Criado por” nas próximas coisas que você criar."
         >
           <div className="relative">
-            <UserRound size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <User size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               value={nome}
               onChange={(e) => setNome(e.target.value)}
@@ -396,7 +383,7 @@ function Senha() {
         <div className="grid gap-3 sm:grid-cols-2">
           <Rotulo texto="Nova senha">
             <div className="relative">
-              <KeyRound size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <Key size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               <input
                 type={ver ? "text" : "password"}
                 value={senha}
@@ -410,7 +397,7 @@ function Senha() {
                 aria-label={ver ? "Esconder senha" : "Mostrar senha"}
                 className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted hover:text-ink"
               >
-                {ver ? <EyeOff size={15} /> : <Eye size={15} />}
+                {ver ? <EyeSlash size={15} /> : <Eye size={15} />}
               </button>
             </div>
           </Rotulo>

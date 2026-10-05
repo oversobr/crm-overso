@@ -1,24 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Check,
-  CheckCircle2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Clock,
-  Copy,
-  ExternalLink,
-  ImageIcon,
-  ImagePlus,
-  Loader2,
-  PartyPopper,
-  Pencil,
-  Plus,
-  Trash2,
-  UserRound,
-  X,
-} from "lucide-react";
+import { ArrowSquareOut, CaretDown, CaretLeft, CaretRight, Check, CheckCircle, CircleNotch, Clock, Confetti, Copy, Image, ImageSquare, PencilSimple, Plus, Trash, User, X } from "@phosphor-icons/react";
 import type { DragEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -319,13 +301,13 @@ function CalendarioTela() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
           <BotaoIcone rotulo={`${capitalizar(unidade)} anterior`} onClick={() => andar(-1)}>
-            <ChevronLeft size={16} />
+            <CaretLeft size={16} />
           </BotaoIcone>
           <h2 className="display min-w-40 px-1 text-center text-base font-semibold text-ink">
             {tituloPeriodo(visao, ref)}
           </h2>
           <BotaoIcone rotulo={`Próxim${visao === "semana" ? "a" : "o"} ${unidade}`} onClick={() => andar(1)}>
-            <ChevronRight size={16} />
+            <CaretRight size={16} />
           </BotaoIcone>
         </div>
         <button
@@ -615,11 +597,11 @@ function MenuConteudo({
           onEditar(c);
         }}
       >
-        <Pencil size={15} className="text-muted" /> Editar
+        <PencilSimple size={15} className="text-muted" /> Editar
       </button>
       <button role="menuitem" className={item} disabled={duplicar.isPending} onClick={() => duplicar.mutate()}>
         {duplicar.isPending ? (
-          <Loader2 size={15} className="animate-spin text-muted" />
+          <CircleNotch size={15} className="animate-spin text-muted" />
         ) : (
           <Copy size={15} className="text-muted" />
         )}
@@ -663,7 +645,7 @@ function MenuConteudo({
           className={`${item} text-rose-600 dark:text-rose-400 hover:bg-rose-500/10`}
           onClick={() => setConfirmando(true)}
         >
-          <Trash2 size={15} /> Excluir
+          <Trash size={15} /> Excluir
         </button>
       )}
     </div>,
@@ -896,7 +878,7 @@ function CartaoHorario({ c, onAbrir, onMenu }: { c: Conteudo; onAbrir: () => voi
           <PilulasConteudo c={c} />
           {(c.midias?.length ?? 0) > 0 && (
             <span className="flex items-center gap-1 text-xs opacity-80">
-              <ImageIcon size={11} /> {c.midias.length}
+              <Image size={11} /> {c.midias.length}
             </span>
           )}
         </div>
@@ -984,8 +966,8 @@ function Chip({
           <span className={`h-2 w-2 shrink-0 rounded-full ${cor.ponto}`} />
           {hhmm(c.hora) && <span className="font-semibold tabular-nums">{hhmm(c.hora)}</span>}
           <span className="ml-auto flex shrink-0 items-center gap-1 opacity-70">
-            {temImagem && <ImageIcon size={12} />}
-            {publicado && <CheckCircle2 size={12} />}
+            {temImagem && <Image size={12} />}
+            {publicado && <CheckCircle size={12} />}
           </span>
         </span>
         <span className="line-clamp-2 font-medium">{c.titulo}</span>
@@ -1020,9 +1002,9 @@ function Chip({
       {hhmm(c.hora) && <span className="shrink-0 font-semibold tabular-nums">{hhmm(c.hora)}</span>}
       <span className="truncate">{c.titulo}</span>
       {(c.midias?.length ?? 0) > 0 && (
-        <ImageIcon size={11} className={`shrink-0 opacity-70 ${publicado ? "" : "ml-auto"}`} />
+        <Image size={11} className={`shrink-0 opacity-70 ${publicado ? "" : "ml-auto"}`} />
       )}
-      {publicado && <CheckCircle2 size={11} className="ml-auto shrink-0" />}
+      {publicado && <CheckCircle size={11} className="ml-auto shrink-0" />}
     </button>
   );
 }
@@ -1115,7 +1097,7 @@ function PreviewConteudo({ c, ancora }: { c: Conteudo; ancora: DOMRect }) {
               <img src={url} alt="" className="h-full w-full object-cover" />
             ) : (
               <div className="flex h-full items-center justify-center text-muted">
-                {isLoading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+                {isLoading ? <CircleNotch size={18} className="animate-spin" /> : <Image size={18} />}
               </div>
             )}
           </div>
@@ -1127,7 +1109,7 @@ function PreviewConteudo({ c, ancora }: { c: Conteudo; ancora: DOMRect }) {
         </div>
       ) : (
         <div className="flex items-center justify-center gap-2 bg-surface-2 py-6 text-xs text-muted">
-          <ImageIcon size={14} /> Sem arte anexada
+          <Image size={14} /> Sem arte anexada
         </div>
       )}
 
@@ -1416,7 +1398,7 @@ function Formulario({
                     title="Abrir link"
                     className="flex shrink-0 items-center rounded-xl border border-line/70 px-3 text-muted transition hover:border-gold/50 hover:text-ink"
                   >
-                    <ExternalLink size={15} />
+                    <ArrowSquareOut size={15} />
                   </a>
                 )}
               </div>
@@ -1446,11 +1428,11 @@ function Formulario({
                   rotulo={(v) => (v ? (eventos.find((e) => e.id === v)?.nome ?? "Evento") : "Nenhum (post avulso)")}
                   ativo={(v) => (f.evento_id ?? "") === v}
                   onEscolher={(v) => set("evento_id", v || null)}
-                  icone={(v) => (v ? <PartyPopper size={14} className="shrink-0 text-muted" /> : null)}
+                  icone={(v) => (v ? <Confetti size={14} className="shrink-0 text-muted" /> : null)}
                   resumo={
                     f.evento_id ? (
                       <span className="flex min-w-0 items-center gap-2">
-                        <PartyPopper size={14} className="shrink-0 text-accent" />
+                        <Confetti size={14} className="shrink-0 text-accent" />
                         <span className="truncate">
                           {eventos.find((e) => e.id === f.evento_id)?.nome ?? "Evento"}
                         </span>
@@ -1587,7 +1569,7 @@ function Formulario({
                 onClick={() => setConfirmandoExcluir(true)}
                 className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
-                <Trash2 size={14} /> Excluir
+                <Trash size={14} /> Excluir
               </button>
             ))}
 
@@ -1622,7 +1604,7 @@ function CriadoPor({ conteudo }: { conteudo: Conteudo | null }) {
   if (!conteudo) {
     return (
       <div className={caixa}>
-        <UserRound size={15} className="mt-0.5 shrink-0" />
+        <User size={15} className="mt-0.5 shrink-0" />
         <p>Ao salvar, fica registrado que <span className="font-medium text-ink">você</span> criou esta demanda.</p>
       </div>
     );
@@ -1631,7 +1613,7 @@ function CriadoPor({ conteudo }: { conteudo: Conteudo | null }) {
   const em = `${d.toLocaleDateString("pt-BR")} às ${d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`;
   return (
     <div className={caixa} title={conteudo.criado_por_email ?? undefined}>
-      <UserRound size={15} className="mt-0.5 shrink-0" />
+      <User size={15} className="mt-0.5 shrink-0" />
       <p>
         {conteudo.criado_por_nome ? (
           <>
@@ -1708,7 +1690,7 @@ function Sanfona<T extends string>({
         className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-ink"
       >
         <span className="flex min-w-0 flex-1 items-center">{resumo}</span>
-        <ChevronDown
+        <CaretDown
           size={16}
           className={`shrink-0 text-muted transition-transform ${aberta ? "rotate-180" : ""}`}
         />
@@ -1738,7 +1720,7 @@ function Sanfona<T extends string>({
                     multiplo ? "rounded" : "rounded-full"
                   } ${marcado ? "border-gold bg-gold text-white" : "border-line"}`}
                 >
-                  {marcado && (multiplo ? <Check size={11} strokeWidth={3} /> : <span className="h-1.5 w-1.5 rounded-full bg-white" />)}
+                  {marcado && (multiplo ? <Check size={11} /> : <span className="h-1.5 w-1.5 rounded-full bg-white" />)}
                 </span>
                 {icone?.(v)}
                 <span className="truncate">{rotulo(v)}</span>
@@ -1866,12 +1848,12 @@ function CampoImagens({
         >
           {enviando > 0 ? (
             <>
-              <Loader2 size={22} className="animate-spin" />
+              <CircleNotch size={22} className="animate-spin" />
               Enviando {enviando} {enviando === 1 ? "imagem" : "imagens"}…
             </>
           ) : (
             <>
-              <ImagePlus size={24} />
+              <ImageSquare size={24} />
               <span className="font-medium text-ink">Clique ou arraste a arte aqui</span>
               <span className="text-xs">JPG, PNG, WebP ou GIF · até {MAX_MIDIA_MB} MB cada</span>
             </>
@@ -1887,7 +1869,7 @@ function CampoImagens({
               </a>
             ) : (
               <div className="flex h-full items-center justify-center text-muted">
-                <Loader2 size={20} className="animate-spin" />
+                <CircleNotch size={20} className="animate-spin" />
               </div>
             )}
             <span className="absolute left-2 top-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
@@ -1900,7 +1882,7 @@ function CampoImagens({
                 title="Trocar imagem"
                 className={`${botaoFoto} flex items-center gap-1 px-2 text-xs hover:bg-black/80`}
               >
-                {enviando > 0 ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+                {enviando > 0 ? <CircleNotch size={13} className="animate-spin" /> : <ImageSquare size={13} />}
                 Trocar
               </button>
               <button

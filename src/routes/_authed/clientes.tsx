@@ -1,18 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  ArrowRight,
-  CalendarDays,
-  Check,
-  ChevronRight,
-  Copy,
-  Lock,
-  PartyPopper,
-  Plus,
-  Trash2,
-  Users,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDots, CaretRight, Check, Confetti, Copy, Lock, Plus, Trash, Users } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -48,12 +36,12 @@ const MODULOS: { id: Modulo; Icone: typeof Users; descricao: string }[] = [
   },
   {
     id: "conteudo",
-    Icone: CalendarDays,
+    Icone: CalendarDots,
     descricao: "Calendário de posts, stories, reels e vídeos, com status, artes e aprovação.",
   },
   {
     id: "eventos",
-    Icone: PartyPopper,
+    Icone: Confetti,
     descricao: "Eventos do cliente, cada um com demandas em Kanban, materiais e divulgação.",
   },
 ];
@@ -164,7 +152,7 @@ function Clientes() {
                     ))}
                   </div>
                 </div>
-                <ChevronRight size={16} className="shrink-0 text-muted transition group-hover:text-ink" />
+                <CaretRight size={16} className="shrink-0 text-muted transition group-hover:text-ink" />
               </button>
             );
           })}
@@ -206,7 +194,7 @@ function SeloModulo({ modulo, ligado }: { modulo: Modulo; ligado: boolean }) {
           : "bg-surface-2 text-muted ring-1 ring-inset ring-line/70"
       }`}
     >
-      {ligado ? <Check size={11} strokeWidth={3} /> : <Lock size={10} />}
+      {ligado ? <Check size={11} /> : <Lock size={10} />}
       {MODULO_LABEL[modulo]}
     </span>
   );
@@ -303,7 +291,7 @@ function NovoClienteModal({ onFechar, onAbrirFicha }: { onFechar: () => void; on
                       ligado ? "border-gold bg-gold text-white" : "border-line"
                     }`}
                   >
-                    {ligado && <Check size={12} strokeWidth={3} />}
+                    {ligado && <Check size={12} />}
                   </span>
                   <m.Icone size={20} className={ligado ? "text-accent" : "text-muted"} />
                   <span className="font-semibold text-ink">{MODULO_LABEL[m.id]}</span>
@@ -397,7 +385,7 @@ function Passos({ atual }: { atual: 1 | 2 | 3 }) {
                 aqui ? "bg-gold text-white" : feito ? "bg-gold/15 text-accent" : "bg-surface-2 text-muted"
               }`}
             >
-              {feito ? <Check size={12} strokeWidth={3} /> : num}
+              {feito ? <Check size={12} /> : num}
             </span>
             <span className={aqui ? "font-medium text-ink" : "text-muted"}>{n}</span>
             {i < nomes.length - 1 && <span className="mx-1 h-px w-6 bg-line" />}
@@ -586,7 +574,7 @@ function FichaCliente({ cliente, onFechar }: { cliente: ProjetoGerenciavel; onFe
           onClick={() => setExcluindo(true)}
           className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
         >
-          <Trash2 size={14} /> Remover
+          <Trash size={14} /> Remover
         </button>
       </div>
       </div>

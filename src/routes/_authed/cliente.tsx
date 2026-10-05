@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Camera, ExternalLink, Link2, Loader2, Lock, Mail, Phone, Plus, Trash2 } from "lucide-react";
+import { ArrowSquareOut, Camera, CircleNotch, Envelope, LinkSimple, Lock, Phone, Plus, Trash } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -186,7 +186,7 @@ function Ficha({
             {(perfil.contato_email || perfil.contato_telefone) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {perfil.contato_email && (
-                  <Atalho href={`mailto:${perfil.contato_email}`} Icone={Mail}>
+                  <Atalho href={`mailto:${perfil.contato_email}`} Icone={Envelope}>
                     {perfil.contato_email}
                   </Atalho>
                 )}
@@ -350,7 +350,7 @@ function LogoCliente({
 
           {podeEditar && (
             <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-              {ocupado ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+              {ocupado ? <CircleNotch size={18} className="animate-spin" /> : <Camera size={18} />}
               {ocupado ? "Enviando…" : "Trocar"}
             </span>
           )}
@@ -397,7 +397,7 @@ function LogoCliente({
                 disabled={ocupado}
                 className="flex items-center gap-1.5 rounded-full border border-line/70 px-4 py-2 text-sm text-muted transition hover:border-rose-400/60 hover:text-rose-500 disabled:opacity-60"
               >
-                <Trash2 size={14} /> Remover
+                <Trash size={14} /> Remover
               </button>
             )}
           </div>
@@ -440,9 +440,9 @@ function Links({
             rel="noreferrer"
             className="flex items-center gap-2 rounded-xl border border-line/70 bg-surface-2/40 px-3 py-2.5 text-sm text-ink transition hover:border-accent/50"
           >
-            <Link2 size={14} className="shrink-0 text-muted" />
+            <LinkSimple size={14} className="shrink-0 text-muted" />
             <span className="min-w-0 flex-1 truncate">{l.rotulo || l.url}</span>
-            <ExternalLink size={13} className="shrink-0 text-muted" />
+            <ArrowSquareOut size={13} className="shrink-0 text-muted" />
           </a>
         ))}
       </div>
@@ -480,7 +480,7 @@ function Links({
               title="Remover link"
               className="shrink-0 rounded-lg p-2 text-muted transition hover:bg-rose-500/10 hover:text-rose-500"
             >
-              <Trash2 size={14} />
+              <Trash size={14} />
             </button>
           </div>
         ))}
@@ -511,7 +511,7 @@ function Atalho({
   children,
 }: {
   href: string;
-  Icone: typeof Mail;
+  Icone: typeof Envelope;
   children: ReactNode;
 }) {
   return (

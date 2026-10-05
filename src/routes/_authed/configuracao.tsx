@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Moon, Sun, Trash2 } from "lucide-react";
+import { Moon, Sun, Trash } from "@phosphor-icons/react";
 import { useState } from "react";
 
 import { Dropdown } from "@/components/dropdown";
@@ -111,7 +111,7 @@ function AcessoGlobal() {
               title="Remover acesso global"
               className="rounded-lg p-2 text-muted transition hover:bg-rose-500/10 hover:text-rose-500"
             >
-              <Trash2 size={14} />
+              <Trash size={14} />
             </button>
           </div>
         ))}
@@ -232,7 +232,7 @@ function Equipe() {
               title="Remover acesso"
               className="rounded-lg p-2 text-muted transition hover:bg-rose-500/10 hover:text-rose-500"
             >
-              <Trash2 size={14} />
+              <Trash size={14} />
             </button>
           </div>
         ))}
@@ -262,7 +262,7 @@ function Aparencia() {
                 : "border-line/70 text-muted hover:text-ink"
             }`}
           >
-            <Icone size={18} strokeWidth={1.75} />
+            <Icone size={18} />
             {rotulo}
           </button>
         ))}

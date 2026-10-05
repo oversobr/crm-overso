@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lock } from "lucide-react";
+import { Lock } from "@phosphor-icons/react";
 
 import { usePainel } from "@/components/painel";
 import { atualizarModulos, podeConectarQuery, type ModulosSalvos } from "@/lib/queries";

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { ChevronDown, Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
+import { CaretDown, CaretLineLeft, CaretLineRight, List, Lock, Moon, Sun, User, X } from "@phosphor-icons/react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -245,7 +245,7 @@ function BarraTopo({ onAbrirMenu }: { onAbrirMenu: () => void }) {
         aria-label="Abrir menu"
         className="rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:hidden"
       >
-        <Menu size={20} strokeWidth={1.75} />
+        <List size={20} />
       </button>
       <div className="text-[#012b43] lg:hidden dark:text-ink">
         <LogoOverso className="h-4 w-auto" />
@@ -325,7 +325,7 @@ function MenuPerfil() {
         )}
         {/* O nome só aparece quando há largura; no celular o avatar basta. */}
         <span className="hidden max-w-32 truncate text-sm text-ink sm:block">{nome}</span>
-        <ChevronDown
+        <CaretDown
           size={15}
           className={`shrink-0 text-muted transition-transform ${aberto ? "rotate-180" : ""}`}
         />
@@ -343,7 +343,7 @@ function MenuPerfil() {
 
           <div className="pt-1.5">
             <Link to="/perfil" onClick={() => setAberto(false)} className={item} role="menuitem">
-              <UserRound size={16} strokeWidth={1.75} />
+              <User size={16} />
               Meu perfil
             </Link>
             <button onClick={() => void sair()} className={item} role="menuitem">
@@ -478,7 +478,7 @@ function Sidebar({
             aria-label="Fechar menu"
             className="rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:hidden"
           >
-            <X size={18} strokeWidth={1.75} />
+            <X size={18} />
           </button>
           <button
             onClick={onAlternarRecolhido}
@@ -487,9 +487,9 @@ function Sidebar({
             className="alternar-menu hidden rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:block"
           >
             {recolhido ? (
-              <PanelLeftOpen size={18} strokeWidth={1.75} />
+              <CaretLineRight size={18} />
             ) : (
-              <PanelLeftClose size={18} strokeWidth={1.75} />
+              <CaretLineLeft size={18} />
             )}
           </button>
         </div>
@@ -574,7 +574,7 @@ function BotaoTema() {
       title={escuro ? "Tema claro" : "Tema escuro"}
       className="rounded-full p-2.5 text-muted transition hover:bg-surface/70 hover:text-ink"
     >
-      {escuro ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
+      {escuro ? <Sun size={18} /> : <Moon size={18} />}
     </button>
   );
 }

@@ -1,5 +1,5 @@
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BarChart3, RefreshCw } from "lucide-react";
+import { ArrowsClockwise, ChartBar } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { createContext, useContext, useMemo, useState } from "react";
 
@@ -133,7 +133,7 @@ export function Cabecalho({
               { value: "", label: "Todo o período" },
               ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
             ]}
-            leading={<BarChart3 size={14} className="shrink-0 text-accent" />}
+            leading={<ChartBar size={14} className="shrink-0 text-accent" />}
             triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-2 text-sm text-ink hover:border-gold/40"
           />
         )}
@@ -145,7 +145,7 @@ export function Cabecalho({
             title="Busca os dados mais recentes do servidor, sem recarregar a página"
             className="ml-auto flex items-center gap-2 rounded-full border border-line/70 bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-gold/50 disabled:opacity-70"
           >
-            <RefreshCw size={14} className={buscando ? "animate-spin" : ""} />
+            <ArrowsClockwise size={14} className={buscando ? "animate-spin" : ""} />
             {buscando ? "Atualizando…" : oQueAtualiza ? `Atualizar ${oQueAtualiza}` : "Atualizar"}
           </button>
         )}

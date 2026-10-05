@@ -1,4 +1,4 @@
-import { Check, ChevronDown } from "lucide-react";
+import { CaretDown, Check } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -60,7 +60,7 @@ export function Dropdown({
         <span className={`flex-1 truncate ${selecionada ? "" : "text-muted"}`}>
           {selecionada?.label ?? placeholder}
         </span>
-        <ChevronDown
+        <CaretDown
           size={16}
           className={`shrink-0 text-muted transition-transform ${aberto ? "rotate-180" : ""}`}
         />

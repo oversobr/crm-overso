@@ -1,16 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import {
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  Megaphone,
-  PartyPopper,
-  Plus,
-  Square,
-  Trash2,
-  UserRound,
-} from "lucide-react";
+import { CaretLeft, CaretRight, CheckSquare, Confetti, Megaphone, Plus, Square, Trash, User } from "@phosphor-icons/react";
 import type { DragEvent, ReactNode } from "react";
 import { useMemo, useState } from "react";
 
@@ -223,13 +213,13 @@ function Calendario() {
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
           <BotaoIcone rotulo={`${capitalizar(unidade)} anterior`} onClick={() => andar(-1)}>
-            <ChevronLeft size={16} />
+            <CaretLeft size={16} />
           </BotaoIcone>
           <h2 className="display min-w-40 px-1 text-center text-base font-semibold text-ink">
             {tituloPeriodo(visao, ref)}
           </h2>
           <BotaoIcone rotulo={`Próxim${visao === "semana" ? "a" : "o"} ${unidade}`} onClick={() => andar(1)}>
-            <ChevronRight size={16} />
+            <CaretRight size={16} />
           </BotaoIcone>
         </div>
         <button
@@ -492,7 +482,7 @@ function FaixaEvento({ e, dia, onAbrir }: { e: Evento; dia: string; onAbrir: () 
       title={`Evento: ${e.nome}`}
       className="flex w-full items-center gap-1 truncate rounded-md bg-gold px-1.5 py-1 text-left text-[11px] font-semibold leading-tight text-white transition hover:bg-gold-dim"
     >
-      <PartyPopper size={11} className="shrink-0" />
+      <Confetti size={11} className="shrink-0" />
       <span className="truncate">{inicio ? e.nome : "↳ " + e.nome}</span>
     </button>
   );
@@ -753,7 +743,7 @@ function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; pro
 
         {editando?.criado_por_nome && (
           <p className="flex items-center gap-1.5 text-xs text-muted">
-            <UserRound size={13} /> Criada por <span className="text-ink">{editando.criado_por_nome}</span> em{" "}
+            <User size={13} /> Criada por <span className="text-ink">{editando.criado_por_nome}</span> em{" "}
             {new Date(editando.criado_em).toLocaleDateString("pt-BR")}
           </p>
         )}
@@ -781,7 +771,7 @@ function FormTarefa({ edicao, projectId, onFechar }: { edicao: EdicaoTarefa; pro
                 onClick={() => setConfirmando(true)}
                 className="flex items-center gap-1.5 rounded-full px-2 py-1.5 text-sm text-rose-600 dark:text-rose-400 transition hover:bg-rose-500/10"
               >
-                <Trash2 size={14} /> Excluir
+                <Trash size={14} /> Excluir
               </button>
             ))}
           <div className="ml-auto flex gap-2">

@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.58.0",
     "@tailwindcss/vite": "^4.2.1",
@@ -16,7 +17,6 @@
     "@tanstack/react-router": "^1.170.16",
     "@tanstack/react-start": "^1.168.26",
     "@tanstack/router-plugin": "^1.168.18",
-    "lucide-react": "^0.475.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^2.15.0",

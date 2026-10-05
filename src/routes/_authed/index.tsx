@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowDown, ArrowRight, ArrowUp, BarChart3, CheckCircle2, ChevronRight, Pencil, Send, Target, Users } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, CaretRight, ChartBar, CheckCircle, PaperPlaneTilt, PencilSimple, Target, Users, Warning } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import type { ComponentType } from "react";
 import { useState } from "react";
@@ -248,7 +248,7 @@ function Dashboard() {
                 { value: "", label: "Todo o período" },
                 ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
               ]}
-              leading={<BarChart3 size={13} className="shrink-0 text-accent" />}
+              leading={<ChartBar size={13} className="shrink-0 text-accent" />}
               triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-1.5 text-xs text-ink hover:border-gold/40"
             />
           )}
@@ -297,7 +297,7 @@ function Dashboard() {
                 title="Editar meta"
                 className="rounded-lg p-1.5 text-muted transition hover:bg-surface-2 hover:text-ink"
               >
-                <Pencil size={14} />
+                <PencilSimple size={14} />
               </button>
             </div>
           </div>
@@ -413,7 +413,7 @@ function Dashboard() {
           estado enquanto a tela não é remontada. */}
       <details className="group mt-4">
         <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-1 py-2 text-sm text-muted transition hover:text-ink">
-          <ChevronRight
+          <CaretRight
             size={15}
             className="shrink-0 transition-transform group-open:rotate-90"
           />
@@ -493,7 +493,7 @@ function Dashboard() {
           sub={pendencias ? "itens parados esperando ação" : "nada parado"}
           alerta={pendencias > 0}
           destaque={pendencias === 0}
-          Icone={pendencias > 0 ? AlertTriangle : CheckCircle2}
+          Icone={pendencias > 0 ? Warning : CheckCircle}
           chip="rosa"
           comparacao={
             pendencias > 0
@@ -506,7 +506,7 @@ function Dashboard() {
             rotulo="Publicados na semana"
             valor={publicadosSemana}
             sub={`de ${daSemana.length} programado${daSemana.length === 1 ? "" : "s"}`}
-            Icone={Send}
+            Icone={PaperPlaneTilt}
             chip="verde"
             comparacao={`Semana passada: ${publicadosSemanaAnterior}`}
           />
@@ -682,7 +682,7 @@ function StatusDoMes({ conteudos, atrasados }: { conteudos: Conteudo[]; atrasado
             to="/postagens"
             className="flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-medium text-rose-600 ring-1 ring-inset ring-rose-500/25 transition hover:bg-rose-500/15 dark:text-rose-300"
           >
-            <AlertTriangle size={12} />
+            <Warning size={12} />
             {atrasados} atrasado{atrasados === 1 ? "" : "s"}
           </Link>
         )}
