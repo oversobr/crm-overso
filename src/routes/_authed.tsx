@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
+import { ChevronDown, Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -313,9 +313,8 @@ function MenuPerfil() {
         onClick={() => setAberto((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={aberto}
-        aria-label={`Conta de ${nome}`}
         title={nome}
-        className="rounded-full transition hover:opacity-80"
+        className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-surface/70"
       >
         {meta.avatar_url ? (
           <img src={meta.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
@@ -324,6 +323,12 @@ function MenuPerfil() {
             {inicial}
           </span>
         )}
+        {/* O nome só aparece quando há largura; no celular o avatar basta. */}
+        <span className="hidden max-w-32 truncate text-sm text-ink sm:block">{nome}</span>
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-muted transition-transform ${aberto ? "rotate-180" : ""}`}
+        />
       </button>
 
       {aberto && (
