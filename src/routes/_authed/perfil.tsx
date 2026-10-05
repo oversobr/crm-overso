@@ -17,6 +17,7 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
+import { recortarQuadrado } from "@/lib/imagem";
 import { Cabecalho } from "@/components/painel";
 import { Card } from "@/components/ui";
 import { podeConectarQuery, projectsQuery } from "@/lib/queries";
@@ -30,44 +31,6 @@ type Meta = { full_name?: string; name?: string; avatar_url?: string; avatar_cam
 const BUCKET = "avatares";
 /** Lado da foto salva: o suficiente pra tela Retina, leve pra carregar. */
 const LADO_FOTO = 320;
-
-/**
- * Recorta a imagem no quadrado central e reduz pra LADO_FOTO. Assim a foto
- * enviada tem sempre o mesmo tamanho e poucos KB, venha de onde vier (celular
- * manda fotos de 5 MB). Sai em JPEG.
- */
-async function prepararFoto(arquivo: File): Promise<Blob> {
-  const url = URL.createObjectURL(arquivo);
-  try {
-    const img = await new Promise<HTMLImageElement>((ok, falha) => {
-      const i = new Image();
-      i.onload = () => ok(i);
-      i.onerror = () => falha(new Error("Não consegui ler essa imagem."));
-      i.src = url;
-    });
-    const lado = Math.min(img.naturalWidth, img.naturalHeight);
-    const canvas = document.createElement("canvas");
-    canvas.width = LADO_FOTO;
-    canvas.height = LADO_FOTO;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(
-      img,
-      (img.naturalWidth - lado) / 2,
-      (img.naturalHeight - lado) / 2,
-      lado,
-      lado,
-      0,
-      0,
-      LADO_FOTO,
-      LADO_FOTO,
-    );
-    return await new Promise<Blob>((ok, falha) =>
-      canvas.toBlob((b) => (b ? ok(b) : falha(new Error("Não consegui processar a imagem."))), "image/jpeg", 0.88),
-    );
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-}
 
 function Perfil() {
   const qc = useQueryClient();
@@ -171,7 +134,7 @@ function Capa({
     mutationFn: async (arquivo: File) => {
       if (!userId) throw new Error("Sessão não encontrada. Entre de novo.");
       if (!arquivo.type.startsWith("image/")) throw new Error("Escolha um arquivo de imagem.");
-      const foto = await prepararFoto(arquivo);
+      const foto = await recortarQuadrado(arquivo, LADO_FOTO);
       // Nome novo a cada troca: o link muda e nenhum cache mostra a foto velha.
       const caminho = `${userId}/${Date.now()}.jpg`;
       const up = await sb.storage.from(BUCKET).upload(caminho, foto, { contentType: "image/jpeg" });

@@ -58,6 +58,9 @@ export type PerfilCliente = {
   observacoes: string | null;
   links: LinkCliente[];
   atualizado_em: string | null;
+  /** 29_logo_cliente.sql. O caminho fica junto pra dar pra apagar o antigo. */
+  logo_url: string | null;
+  logo_caminho: string | null;
 };
 
 /** O que o formulário da ficha envia — o resto da linha não se toca. */

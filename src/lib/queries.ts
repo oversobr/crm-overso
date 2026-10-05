@@ -1020,7 +1020,7 @@ export const perfilClienteQuery = (projectId: string | undefined) =>
       const { data, error } = await getSupabaseBrowserClient()
         .from("projects")
         .select(
-          "id, nome, slug, criado_em, responsavel, contato_nome, contato_email, contato_telefone, observacoes, links, atualizado_em",
+          "id, nome, slug, criado_em, responsavel, contato_nome, contato_email, contato_telefone, observacoes, links, atualizado_em, logo_url, logo_caminho",
         )
         .eq("id", projectId!)
         // single(): um id devolve uma linha ou nenhuma. Se vier diferente
@@ -1060,3 +1060,20 @@ export const podeGerenciarQuery = (projectId: string | undefined) =>
       return Boolean(data);
     },
   });
+
+/**
+ * Grava o endereço do logo. Separado de `salvarPerfilCliente` porque o
+ * logo vale assim que sobe — não espera o botão Salvar da ficha.
+ */
+export async function salvarLogoCliente(
+  projectId: string,
+  logo: { logo_url: string | null; logo_caminho: string | null },
+) {
+  const { data, error } = await getSupabaseBrowserClient()
+    .from("projects")
+    .update(logo)
+    .eq("id", projectId)
+    .select("id");
+  if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error("Só um admin deste cliente pode trocar o logo.");
+}
