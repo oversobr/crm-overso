@@ -531,6 +531,10 @@ function Sidebar({
         />
       </div>
 
+      <nav className="mt-1 flex flex-col gap-1">
+        <ItemNav to="/cliente" rotulo="Perfil do cliente" Icone={IconePerfil} onNavegar={onFechar} />
+      </nav>
+
       <Secao>Geral</Secao>
       <nav className="flex flex-col gap-1">
         {GERAL.map((item) => (

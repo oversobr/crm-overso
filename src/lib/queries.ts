@@ -19,6 +19,8 @@ import type {
   Lead,
   Project,
   ProjetoGerenciavel,
+  PerfilCliente,
+  PerfilClienteEntrada,
 } from "./types";
 
 export const projectsQuery = () =>
@@ -1001,3 +1003,60 @@ export async function excluirTarefa(id: string) {
   if (error) throw error;
   if (!data?.length) throw new Error(RECUSADO_TAREFA);
 }
+
+/* ── Ficha de trabalho do cliente (28_perfil_cliente.sql) ───────────
+   Toda consulta daqui é presa ao id do cliente — nenhuma lê a tabela
+   inteira e filtra depois. Somado à RLS, é o que garante que a ficha de
+   um cliente nunca mostre dado de outro. */
+
+export const perfilClienteQuery = (projectId: string | undefined) =>
+  queryOptions({
+    queryKey: ["perfil-cliente", projectId],
+    enabled: Boolean(projectId),
+    // Sem retry: num banco sem a migration 28 o erro é de coluna, e repetir
+    // só atrasa o aviso na tela.
+    retry: false,
+    queryFn: async (): Promise<PerfilCliente> => {
+      const { data, error } = await getSupabaseBrowserClient()
+        .from("projects")
+        .select(
+          "id, nome, slug, criado_em, responsavel, contato_nome, contato_email, contato_telefone, observacoes, links, atualizado_em",
+        )
+        .eq("id", projectId!)
+        // single(): um id devolve uma linha ou nenhuma. Se vier diferente
+        // disso, algo está muito errado e é melhor falhar que exibir.
+        .single();
+      if (error) throw error;
+      return data as PerfilCliente;
+    },
+  });
+
+/** Quem edita é admin do projeto ou super-admin — o banco confere de novo. */
+export async function salvarPerfilCliente(projectId: string, dados: PerfilClienteEntrada) {
+  const { data, error } = await getSupabaseBrowserClient()
+    .from("projects")
+    .update(dados)
+    .eq("id", projectId)
+    .select("id");
+  if (error) throw new Error(error.message);
+  // Mesma lição do 17: a policy barra sem devolver erro. Zero linha aqui
+  // significa "você não tem permissão", não "deu certo".
+  if (!data?.length) {
+    throw new Error("Só um admin deste cliente pode alterar a ficha.");
+  }
+}
+
+/** Se o usuário pode editar a ficha deste cliente. */
+export const podeGerenciarQuery = (projectId: string | undefined) =>
+  queryOptions({
+    queryKey: ["pode-gerenciar", projectId],
+    enabled: Boolean(projectId),
+    staleTime: 5 * 60_000,
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await getSupabaseBrowserClient().rpc("pode_gerenciar", {
+        p_project: projectId!,
+      });
+      if (error) throw error;
+      return Boolean(data);
+    },
+  });

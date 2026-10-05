@@ -37,6 +37,35 @@ export type Project = {
   usa_eventos?: boolean | undefined;
 };
 
+/** Um lugar do cliente: site, drive, pasta de artes, perfil numa rede… */
+export type LinkCliente = { rotulo: string; url: string };
+
+/**
+ * Ficha de trabalho do cliente (28_perfil_cliente.sql). Fica separada de
+ * `Project` de propósito: o `projectsQuery`, que alimenta o seletor da
+ * sidebar, roda em toda tela e não deve carregar observações e links que
+ * só uma página usa.
+ */
+export type PerfilCliente = {
+  id: string;
+  nome: string;
+  slug: string;
+  criado_em: string;
+  responsavel: string | null;
+  contato_nome: string | null;
+  contato_email: string | null;
+  contato_telefone: string | null;
+  observacoes: string | null;
+  links: LinkCliente[];
+  atualizado_em: string | null;
+};
+
+/** O que o formulário da ficha envia — o resto da linha não se toca. */
+export type PerfilClienteEntrada = Pick<
+  PerfilCliente,
+  "responsavel" | "contato_nome" | "contato_email" | "contato_telefone" | "observacoes" | "links"
+>;
+
 export type Modulo = "crm" | "conteudo" | "eventos";
 
 export const MODULO_LABEL: Record<Modulo, string> = { crm: "CRM", conteudo: "Conteúdo", eventos: "Eventos" };

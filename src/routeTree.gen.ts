@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as AuthedCalendarioRouteImport } from './routes/_authed/calendario'
+import { Route as AuthedClienteRouteImport } from './routes/_authed/cliente'
 import { Route as AuthedClientesRouteImport } from './routes/_authed/clientes'
 import { Route as AuthedConectarRouteImport } from './routes/_authed/conectar'
 import { Route as AuthedConfiguracaoRouteImport } from './routes/_authed/configuracao'
@@ -41,6 +42,11 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
 const AuthedCalendarioRoute = AuthedCalendarioRouteImport.update({
   id: '/calendario',
   path: '/calendario',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedClienteRoute = AuthedClienteRouteImport.update({
+  id: '/cliente',
+  path: '/cliente',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedClientesRoute = AuthedClientesRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
   '/calendario': typeof AuthedCalendarioRoute
+  '/cliente': typeof AuthedClienteRoute
   '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
   '/configuracao': typeof AuthedConfiguracaoRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/calendario': typeof AuthedCalendarioRoute
+  '/cliente': typeof AuthedClienteRoute
   '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
   '/configuracao': typeof AuthedConfiguracaoRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authed/calendario': typeof AuthedCalendarioRoute
+  '/_authed/cliente': typeof AuthedClienteRoute
   '/_authed/clientes': typeof AuthedClientesRoute
   '/_authed/conectar': typeof AuthedConectarRoute
   '/_authed/configuracao': typeof AuthedConfiguracaoRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/calendario'
+    | '/cliente'
     | '/clientes'
     | '/conectar'
     | '/configuracao'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/calendario'
+    | '/cliente'
     | '/clientes'
     | '/conectar'
     | '/configuracao'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/login'
     | '/_authed/calendario'
+    | '/_authed/cliente'
     | '/_authed/clientes'
     | '/_authed/conectar'
     | '/_authed/configuracao'
@@ -223,6 +235,13 @@ declare module '@tanstack/react-router' {
       path: '/calendario'
       fullPath: '/calendario'
       preLoaderRoute: typeof AuthedCalendarioRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/cliente': {
+      id: '/_authed/cliente'
+      path: '/cliente'
+      fullPath: '/cliente'
+      preLoaderRoute: typeof AuthedClienteRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/clientes': {
@@ -300,6 +319,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthedRouteChildren {
   AuthedCalendarioRoute: typeof AuthedCalendarioRoute
+  AuthedClienteRoute: typeof AuthedClienteRoute
   AuthedClientesRoute: typeof AuthedClientesRoute
   AuthedConectarRoute: typeof AuthedConectarRoute
   AuthedConfiguracaoRoute: typeof AuthedConfiguracaoRoute
@@ -315,6 +335,7 @@ interface AuthedRouteChildren {
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedCalendarioRoute: AuthedCalendarioRoute,
+  AuthedClienteRoute: AuthedClienteRoute,
   AuthedClientesRoute: AuthedClientesRoute,
   AuthedConectarRoute: AuthedConectarRoute,
   AuthedConfiguracaoRoute: AuthedConfiguracaoRoute,
