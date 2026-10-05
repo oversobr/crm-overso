@@ -8,7 +8,7 @@ import {
   Megaphone,
   Settings,
   Ticket,
-  UsersRound,
+  UserRound,
 } from "lucide-react";
 
 /**
@@ -38,12 +38,13 @@ export function IconeDashboard({ className = "" }: Props) {
 }
 
 /**
- * `UsersRound` e não `Users`: o segundo desenha duas figuras sobrepostas
- * com ombro, cabeça e recorte entre elas — detalhe demais para 18px, onde
- * vira um borrão. As formas arredondadas se separam melhor nesse tamanho.
+ * Uma silhueta só. Duas figuras — em qualquer variante — viram borrão em
+ * 18px: são duas cabeças, dois ombros e o recorte entre elas no espaço de
+ * um ícone. O que distingue este do de Meu perfil é o círculo: lá a pessoa
+ * fica dentro de um, aqui não.
  */
 export function IconeLeads({ className = "" }: Props) {
-  return <UsersRound size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
+  return <UserRound size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
 }
 
 export function IconeFunil({ className = "" }: Props) {
