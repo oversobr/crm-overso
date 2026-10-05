@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { Lock, Megaphone, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
+import { ChevronDown, Lock, Megaphone, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -62,8 +62,8 @@ function IconePostagem({ className = "" }: { className?: string }) {
 
 // Cada item da seção Conteúdo apaga conforme o SEU módulo: a Programação
 // segue o Conteúdo, os Eventos seguem o módulo Eventos.
-const CONTEUDO: { to: string; rotulo: string; Icone: IconeNav; modulo: Modulo }[] = [
-  { to: "/postagens", rotulo: "Programação de Postagem", Icone: IconePostagem, modulo: "conteudo" },
+const CONTEUDO: { to: string; rotulo: string; titulo?: string; Icone: IconeNav; modulo: Modulo }[] = [
+  { to: "/postagens", rotulo: "Programação", titulo: "Programação de Postagem", Icone: IconePostagem, modulo: "conteudo" },
   { to: "/eventos", rotulo: "Eventos", Icone: IconeEventos, modulo: "eventos" },
 ];
 
@@ -139,7 +139,7 @@ function Layout() {
         {/* min-w-0 é o que impede uma tabela larga de esticar a coluna inteira
             e empurrar o layout — sem isso o flex-1 cresce além da tela. */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <BarraMobile onAbrirMenu={() => setMenuAberto(true)} />
+          <BarraTopo onAbrirMenu={() => setMenuAberto(true)} />
           <AreaDoCliente />
         </div>
       </div>
@@ -240,20 +240,130 @@ function CortinaDeTroca() {
 }
 
 /** Barra de topo do celular: só ela dá acesso ao menu quando a gaveta fecha. */
-function BarraMobile({ onAbrirMenu }: { onAbrirMenu: () => void }) {
+/**
+ * Barra superior. Fixa por construção: a moldura é h-dvh com overflow-hidden
+ * e só o <main> rola, então ela nunca sai da tela.
+ *
+ * O hambúrguer e o logo só existem abaixo de lg — no desktop a sidebar já
+ * mostra os dois. Tema e perfil ficam à direita em qualquer tamanho.
+ */
+function BarraTopo({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line/70 bg-sidebar px-4 lg:hidden">
+    <header className="flex h-14 shrink-0 items-center gap-3 border-b border-line/70 bg-sidebar px-4 sm:px-6">
       <button
         onClick={onAbrirMenu}
         aria-label="Abrir menu"
-        className="rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink"
+        className="rounded-xl p-2 text-muted transition hover:bg-surface/70 hover:text-ink lg:hidden"
       >
         <Menu size={20} strokeWidth={1.75} />
       </button>
-      <div className="text-[#012b43] dark:text-ink">
+      <div className="text-[#012b43] lg:hidden dark:text-ink">
         <LogoOverso className="h-4 w-auto" />
       </div>
+
+      <div className="ml-auto flex items-center gap-1">
+        <BotaoTema />
+        <MenuPerfil />
+      </div>
     </header>
+  );
+}
+
+/**
+ * Avatar que abre o menu da conta: Meu perfil e Sair. Antes isso ocupava
+ * três linhas no rodapé da sidebar — espaço fixo para duas ações raras.
+ */
+function MenuPerfil() {
+  const router = useRouter();
+  const [aberto, setAberto] = useState(false);
+  const caixa = useRef<HTMLDivElement>(null);
+
+  const { data: user } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => {
+      const { data } = await getSupabaseBrowserClient().auth.getUser();
+      return data.user;
+    },
+  });
+
+  // Fecha ao clicar fora e no Esc — mesmo contrato do Dropdown.
+  useEffect(() => {
+    if (!aberto) return;
+    function fora(e: MouseEvent) {
+      if (caixa.current && !caixa.current.contains(e.target as Node)) setAberto(false);
+    }
+    function esc(e: KeyboardEvent) {
+      if (e.key === "Escape") setAberto(false);
+    }
+    document.addEventListener("mousedown", fora);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", fora);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [aberto]);
+
+  const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; avatar_url?: string };
+  const email = user?.email ?? "";
+  const nome = meta.full_name || meta.name || (email ? email.split("@")[0] : "Usuário");
+  const inicial = (nome.trim()[0] ?? "?").toUpperCase();
+
+  async function sair() {
+    await getSupabaseBrowserClient().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/login" });
+  }
+
+  const item =
+    "flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm text-muted transition hover:bg-surface-2/70 hover:text-ink";
+
+  return (
+    <div ref={caixa} className="relative">
+      <button
+        onClick={() => setAberto((v) => !v)}
+        aria-haspopup="menu"
+        aria-expanded={aberto}
+        title={nome}
+        className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-surface/70"
+      >
+        {meta.avatar_url ? (
+          <img src={meta.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
+        ) : (
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-xs font-semibold text-white">
+            {inicial}
+          </span>
+        )}
+        {/* O nome só aparece quando há largura; o avatar sozinho já identifica. */}
+        <span className="hidden max-w-32 truncate text-sm text-ink sm:block">{nome}</span>
+        <ChevronDown
+          size={15}
+          className={`shrink-0 text-muted transition-transform ${aberto ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {aberto && (
+        <div
+          role="menu"
+          className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-2xl border border-line/70 bg-surface p-1.5 shadow-xl shadow-black/20"
+        >
+          <div className="border-b border-line/70 px-3 pb-2.5 pt-1.5">
+            <p className="truncate text-sm font-medium text-ink">{nome}</p>
+            <p className="truncate text-xs text-muted">{email}</p>
+          </div>
+
+          <div className="pt-1.5">
+            <Link to="/perfil" onClick={() => setAberto(false)} className={item} role="menuitem">
+              <UserRound size={16} strokeWidth={1.75} />
+              Meu perfil
+            </Link>
+            <button onClick={() => void sair()} className={item} role="menuitem">
+              <IconeSair />
+              Sair
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -270,12 +380,15 @@ function Logo({ compacto = false }: { compacto?: boolean }) {
 function ItemNav({
   to,
   rotulo,
+  titulo,
   Icone,
   onNavegar,
   desativado = false,
 }: {
   to: string;
   rotulo: string;
+  /** Nome por extenso no tooltip, quando o rótulo da tela precisa ser curto. */
+  titulo?: string;
   Icone: IconeNav;
   /** Fecha a gaveta no celular; no desktop não faz diferença. */
   onNavegar?: () => void;
@@ -294,7 +407,7 @@ function ItemNav({
       // cursor — antes só a cor do ícone/texto mudava.
       // Sempre com title: no menu recolhido só o ícone aparece, e sem ele o
       // trilho vira adivinhação. O aviso de módulo desativado tem prioridade.
-      title={desativado ? "Módulo não ativado para este cliente" : rotulo}
+      title={desativado ? "Módulo não ativado para este cliente" : (titulo ?? rotulo)}
       className={`item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink ${
         desativado ? "opacity-45" : ""
       }`}
@@ -302,7 +415,7 @@ function ItemNav({
       activeProps={{ className: "!bg-surface !text-ink shadow-sm shadow-black/5" }}
     >
       <Icone />
-      <span className="rotulo-menu">{rotulo}</span>
+      <span className="rotulo-menu min-w-0 truncate">{rotulo}</span>
       {desativado && <Lock size={13} className="ml-auto shrink-0 rotulo-menu" />}
     </Link>
   );
@@ -340,12 +453,6 @@ function Sidebar({
   const { projeto, projetos, trocarCliente, trocas } = usePainel();
   const mods = modulosDe(projeto);
   const { data: podeConectar } = useQuery(podeConectarQuery());
-
-  async function sair() {
-    await getSupabaseBrowserClient().auth.signOut();
-    await router.invalidate();
-    await router.navigate({ to: "/login" });
-  }
 
   return (
     <>
@@ -456,68 +563,8 @@ function Sidebar({
         )}
       </nav>
 
-      <div className="mt-auto">
-        <Usuario onNavegar={onFechar} />
-        <div className="flex flex-col gap-1">
-          <BotaoTema />
-          <button
-            onClick={() => {
-              onFechar();
-              void sair();
-            }}
-            title="Sair"
-            className="item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
-          >
-            <IconeSair />
-            <span className="rotulo-menu">Sair</span>
-          </button>
-        </div>
-      </div>
       </aside>
     </>
-  );
-}
-
-/** Bloco de identidade: avatar (imagem ou inicial do nome), nome e email. */
-function Usuario({ onNavegar }: { onNavegar?: () => void }) {
-  const { data: user } = useQuery({
-    queryKey: ["auth-user"],
-    queryFn: async () => {
-      const { data } = await getSupabaseBrowserClient().auth.getUser();
-      return data.user;
-    },
-  });
-
-  const meta = (user?.user_metadata ?? {}) as { full_name?: string; name?: string; avatar_url?: string };
-  const email = user?.email ?? "";
-  // Nome: metadata > parte antes do @ > "Usuário".
-  const nome = meta.full_name || meta.name || (email ? email.split("@")[0] : "Usuário");
-  const inicial = (nome.trim()[0] ?? "?").toUpperCase();
-
-  return (
-    // Clicar no próprio nome/foto leva a Meu perfil.
-    <Link
-      to="/perfil"
-      onClick={onNavegar}
-      title="Meu perfil"
-      className="item-menu mb-2 mt-6 flex items-center gap-3 rounded-xl border-t border-line/70 px-2 pt-4 transition hover:opacity-80"
-    >
-      {meta.avatar_url ? (
-        <img
-          src={meta.avatar_url}
-          alt={nome}
-          className="h-9 w-9 shrink-0 rounded-full object-cover"
-        />
-      ) : (
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold text-sm font-semibold text-white">
-          {inicial}
-        </div>
-      )}
-      <div className="rotulo-menu min-w-0">
-        <p className="truncate text-sm font-medium text-ink">{nome}</p>
-        <p className="truncate text-xs text-muted">{email}</p>
-      </div>
-    </Link>
   );
 }
 
@@ -525,13 +572,15 @@ function BotaoTema() {
   const tema = useTema();
   const escuro = tema === "dark";
   return (
+    // Na barra do topo é só o ícone: o rótulo que ele tinha na sidebar
+    // repetiria o que o próprio sol/lua já diz.
     <button
       onClick={() => trocarTema()}
+      aria-label={escuro ? "Tema claro" : "Tema escuro"}
       title={escuro ? "Tema claro" : "Tema escuro"}
-      className="item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink"
+      className="rounded-full p-2.5 text-muted transition hover:bg-surface/70 hover:text-ink"
     >
       {escuro ? <Sun size={18} strokeWidth={1.75} /> : <Moon size={18} strokeWidth={1.75} />}
-      <span className="rotulo-menu">{escuro ? "Tema claro" : "Tema escuro"}</span>
     </button>
   );
 }

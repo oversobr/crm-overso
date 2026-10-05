@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   Building2,
   CalendarDays,
@@ -9,6 +9,7 @@ import {
   EyeOff,
   KeyRound,
   Loader2,
+  LogOut,
   ShieldCheck,
   Trash2,
   UserRound,
@@ -98,7 +99,44 @@ function Perfil() {
         <Nome meta={meta} email={email} onSalvo={recarregar} />
         <Senha />
       </div>
+
+      <Sair />
     </>
+  );
+}
+
+/**
+ * Encerrar a sessão é ação de conta, então mora na página da conta — e não
+ * mais no rodapé da sidebar, onde ocupava espaço fixo para um clique raro.
+ * O menu do avatar, no topo, é o atalho.
+ */
+function Sair() {
+  const router = useRouter();
+  const [saindo, setSaindo] = useState(false);
+
+  async function sair() {
+    setSaindo(true);
+    await getSupabaseBrowserClient().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/login" });
+  }
+
+  return (
+    <Card className="mt-4" titulo="Sessão">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted">
+          Encerra a sessão neste navegador. Você vai precisar entrar de novo.
+        </p>
+        <button
+          onClick={() => void sair()}
+          disabled={saindo}
+          className="flex shrink-0 items-center gap-2 rounded-xl border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-60 dark:text-rose-400"
+        >
+          <LogOut size={15} />
+          {saindo ? "Saindo…" : "Sair da conta"}
+        </button>
+      </div>
+    </Card>
   );
 }
 
