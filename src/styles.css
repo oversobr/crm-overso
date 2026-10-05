@@ -362,13 +362,6 @@ input:-webkit-autofill:focus {
 
   .menu-compacto .topo-menu {
     justify-content: center;
-    /* A faixa sangra até a borda da barra, e no trilho a barra tem px-2 e
-       não px-3 — sem acertar aqui, a linha de baixo ficaria 4px mais larga
-       que a própria barra de cada lado. */
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
   }
   .menu-compacto .topo-menu > div {
     padding-left: 0;

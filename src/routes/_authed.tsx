@@ -471,7 +471,7 @@ function Sidebar({
       >
         {/* No celular o logo do topo já está na barra; aqui vira o botão de
             fechar, que é o que a mão procura com a gaveta aberta. */}
-        <div className="topo-menu -mx-3 mb-4 flex h-14 shrink-0 items-center justify-between border-b border-line/70 px-3">
+        <div className="topo-menu mb-4 flex h-14 shrink-0 items-center justify-between">
           <Logo compacto={compacto} />
           <button
             onClick={onFechar}
