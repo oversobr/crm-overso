@@ -51,7 +51,6 @@ export type PerfilCliente = {
   nome: string;
   slug: string;
   criado_em: string;
-  responsavel: string | null;
   contato_nome: string | null;
   contato_email: string | null;
   contato_telefone: string | null;
@@ -66,7 +65,7 @@ export type PerfilCliente = {
 /** O que o formulário da ficha envia — o resto da linha não se toca. */
 export type PerfilClienteEntrada = Pick<
   PerfilCliente,
-  "responsavel" | "contato_nome" | "contato_email" | "contato_telefone" | "observacoes" | "links"
+  "contato_nome" | "contato_email" | "contato_telefone" | "observacoes" | "links"
 >;
 
 export type Modulo = "crm" | "conteudo" | "eventos";

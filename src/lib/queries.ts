@@ -1020,7 +1020,7 @@ export const perfilClienteQuery = (projectId: string | undefined) =>
       const { data, error } = await getSupabaseBrowserClient()
         .from("projects")
         .select(
-          "id, nome, slug, criado_em, responsavel, contato_nome, contato_email, contato_telefone, observacoes, links, atualizado_em, logo_url, logo_caminho",
+          "id, nome, slug, criado_em, contato_nome, contato_email, contato_telefone, observacoes, links, atualizado_em, logo_url, logo_caminho",
         )
         .eq("id", projectId!)
         // single(): um id devolve uma linha ou nenhuma. Se vier diferente

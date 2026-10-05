@@ -89,7 +89,6 @@ function Ficha({
   podeEditar: boolean;
   onSalvo: () => Promise<void> | void;
 }) {
-  const [responsavel, setResponsavel] = useState(perfil.responsavel ?? "");
   const [contatoNome, setContatoNome] = useState(perfil.contato_nome ?? "");
   const [contatoEmail, setContatoEmail] = useState(perfil.contato_email ?? "");
   const [contatoTelefone, setContatoTelefone] = useState(perfil.contato_telefone ?? "");
@@ -98,7 +97,6 @@ function Ficha({
 
   // "Salvar" só acende quando há o que salvar.
   const original = JSON.stringify({
-    responsavel: perfil.responsavel ?? "",
     contatoNome: perfil.contato_nome ?? "",
     contatoEmail: perfil.contato_email ?? "",
     contatoTelefone: perfil.contato_telefone ?? "",
@@ -106,7 +104,6 @@ function Ficha({
     links: perfil.links ?? [],
   });
   const atual = JSON.stringify({
-    responsavel,
     contatoNome,
     contatoEmail,
     contatoTelefone,
@@ -126,7 +123,6 @@ function Ficha({
   const salvar = useMutation({
     mutationFn: () =>
       salvarPerfilCliente(perfil.id, {
-        responsavel: responsavel.trim() || null,
         contato_nome: contatoNome.trim() || null,
         contato_email: contatoEmail.trim() || null,
         contato_telefone: contatoTelefone.trim() || null,
@@ -155,21 +151,8 @@ function Ficha({
       <LogoCliente perfil={perfil} podeEditar={podeEditar} onSalvo={onSalvo} />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card titulo="Quem cuida">
-          <Rotulo texto="Responsável na OVERSO">
-            <input
-              value={responsavel}
-              onChange={(e) => setResponsavel(e.target.value)}
-              disabled={!podeEditar}
-              placeholder="Ex.: José"
-              className={campo}
-            />
-          </Rotulo>
-
-          <div className="mt-4 border-t border-line/70 pt-4">
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted">
-              Contato do cliente
-            </p>
+        <Card titulo="Contato do cliente">
+          <div>
             <Rotulo texto="Nome">
               <input
                 value={contatoNome}
