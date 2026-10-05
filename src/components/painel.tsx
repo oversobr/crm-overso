@@ -122,8 +122,13 @@ export function Cabecalho({
     <div className="mb-6">
       {/* flex-wrap: no celular o seletor de campanha e o botão descem em vez
           de espremer o título. A altura fixa só vale de sm pra cima. */}
-      <header className="flex flex-wrap items-center gap-3 sm:h-10 sm:gap-4">
-        <h1 className="display text-xl font-bold text-ink sm:text-2xl">{titulo}</h1>
+      <header className="flex flex-wrap items-center gap-3 sm:gap-4">
+        <div className="min-w-0">
+          <h1 className="display text-2xl font-bold tracking-tight text-ink sm:text-[28px]">
+            {titulo}
+          </h1>
+          {subtitulo && <p className="mt-0.5 text-sm text-muted">{subtitulo}</p>}
+        </div>
 
         {comCampanha && campanhas.length > 0 && (
           <Dropdown
@@ -134,7 +139,7 @@ export function Cabecalho({
               ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
             ]}
             leading={<ChartBar size={14} className="shrink-0 text-accent" />}
-            triggerClassName="rounded-full border border-line/70 bg-surface px-3 py-2 text-sm text-ink hover:border-gold/40"
+            triggerClassName="rounded-full border border-line/60 bg-surface px-3.5 py-2 text-sm text-ink transition hover:border-accent/50"
           />
         )}
 
@@ -143,7 +148,7 @@ export function Cabecalho({
             onClick={atualizar}
             disabled={buscando}
             title="Busca os dados mais recentes do servidor, sem recarregar a página"
-            className="ml-auto flex items-center gap-2 rounded-full border border-line/70 bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-gold/50 disabled:opacity-70"
+            className="ml-auto flex items-center gap-2 rounded-full border border-line/60 bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-accent/50 hover:bg-surface-2/50 disabled:opacity-60"
           >
             <ArrowsClockwise size={14} className={buscando ? "animate-spin" : ""} />
             {buscando ? "Atualizando…" : oQueAtualiza ? `Atualizar ${oQueAtualiza}` : "Atualizar"}
@@ -152,8 +157,6 @@ export function Cabecalho({
 
         {children && <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>}
       </header>
-
-      {subtitulo && <p className="mt-1 text-sm text-muted">{subtitulo}</p>}
 
       {/* Barra indeterminada: sinaliza que os dados estão sendo atualizados. */}
       {atualizavel && (

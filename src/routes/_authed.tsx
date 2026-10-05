@@ -398,11 +398,14 @@ function ItemNav({
       // Sempre com title: no menu recolhido só o ícone aparece, e sem ele o
       // trilho vira adivinhação. O aviso de módulo desativado tem prioridade.
       title={desativado ? "Módulo não ativado para este cliente" : (titulo ?? rotulo)}
-      className={`item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition hover:bg-surface/70 hover:text-ink ${
+      className={`item-menu flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-surface/70 hover:text-ink ${
         desativado ? "opacity-45" : ""
       }`}
-      // Ativo = card cheio com sombra, como na referência.
-      activeProps={{ className: "!bg-surface !text-ink shadow-sm shadow-black/5" }}
+      // Ativo = pílula sólida no acento, como nas referências. Antes era um
+      // card cinza, que no menu inteiro em cinza mal se distinguia do hover.
+      activeProps={{
+        className: "!bg-gold !text-white shadow-sm shadow-gold/25 hover:!bg-gold-dim",
+      }}
     >
       <Icone />
       <span className="rotulo-menu min-w-0 truncate">{rotulo}</span>

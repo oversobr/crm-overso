@@ -10,7 +10,7 @@ import { COR_STATUS_CAL, PilulasConteudo, StatusConteudoBadge } from "@/componen
 import { Dropdown } from "@/components/dropdown";
 import { Cabecalho, usePainel } from "@/components/painel";
 import { Modal } from "@/components/modal";
-import { Card, StatusBadge, Vazio } from "@/components/ui";
+import { Card, Pilula, StatusBadge, Vazio } from "@/components/ui";
 import { DadosBlur } from "@/components/dados-blur";
 import { deYmd, fmt, hhmm, SEMANA, semanaDe, somarDias, ymd } from "@/lib/datas";
 import {
@@ -940,48 +940,32 @@ function Kpi({
         )}
       </div>
 
-      <div className="mt-2 flex items-baseline gap-2">
-        <p
-          className={`text-4xl font-semibold tracking-tight ${
-            destaque ? "text-white" : alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
-          }`}
-        >
-          {valor}
-        </p>
-        {delta != null && <Delta v={delta} />}
-      </div>
+      <p
+        className={`mt-2 text-4xl font-semibold tracking-tight ${
+          destaque ? "text-white" : alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
+        }`}
+      >
+        {valor}
+      </p>
 
       {sub && <p className={`mt-1 text-xs ${destaque ? "text-white" : "text-muted"}`}>{sub}</p>}
 
       {/* Linha de referência separada por um fio, como nos cards das refs:
           o número sozinho não diz se está bom — o de antes diz. */}
-      {comparacao && (
-        <p
-          className={`mt-3 border-t pt-2.5 text-xs ${
-            destaque ? "border-white/20 text-white" : "border-line/70 text-muted"
+      {(delta != null || comparacao) && (
+        <div
+          className={`mt-3 flex flex-wrap items-center gap-2 border-t pt-3 text-xs ${
+            destaque ? "border-white/20 text-white" : "border-line/40 text-muted"
           }`}
         >
-          {comparacao}
-        </p>
+          {delta != null && <Pilula valor={delta} sufixo="" />}
+          {comparacao && <span className="min-w-0 truncate">{comparacao}</span>}
+        </div>
       )}
     </div>
   );
 }
 
-function Delta({ v }: { v: number }) {
-  if (v === 0) return <span className="text-xs text-muted">= ontem</span>;
-  const subiu = v > 0;
-  return (
-    <span
-      className={`flex items-center gap-0.5 text-xs font-medium ${
-        subiu ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-      }`}
-    >
-      {subiu ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
-      {Math.abs(v)} vs ontem
-    </span>
-  );
-}
 
 function Legenda({ cor }: { cor: { fill: string; fill2: string } }) {
   return (
