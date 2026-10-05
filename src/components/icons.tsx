@@ -1,7 +1,6 @@
 import {
   Building2,
   CalendarDays,
-  ChartColumnBig,
   CircleUser,
   Filter,
   LayoutDashboard,
@@ -71,10 +70,6 @@ export function IconeCalendario({ className = "" }: Props) {
 /** Ingresso, e não outro calendário: Calendário já é o vizinho na lista. */
 export function IconeEventos({ className = "" }: Props) {
   return <Ticket size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
-}
-
-export function IconeRelatorios({ className = "" }: Props) {
-  return <ChartColumnBig size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
 }
 
 export function IconePostagem({ className = "" }: Props) {

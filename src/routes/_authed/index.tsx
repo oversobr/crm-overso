@@ -407,7 +407,7 @@ function Dashboard() {
         </Card>
       </div>
 
-      {/* Fontes e Leads Recentes existem inteiros em /relatorios e /leads.
+      {/* Fontes e Leads Recentes existem inteiros em /leads e no Funil.
           Em vez de remover (você pode usar no dia a dia), ficam recolhidos:
           a página encurta e eles continuam a um clique. O <details> guarda o
           estado enquanto a tela não é remontada. */}

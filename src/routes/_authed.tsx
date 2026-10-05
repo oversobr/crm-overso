@@ -14,7 +14,6 @@ import {
   IconeLeads,
   IconePerfil,
   IconePostagem,
-  IconeRelatorios,
   IconeSair,
 } from "@/components/icons";
 import { Dropdown } from "@/components/dropdown";
@@ -49,7 +48,6 @@ type IconeNav = ComponentType<{ className?: string }>;
 const GERAL: { to: string; rotulo: string; Icone: IconeNav }[] = [
   { to: "/", rotulo: "Dashboard", Icone: IconeDashboard },
   { to: "/calendario", rotulo: "Calendário", Icone: IconeCalendario },
-  { to: "/relatorios", rotulo: "Relatórios", Icone: IconeRelatorios },
 ];
 
 const CRM: { to: string; rotulo: string; Icone: IconeNav }[] = [
