@@ -348,10 +348,19 @@ input:-webkit-autofill:focus {
     gap: 0;
   }
 
-  /* Logo e botão de recolher empilham: lado a lado não cabem em 4.5rem. */
+  /* No trilho sobra só o logo, centrado. O botão de recolher não cabe ao
+     lado dele em 4.5rem, e empilhar deixou de ser opção agora que a faixa
+     tem a altura da barra do topo (56px). Também não faz falta: pairar já
+     expande a barra, e aí o botão reaparece pra fixar a escolha. */
   .menu-compacto .topo-menu {
-    flex-direction: column;
-    gap: 0.25rem;
+    justify-content: center;
+    /* A faixa sangra até a borda da barra, e no trilho a barra tem px-2 e
+       não px-3 — sem acertar aqui, a linha de baixo ficaria 4px mais larga
+       que a própria barra de cada lado. */
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   .menu-compacto .topo-menu > div {
     padding-left: 0;

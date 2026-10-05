@@ -473,7 +473,7 @@ function Sidebar({
       <aside
         onMouseEnter={() => recolhido && setPairando(true)}
         onMouseLeave={() => setPairando(false)}
-        className={`barra-lateral fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-line/70 bg-sidebar px-3 pb-4 pt-6 transition-[width,transform] duration-[320ms] ease-[var(--ease-gaveta)] lg:z-40 lg:translate-x-0 ${
+        className={`barra-lateral fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col overflow-y-auto overflow-x-hidden bg-sidebar px-3 pb-4 transition-[width,transform] duration-[320ms] ease-[var(--ease-gaveta)] lg:z-40 lg:translate-x-0 ${
           aberto ? "translate-x-0" : "-translate-x-full"
         } ${compacto ? "menu-compacto lg:w-[4.5rem] lg:px-2" : "lg:w-60"} ${
           recolhido && pairando ? "lg:shadow-2xl lg:shadow-black/30" : ""
@@ -481,7 +481,7 @@ function Sidebar({
       >
         {/* No celular o logo do topo já está na barra; aqui vira o botão de
             fechar, que é o que a mão procura com a gaveta aberta. */}
-        <div className="topo-menu flex items-center justify-between">
+        <div className="topo-menu -mx-3 mb-4 flex h-14 shrink-0 items-center justify-between border-b border-line/70 px-3">
           <Logo compacto={compacto} />
           <button
             onClick={onFechar}
