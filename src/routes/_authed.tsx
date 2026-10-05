@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { ChevronDown, Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
+import { Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -154,7 +154,7 @@ function AreaDoCliente() {
   }, [trocas]);
 
   return (
-    <main ref={main} className="flex-1 overflow-y-auto px-4 pb-5 pt-24 sm:px-6 lg:px-8 lg:pb-6">
+    <main ref={main} className="flex-1 overflow-y-auto px-4 pb-5 pt-[84px] sm:px-6 lg:px-8 lg:pb-6">
       <div key={trocas}>
         <Outlet />
       </div>
@@ -239,7 +239,7 @@ function CortinaDeTroca() {
  */
 function BarraTopo({ onAbrirMenu }: { onAbrirMenu: () => void }) {
   return (
-    <header className="absolute inset-x-0 top-0 z-30 flex h-20 items-center gap-3 bg-sidebar/85 px-4 backdrop-blur-xl sm:px-6">
+    <header className="absolute inset-x-0 top-0 z-30 flex h-[68px] items-center gap-3 bg-sidebar/85 px-4 backdrop-blur-xl sm:px-6">
       <button
         onClick={onAbrirMenu}
         aria-label="Abrir menu"
@@ -313,8 +313,9 @@ function MenuPerfil() {
         onClick={() => setAberto((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={aberto}
+        aria-label={`Conta de ${nome}`}
         title={nome}
-        className="flex items-center gap-2 rounded-full p-1 pr-2 transition hover:bg-surface/70"
+        className="rounded-full transition hover:opacity-80"
       >
         {meta.avatar_url ? (
           <img src={meta.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" />
@@ -323,12 +324,6 @@ function MenuPerfil() {
             {inicial}
           </span>
         )}
-        {/* O nome só aparece quando há largura; o avatar sozinho já identifica. */}
-        <span className="hidden max-w-32 truncate text-sm text-ink sm:block">{nome}</span>
-        <ChevronDown
-          size={15}
-          className={`shrink-0 text-muted transition-transform ${aberto ? "rotate-180" : ""}`}
-        />
       </button>
 
       {aberto && (
@@ -471,7 +466,7 @@ function Sidebar({
       >
         {/* No celular o logo do topo já está na barra; aqui vira o botão de
             fechar, que é o que a mão procura com a gaveta aberta. */}
-        <div className="topo-menu mb-4 flex h-20 shrink-0 items-center justify-between">
+        <div className="topo-menu mb-4 flex h-[68px] shrink-0 items-center justify-between">
           <Logo compacto={compacto} />
           <button
             onClick={onFechar}
