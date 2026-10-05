@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, Outlet, redirect, useRouter } from "@tanstack/react-router";
-import { ChevronDown, Lock, Megaphone, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
+import { ChevronDown, Lock, Menu, Moon, PanelLeftClose, PanelLeftOpen, Sun, UserRound, X } from "lucide-react";
 import type { ComponentType } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -12,6 +12,8 @@ import {
   IconeDashboard,
   IconeFunil,
   IconeLeads,
+  IconePerfil,
+  IconePostagem,
   IconeRelatorios,
   IconeSair,
 } from "@/components/icons";
@@ -55,11 +57,6 @@ const CRM: { to: string; rotulo: string; Icone: IconeNav }[] = [
   { to: "/funil", rotulo: "Funil", Icone: IconeFunil },
 ];
 
-/** Ícone do lucide no mesmo tamanho e traço dos ícones da marca. */
-function IconePostagem({ className = "" }: { className?: string }) {
-  return <Megaphone size={18} strokeWidth={1.6} className={`shrink-0 ${className}`} />;
-}
-
 // Cada item da seção Conteúdo apaga conforme o SEU módulo: a Programação
 // segue o Conteúdo, os Eventos seguem o módulo Eventos.
 const CONTEUDO: { to: string; rotulo: string; titulo?: string; Icone: IconeNav; modulo: Modulo }[] = [
@@ -72,11 +69,6 @@ const CONTEUDO: { to: string; rotulo: string; titulo?: string; Icone: IconeNav; 
 // `somenteAdmin` esconde o item de quem não administra nenhuma página. É só a
 // interface: quem chamar a API direto esbarra no banco do mesmo jeito
 // (16_conectar_admin.sql).
-/** Ícone do lucide no mesmo tamanho e traço dos ícones da marca. */
-function IconePerfil({ className = "" }: { className?: string }) {
-  return <UserRound size={18} strokeWidth={1.6} className={`shrink-0 ${className}`} />;
-}
-
 const PREFERENCIAS: { to: string; rotulo: string; Icone: IconeNav; somenteAdmin?: boolean }[] = [
   { to: "/perfil", rotulo: "Meu perfil", Icone: IconePerfil },
   { to: "/configuracao", rotulo: "Configuração", Icone: IconeConfiguracao },
