@@ -281,6 +281,15 @@ input:-webkit-autofill:focus {
   }
 }
 
+/* O primeiro rótulo de seção não separa dois grupos — ele só vem depois do
+   logo. Com o respiro dos outros, o vão abaixo da marca ficava grande. */
+.barra-lateral .secao-menu:first-of-type {
+  padding-top: 0.75rem;
+}
+.barra-lateral .traco-secao:first-of-type {
+  margin-top: 0.75rem;
+}
+
 /* ── Menu recolhido (trilho de ícones) ──────────────────────────────
    O estado mora no React, mas o que ele muda está aqui, e não no JSX,
    por um motivo: abaixo de lg a sidebar é uma GAVETA, sempre larga.
