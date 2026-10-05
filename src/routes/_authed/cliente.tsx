@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ExternalLink, Image as ImageIcon, Link2, Lock, Mail, Phone, Plus, Trash2, Upload } from "lucide-react";
+import { Camera, ExternalLink, Link2, Loader2, Lock, Mail, Phone, Plus, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -326,78 +326,104 @@ function LogoCliente({
   const ocupado = trocar.isPending || remover.isPending;
 
   return (
-    <Card className="mb-4">
-      <div className="flex flex-wrap items-center gap-5">
-        {/* Xadrez por baixo: logo com transparência precisa de um fundo que
-            denuncie o que é transparente, nos dois temas. */}
+    <section className="mb-4 overflow-hidden rounded-3xl border border-line/70 bg-surface shadow-sm shadow-black/5">
+      {/* Faixa da marca, igual à capa do perfil de usuário e à do login:
+          é ela que faz o bloco ler como identidade e não como formulário. */}
+      <div className="relative h-24 overflow-hidden bg-brand-950 sm:h-28">
         <div
-          className="flex h-24 w-40 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-line/70 bg-surface-2"
-          style={{
-            backgroundImage:
-              "linear-gradient(45deg, rgba(128,128,128,0.12) 25%, transparent 25%, transparent 75%, rgba(128,128,128,0.12) 75%), linear-gradient(45deg, rgba(128,128,128,0.12) 25%, transparent 25%, transparent 75%, rgba(128,128,128,0.12) 75%)",
-            backgroundSize: "16px 16px",
-            backgroundPosition: "0 0, 8px 8px",
-          }}
+          aria-hidden
+          className="pointer-events-none absolute -left-16 -top-24 h-64 w-64 rounded-full bg-brand-500/40 blur-[90px]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 right-10 h-64 w-64 rounded-full bg-brand-700/60 blur-[100px]"
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 pb-6 sm:px-6">
+        {/* Quadrado arredondado, e não círculo: logo é quase sempre horizontal,
+            e num círculo ele teria que encolher muito pra caber. A inicial no
+            azul da marca cobre quem ainda não tem logo — o cliente se
+            identifica de cara de um jeito ou de outro.
+            `object-contain`: o logo cabe inteiro, nunca é cortado. */}
+        <button
+          type="button"
+          onClick={() => podeEditar && entrada.current?.click()}
+          disabled={!podeEditar || ocupado}
+          title={podeEditar ? "Trocar logo" : perfil.nome}
+          className="group relative -mt-10 h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-gold text-3xl font-semibold text-white shadow-lg shadow-black/20 ring-4 ring-surface disabled:cursor-default"
         >
           {perfil.logo_url ? (
             <img
               src={perfil.logo_url}
-              alt={`Logo de ${perfil.nome}`}
-              className="max-h-full max-w-full object-contain p-2"
+              alt={perfil.nome}
+              className="h-full w-full bg-surface object-contain p-1.5"
             />
           ) : (
-            <ImageIcon size={22} className="text-muted" />
+            <span className="flex h-full w-full items-center justify-center">
+              {(perfil.nome.trim()[0] ?? "?").toUpperCase()}
+            </span>
           )}
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <h2 className="display truncate text-lg font-semibold text-ink">{perfil.nome}</h2>
-          <p className="truncate text-xs text-muted">{perfil.slug}</p>
 
           {podeEditar && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              <input
-                ref={entrada}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="hidden"
-                onChange={(e) => {
-                  const a = e.target.files?.[0];
-                  // Zera o input: escolher o MESMO arquivo de novo precisa
-                  // disparar o evento, e sem isto o navegador não dispara.
-                  e.target.value = "";
-                  if (a) trocar.mutate(a);
-                }}
-              />
-              <button
-                onClick={() => entrada.current?.click()}
-                disabled={ocupado}
-                className="flex items-center gap-2 rounded-xl border border-line/70 px-3 py-2 text-sm text-ink transition hover:border-accent/50 disabled:opacity-60"
-              >
-                <Upload size={14} />
-                {trocar.isPending ? "Enviando…" : perfil.logo_url ? "Trocar logo" : "Enviar logo"}
-              </button>
-
-              {perfil.logo_url && (
-                <button
-                  onClick={() => remover.mutate()}
-                  disabled={ocupado}
-                  className="flex items-center gap-2 rounded-xl border border-rose-500/30 px-3 py-2 text-sm text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-60 dark:text-rose-400"
-                >
-                  <Trash2 size={14} /> Remover
-                </button>
-              )}
-            </div>
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 text-[10px] font-medium text-white opacity-0 transition group-hover:opacity-100">
+              {ocupado ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+              {ocupado ? "Enviando…" : "Trocar"}
+            </span>
           )}
+        </button>
 
-          <p className="mt-2 text-xs text-muted">
-            PNG, JPEG ou WebP, até 2 MB. A transparência do PNG é preservada.
+        <div className="min-w-[10rem] flex-1">
+          <h2 className="display truncate text-xl font-bold text-ink">{perfil.nome}</h2>
+          <p className="truncate text-sm text-muted">
+            {perfil.slug} · cliente desde{" "}
+            {new Date(perfil.criado_em).toLocaleDateString("pt-BR", {
+              month: "short",
+              year: "numeric",
+            })}
           </p>
         </div>
+
+        {podeEditar && (
+          <div className="ml-auto flex shrink-0 flex-wrap gap-2">
+            <input
+              ref={entrada}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const a = e.target.files?.[0];
+                // Zera o input: escolher o MESMO arquivo de novo precisa
+                // disparar o evento, e sem isto o navegador não dispara.
+                e.target.value = "";
+                if (a) trocar.mutate(a);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => entrada.current?.click()}
+              disabled={ocupado}
+              className="flex items-center gap-1.5 rounded-full bg-gold px-4 py-2 text-sm font-medium text-white transition hover:bg-gold-dim disabled:opacity-60"
+            >
+              <Camera size={14} /> {perfil.logo_url ? "Trocar logo" : "Enviar logo"}
+            </button>
+            {perfil.logo_url && (
+              <button
+                type="button"
+                onClick={() => remover.mutate()}
+                disabled={ocupado}
+                className="flex items-center gap-1.5 rounded-full border border-line/70 px-4 py-2 text-sm text-muted transition hover:border-rose-400/60 hover:text-rose-500 disabled:opacity-60"
+              >
+                <Trash2 size={14} /> Remover
+              </button>
+            )}
+          </div>
+        )}
       </div>
-    </Card>
+    </section>
   );
 }
+
 
 function Links({
   links,
