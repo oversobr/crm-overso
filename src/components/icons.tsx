@@ -8,7 +8,7 @@ import {
   Megaphone,
   Settings,
   Ticket,
-  UserRound,
+  IdCard,
 } from "lucide-react";
 
 /**
@@ -38,13 +38,14 @@ export function IconeDashboard({ className = "" }: Props) {
 }
 
 /**
- * Uma silhueta só. Duas figuras — em qualquer variante — viram borrão em
- * 18px: são duas cabeças, dois ombros e o recorte entre elas no espaço de
- * um ícone. O que distingue este do de Meu perfil é o círculo: lá a pessoa
- * fica dentro de um, aqui não.
+ * Ficha de contato: um retângulo FECHADO com a pessoa e as linhas de dado
+ * dentro. As silhuetas de pessoa do lucide desenham o ombro como um arco
+ * aberto — o traço começa e termina no vazio, e em 18px aquilo lê como
+ * ícone quebrado. Um contorno que fecha não tem esse problema, e ainda
+ * diz melhor o que a tela é: cadastro de gente, não gente.
  */
 export function IconeLeads({ className = "" }: Props) {
-  return <UserRound size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
+  return <IdCard size={LADO} strokeWidth={TRACO} className={`${base} ${className}`} />;
 }
 
 export function IconeFunil({ className = "" }: Props) {
