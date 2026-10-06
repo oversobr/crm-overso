@@ -22,6 +22,7 @@ import {
   IconeConteudo,
   IconeDashboard,
   IconeEventos,
+  IconeFunil,
   IconeLeads,
   IconePerfil,
   MarcaOverso,
@@ -42,6 +43,7 @@ const MENU: Item[] = [
 
 const MODULOS: Item[] = [
   { to: "/leads", rotulo: "Leads", Icone: IconeLeads, modulo: "crm" },
+  { to: "/funil", rotulo: "Funil", Icone: IconeFunil, modulo: "crm" },
   { to: "/postagens", rotulo: "Programação de post", Icone: IconeConteudo, modulo: "conteudo" },
   { to: "/eventos", rotulo: "Eventos", Icone: IconeEventos, modulo: "eventos" },
 ];

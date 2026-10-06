@@ -10,8 +10,8 @@ import type { Formato } from "@/lib/types";
 import { FORMATO_LABEL } from "@/lib/types";
 import { iniciais } from "@/lib/usuario";
 
-/* Peças do post usadas pelos dois popups (nova postagem e detalhes): a
-   prévia de como ele sai na rede e o campo das artes. */
+/* Peças da coluna do meio do popup de postagem: a prévia de como o post sai
+   na rede e, embaixo dela, o campo das artes. */
 
 /** Formatos em pé (9:16). Feed e carrossel são 4:5; o que sobra fica quadrado. */
 const VERTICAIS: Formato[] = ["reels", "story", "shorts", "tiktok"];
@@ -19,10 +19,15 @@ const RETRATO: Formato[] = ["post", "carrossel"];
 /** Quantas artes um post aceita (o limite de um carrossel no Instagram é 20; 10 cobre o uso). */
 export const MAX_ARTES = 10;
 
+/**
+ * A altura da prévia é a do design, e não a proporção exata: a coluna tem
+ * 336px de largura, e um 9:16 de verdade teria 600px de altura. O rótulo diz
+ * a proporção em que o post sai na rede.
+ */
 function proporcaoDo(formato: Formato): { altura: number; rotulo: string } {
-  if (VERTICAIS.includes(formato)) return { altura: 400, rotulo: "9:16" };
-  if (RETRATO.includes(formato)) return { altura: 390, rotulo: "4:5" };
-  return { altura: 312, rotulo: "1:1" };
+  if (VERTICAIS.includes(formato)) return { altura: 320, rotulo: "9:16" };
+  if (RETRATO.includes(formato)) return { altura: 290, rotulo: "4:5" };
+  return { altura: 250, rotulo: "1:1" };
 }
 
 /** Links assinados das artes (bucket privado): um mapa caminho → URL. */
@@ -62,22 +67,22 @@ export function PostPreview({
     .join(" · ");
 
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="text-[13px] font-bold">Prévia</span>
-        <span className="rounded-full bg-white px-[9px] py-[3px] text-[11px] font-bold text-texto-2">
+        <span className="rounded-full bg-gelo px-[9px] py-[3px] text-[11px] font-bold text-texto-2">
           {FORMATO_LABEL[formato]} · {rotulo}
         </span>
       </div>
 
-      <div className="flex flex-col overflow-hidden rounded-[18px] border border-borda bg-white">
-        <div className="flex items-center gap-2.5 px-3.5 py-3">
-          <span className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-azul text-[11px] font-bold text-white">
+      <div className="flex flex-col overflow-hidden rounded-[16px] border border-borda bg-white">
+        <div className="flex items-center gap-2.5 px-3 py-2.5">
+          <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-azul text-[10px] font-bold text-white">
             {iniciais(cliente)}
           </span>
           <span className="flex min-w-0 flex-col gap-px">
-            <span className="truncate text-[13px] font-bold">{cliente}</span>
-            <span className="text-[11px] text-texto-3">{quando || "Sem data"}</span>
+            <span className="truncate text-[12px] font-bold">{cliente}</span>
+            <span className="text-[10px] text-texto-3">{quando || "Sem data"}</span>
           </span>
         </div>
 
@@ -92,7 +97,7 @@ export function PostPreview({
             )}
             {varias && (
               <>
-                <span className="absolute right-3 top-3 rounded-full bg-[rgba(28,46,69,0.6)] px-[9px] py-1 text-[11px] font-bold text-white">
+                <span className="absolute right-2.5 top-2.5 rounded-full bg-[rgba(28,46,69,0.6)] px-[9px] py-1 text-[11px] font-bold text-white">
                   {indice + 1}/{midias.length}
                 </span>
                 {/* As mesmas setas do popup de detalhes; dão a volta nas pontas. */}
@@ -100,7 +105,7 @@ export function PostPreview({
                   type="button"
                   onClick={() => onAtivo((indice + midias.length - 1) % midias.length)}
                   aria-label="Arte anterior"
-                  className="absolute left-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute left-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
                 >
                   <ChevronLeft size={16} strokeWidth={2.2} aria-hidden />
                 </button>
@@ -108,10 +113,22 @@ export function PostPreview({
                   type="button"
                   onClick={() => onAtivo((indice + 1) % midias.length)}
                   aria-label="Próxima arte"
-                  className="absolute right-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute right-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
                 >
                   <ChevronRight size={16} strokeWidth={2.2} aria-hidden />
                 </button>
+                <div className="absolute inset-x-0 bottom-2.5 flex justify-center gap-[5px]">
+                  {midias.map((m, i) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => onAtivo(i)}
+                      aria-label={`Ver arte ${i + 1}`}
+                      aria-pressed={i === indice}
+                      className={`h-1.5 w-1.5 rounded-full border-0 p-0 shadow-[0_0_0_1px_rgba(28,46,69,0.25)] ${i === indice ? "bg-azul" : "bg-white"}`}
+                    />
+                  ))}
+                </div>
               </>
             )}
           </div>
@@ -120,40 +137,30 @@ export function PostPreview({
             className="flex flex-col items-center justify-center gap-2 bg-gelo text-[12px] font-semibold text-texto-3"
             style={{ height: altura }}
           >
-            <IconeImagem size={32} strokeWidth={1.6} aria-hidden />
+            <IconeImagem size={30} strokeWidth={1.6} aria-hidden />
             Nenhuma arte anexada
           </div>
         )}
 
-        {varias && (
-          <div className="flex justify-center gap-[5px] pt-2.5">
-            {midias.map((m, i) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => onAtivo(i)}
-                aria-label={`Ver arte ${i + 1}`}
-                aria-pressed={i === indice}
-                className={`h-1.5 w-1.5 rounded-full border-0 p-0 ${i === indice ? "bg-azul" : "bg-nevoa-2"}`}
-              />
-            ))}
-          </div>
-        )}
-
-        <p className={`m-0 whitespace-pre-line px-3.5 pb-4 pt-3 text-[12px] leading-normal [overflow-wrap:anywhere] ${legenda ? "" : "text-texto-3"}`}>
-          <strong className="font-bold text-marinho">{cliente}</strong>{" "}
-          {legenda || "A legenda aparece aqui enquanto você escreve."}
+        {/* Três linhas: a legenda inteira está no campo ao lado; aqui é só o começo, como na rede. */}
+        <p
+          className={`m-0 line-clamp-3 whitespace-pre-line px-3 pb-3 pt-2.5 text-[12px] leading-normal [overflow-wrap:anywhere] ${legenda ? "" : "text-texto-3"}`}
+        >
+          <strong className="font-bold text-marinho">{cliente}</strong> {legenda || "A legenda aparece aqui enquanto você escreve."}
         </p>
       </div>
-    </>
+    </div>
   );
 }
 
 /**
- * As artes do post: a área de envio e as miniaturas, na ordem do carrossel.
- * Cada imagem sobe pro bucket assim que é escolhida ou solta na área. Tirar
- * uma miniatura só a tira do formulário; quem chama decide quando o arquivo
- * sai do bucket (depois de salvar, ou ao cancelar).
+ * As artes do post, na ordem do carrossel. Sem nenhuma, aparece a caixa
+ * inteira de envio. Com alguma, só as miniaturas e, ao lado delas, um
+ * quadrado tracejado do mesmo tamanho para enviar mais.
+ *
+ * Cada imagem sobe pro bucket assim que é escolhida ou solta. Tirar uma
+ * miniatura só a tira do formulário; quem chama decide quando o arquivo sai
+ * do bucket (depois de salvar, ou ao cancelar).
  */
 export function CampoArtes({
   projectId,
@@ -218,64 +225,50 @@ export function CampoArtes({
       void enviar(e.dataTransfer.files);
     },
   };
+  const tracejado = arrastando ? "border-azul bg-azul-claro-2" : "border-azul-borda bg-azul-claro hover:border-azul";
+  const oQuePode = `JPG, PNG, WebP ou GIF, até ${MAX_MIDIA_MB} MB cada`;
 
   return (
     <div className="flex flex-col gap-2.5">
       <span className="flex justify-between text-[13px] font-bold">
         Arte
         <span className="font-semibold text-texto-3">
-          {midias.length} {midias.length === 1 ? "anexada" : "anexadas"}
+          {enviando > 0
+            ? `Enviando ${enviando}…`
+            : `${midias.length} ${midias.length === 1 ? "anexada" : "anexadas"}`}
         </span>
       </span>
 
-      <button
-        type="button"
-        {...soltavel}
-        onClick={() => input.current?.click()}
-        disabled={cheio}
-        className={`flex min-h-16 items-center gap-3.5 rounded-[16px] border-[1.5px] border-dashed px-4 py-2.5 text-left text-marinho transition-colors disabled:opacity-60 ${
-          arrastando ? "border-azul bg-azul-claro-2" : "border-azul-borda bg-azul-claro hover:border-azul"
-        }`}
-      >
-        <span className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-[12px] bg-white text-azul">
-          {enviando > 0 ? (
-            <LoaderCircle size={20} className="animate-spin" aria-hidden />
-          ) : (
-            <Upload size={20} strokeWidth={1.8} aria-hidden />
-          )}
-        </span>
-        <span className="flex flex-col gap-[3px]">
-          <span className="text-[14px] font-bold">
-            {enviando > 0
-              ? `Enviando ${enviando} ${enviando === 1 ? "arte" : "artes"}…`
-              : cheio
-                ? `Limite de ${MAX_ARTES} artes atingido`
-                : "Arraste a arte ou clique para enviar"}
+      {midias.length === 0 ? (
+        <button
+          type="button"
+          {...soltavel}
+          onClick={() => input.current?.click()}
+          className={`flex min-h-14 items-center gap-3 rounded-[14px] border-[1.5px] border-dashed px-3 py-2 text-left text-marinho transition-colors ${tracejado}`}
+        >
+          <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[10px] bg-white text-azul">
+            {enviando > 0 ? <LoaderCircle size={18} className="animate-spin" aria-hidden /> : <Upload size={18} strokeWidth={1.8} aria-hidden />}
           </span>
-          <span className="text-[12px] text-texto-3">
-            JPG, PNG, WebP ou GIF, até {MAX_MIDIA_MB} MB cada. Vídeo e pasta do Drive vão pelo link abaixo.
+          <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="text-[13px] font-bold">{enviando > 0 ? "Enviando a arte…" : "Arraste ou clique para enviar"}</span>
+            <span className="text-[11px] text-texto-3">{oQuePode}</span>
           </span>
-        </span>
-      </button>
-
-      {midias.length > 0 && (
-        <div className="flex flex-wrap gap-2.5 pt-1">
+        </button>
+      ) : (
+        <div className="flex flex-wrap gap-1.5 pt-1.5" {...soltavel}>
           {midias.map((m, i) => (
-            <div key={m} className="relative flex w-24 flex-col gap-1.5">
+            <div key={m} className="relative flex">
               <button
                 type="button"
                 onClick={() => onAtivo(i)}
                 aria-label={`Ver arte ${i + 1} na prévia`}
                 aria-pressed={i === ativo}
-                className={`box-border flex h-24 w-24 items-center justify-center overflow-hidden rounded-[14px] border-[2.5px] bg-gelo p-0 text-texto-3 ${
-                  i === ativo ? "border-azul" : "border-white"
+                title={`Arte ${i + 1}`}
+                className={`box-border flex h-[60px] w-[60px] items-center justify-center overflow-hidden rounded-[12px] border-[2.5px] bg-gelo p-0 text-texto-3 ${
+                  i === ativo ? "border-azul" : "border-transparent"
                 }`}
               >
-                {urls[m] ? (
-                  <img src={urls[m]} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <LoaderCircle size={18} className="animate-spin" aria-hidden />
-                )}
+                {urls[m] ? <img src={urls[m]} alt="" className="h-full w-full object-cover" /> : <LoaderCircle size={16} className="animate-spin" aria-hidden />}
               </button>
               <button
                 type="button"
@@ -284,13 +277,23 @@ export function CampoArtes({
                   onAtivo(0);
                 }}
                 aria-label={`Remover arte ${i + 1}`}
-                className="absolute -right-2 -top-2 flex h-[26px] w-[26px] items-center justify-center rounded-full border-2 border-white bg-marinho p-0 text-white transition-colors hover:bg-erro"
+                className="absolute -right-[7px] -top-[7px] flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-white bg-marinho p-0 text-white transition-colors hover:bg-erro"
               >
-                <X size={12} strokeWidth={3} aria-hidden />
+                <X size={10} strokeWidth={3} aria-hidden />
               </button>
-              <span className="truncate text-[11px] font-semibold text-texto-2">Arte {i + 1}</span>
             </div>
           ))}
+          {!cheio && (
+            <button
+              type="button"
+              onClick={() => input.current?.click()}
+              aria-label="Enviar mais artes"
+              title={`Arraste ou clique para enviar mais artes. ${oQuePode}.`}
+              className={`box-border flex h-[60px] w-[60px] items-center justify-center rounded-[12px] border-[1.5px] border-dashed p-0 text-azul transition-colors ${tracejado}`}
+            >
+              {enviando > 0 ? <LoaderCircle size={20} className="animate-spin" aria-hidden /> : <Upload size={20} strokeWidth={1.8} aria-hidden />}
+            </button>
+          )}
         </div>
       )}
 

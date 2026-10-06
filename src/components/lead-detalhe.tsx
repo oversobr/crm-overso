@@ -3,7 +3,7 @@ import { ArrowRight, MessageCircle, Trash2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-import { ModalDegrade } from "@/components/ds/modal";
+import { ModalColuna, ModalColunas, ModalDegrade, ModalFaixa } from "@/components/ds/modal";
 import { chegouEm, horaDe, linkWhatsApp, nomeDoLead, paginaDoLead, respostasDe, telefoneBonito, valorDaResposta } from "@/lib/leads";
 import {
   aberturaDoLeadQuery,
@@ -31,8 +31,8 @@ const ORDEM_UTM = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "u
 const FORA_DA_LISTA = new Set(["dispositivo", "sistema", "navegador", ...Object.keys(CLIQUE_ANUNCIO)]);
 
 /**
- * Popup do lead: status, contato, origem e UTMs, respostas, jornada do
- * formulário e anotações da equipe. O status muda na tela e só vai para o
+ * Popup do lead, em três colunas: origem e jornada, respostas e contato,
+ * anotações da equipe. O status fica numa faixa abaixo do cabeçalho. O status muda na tela e só vai para o
  * banco em "Salvar alterações"; a anotação é gravada na hora.
  */
 export function LeadDetalhe({
@@ -100,16 +100,51 @@ export function LeadDetalhe({
       return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
     });
 
+  // Data, dispositivo (se houver), anúncio (se houver) e as UTMs, ou "direto" na falta delas.
+  const celulasDeOrigem = 1 + (dispositivo ? 1 : 0) + (anuncios.length ? 1 : 0) + (utms.length || (anuncios.length ? 0 : 1));
+
   return (
     <ModalDegrade
       aberto
       onFechar={onFechar}
       livre
-      largura={980}
       icone={iniciais(lead.nome)}
       titulo={nome}
       selo={pagina ? `LP ${pagina}` : lead.completo ? undefined : "Parcial"}
-      contexto={`Chegou ${chegouEm(lead.criado_em).replace(/^(Hoje|Ontem)/, (m) => m.toLowerCase())}`}
+      contexto={
+        <>
+          {telefone && (
+            <span className="rounded-full border border-white/[0.24] bg-white/[0.16] px-[9px] py-[3px] font-bold">{telefone}</span>
+          )}
+          Chegou {chegouEm(lead.criado_em).replace(/^(Hoje|Ontem)/, (m) => m.toLowerCase())}
+        </>
+      }
+      faixa={
+        <ModalFaixa rotulo="Status">
+          <div role="radiogroup" aria-label="Status do lead" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {(Object.keys(STATUS_LABEL) as Status[]).map((s) => {
+              const cor = COR_LEAD[s];
+              const marcado = s === status;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  role="radio"
+                  aria-checked={marcado}
+                  onClick={() => setStatus(s)}
+                  className={`flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-[1.5px] px-2 text-[13px] font-bold transition-colors ${
+                    marcado ? "" : "border-borda-campo bg-white text-texto-2 hover:border-borda-campo-hover"
+                  }`}
+                  style={marcado ? { background: cor.fundo, color: cor.texto, borderColor: cor.ponto } : undefined}
+                >
+                  <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: cor.ponto }} />
+                  {STATUS_LABEL[s]}
+                </button>
+              );
+            })}
+          </div>
+        </ModalFaixa>
+      }
       acoes={
         lead.whatsapp && (
           <a
@@ -155,14 +190,14 @@ export function LeadDetalhe({
             <span />
           )}
           <div className="flex gap-2.5">
-            <button type="button" onClick={onFechar} className="btn btn-secundario min-h-[46px] font-bold">
+            <button type="button" onClick={onFechar} className="btn btn-secundario font-bold">
               Fechar
             </button>
             <button
               type="button"
               onClick={() => salvar.mutate()}
               disabled={!mudou || salvar.isPending}
-              className="btn btn-primario min-h-[46px] px-5"
+              className="btn btn-primario px-5"
             >
               {salvar.isPending ? "Salvando…" : "Salvar alterações"}
             </button>
@@ -170,44 +205,10 @@ export function LeadDetalhe({
         </>
       }
     >
-      <div className="flex flex-col gap-2.5 border-b border-borda px-5 py-5 sm:px-7">
-        <span className="text-[13px] font-bold">Status</span>
-        <div role="radiogroup" aria-label="Status do lead" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {(Object.keys(STATUS_LABEL) as Status[]).map((s) => {
-            const cor = COR_LEAD[s];
-            const marcado = s === status;
-            return (
-              <button
-                key={s}
-                type="button"
-                role="radio"
-                aria-checked={marcado}
-                onClick={() => setStatus(s)}
-                className={`flex min-h-[46px] items-center justify-center gap-2 rounded-[12px] border-[1.5px] px-2 text-[13px] font-bold transition-colors ${
-                  marcado ? "" : "border-borda-campo bg-white text-texto-2 hover:border-borda-campo-hover"
-                }`}
-                style={marcado ? { background: cor.fundo, color: cor.texto, borderColor: cor.ponto } : undefined}
-              >
-                <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: cor.ponto }} />
-                {STATUS_LABEL[s]}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="flex min-w-0 flex-col gap-5 px-5 py-[22px] sm:px-7">
-          <Secao titulo="Contato">
-            <div className="grid gap-2.5 sm:grid-cols-2">
-              <Caixa rotulo="WHATSAPP">{telefone ?? "Sem telefone"}</Caixa>
-              <Caixa rotulo="LANDING PAGE">{pagina ?? "Não informada"}</Caixa>
-              {lead.email && <Caixa rotulo="EMAIL">{lead.email}</Caixa>}
-            </div>
-          </Secao>
-
-          <Secao titulo="Origem e campanha" nota="Lido da URL da landing page (UTMs)">
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-borda bg-borda sm:grid-cols-3">
+      <ModalColunas colunas="minmax(0,1fr) minmax(0,1fr) 340px">
+        <ModalColuna>
+          <Secao titulo="Origem e campanha" nota="Lido da URL (UTMs)">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-borda bg-borda">
               <Origem rotulo="DATA">
                 {new Date(lead.criado_em).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}
               </Origem>
@@ -225,10 +226,16 @@ export function LeadDetalhe({
                 </Origem>
               ))}
               {utms.length === 0 && anuncios.length === 0 && <Origem rotulo="SOURCE">direto</Origem>}
+              {/* Número ímpar de caixas: a última célula fica branca, não cinza. */}
+              {celulasDeOrigem % 2 === 1 && <span className="bg-white" />}
             </div>
           </Secao>
 
-          <Secao titulo="Respostas do formulário" nota="Perguntas definidas pela landing page">
+          <Jornada lead={lead} />
+        </ModalColuna>
+
+        <ModalColuna>
+          <Secao titulo="Respostas do formulário" nota="Definidas pela landing page">
             {respostas.length === 0 ? (
               <p className="m-0 rounded-[14px] border border-borda px-3.5 py-3 text-[13px] text-texto-3">
                 Nenhuma resposta ainda.
@@ -238,7 +245,7 @@ export function LeadDetalhe({
                 {respostas.map(([pergunta, valor]) => (
                   <div
                     key={pergunta}
-                    className="grid gap-x-3.5 gap-y-1 border-b border-gelo px-3.5 py-3 text-[13px] last:border-b-0 sm:grid-cols-[200px_minmax(0,1fr)]"
+                    className="grid gap-x-3 gap-y-1 border-b border-gelo px-3.5 py-3 text-[13px] last:border-b-0 sm:grid-cols-[170px_minmax(0,1fr)]"
                   >
                     <span className="font-semibold text-texto-3 [overflow-wrap:anywhere]">{pergunta}</span>
                     <span className="font-bold [overflow-wrap:anywhere]">{valorDaResposta(valor)}</span>
@@ -248,11 +255,17 @@ export function LeadDetalhe({
             )}
           </Secao>
 
-          <Jornada lead={lead} />
-        </div>
+          <Secao titulo="Contato">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Caixa rotulo="WHATSAPP">{telefone ?? "Sem telefone"}</Caixa>
+              <Caixa rotulo="LANDING PAGE">{pagina ?? "Não informada"}</Caixa>
+              {lead.email && <Caixa rotulo="EMAIL">{lead.email}</Caixa>}
+            </div>
+          </Secao>
+        </ModalColuna>
 
         <Anotacoes leadId={lead.id} />
-      </div>
+      </ModalColunas>
     </ModalDegrade>
   );
 }
@@ -364,7 +377,38 @@ function Anotacoes({ leadId }: { leadId: string }) {
   }
 
   return (
-    <aside aria-label="Anotações" className="flex min-h-[260px] flex-col gap-3 border-t border-borda bg-superficie-2 px-5 py-[22px] sm:px-6 lg:border-l lg:border-t-0">
+    <ModalColuna
+      aria-label="Anotações"
+      fundo
+      className="!gap-2.5"
+      rodape={
+        <div className="campo flex min-h-0 items-center gap-2 py-1 pl-3 pr-1">
+          <label className="flex min-w-0 flex-1">
+            <span className="sr-only">Escrever anotação</span>
+            <input
+              type="text"
+              value={rascunho}
+              onChange={(e) => setRascunho(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") enviar();
+              }}
+              placeholder="Escreva uma anotação"
+              maxLength={2000}
+              className="min-h-9 min-w-0 flex-1 border-0 bg-transparent text-[12px] text-marinho"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={enviar}
+            disabled={!rascunho.trim() || anotar.isPending}
+            aria-label="Salvar anotação"
+            className="btn btn-primario h-9 !min-h-0 w-9 flex-none rounded-[10px] p-0"
+          >
+            <ArrowRight size={16} strokeWidth={2} aria-hidden />
+          </button>
+        </div>
+      }
+    >
       <div className="flex items-center justify-between">
         <h3 className="m-0 text-[14px] font-bold">Anotações da equipe</h3>
         <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-[#1A57A6]">{notas.length}</span>
@@ -395,32 +439,6 @@ function Anotacoes({ leadId }: { leadId: string }) {
           </div>
         );
       })}
-
-      <div className="campo mt-auto flex min-h-0 items-center gap-2 py-1 pl-3 pr-1">
-        <label className="flex min-w-0 flex-1">
-          <span className="sr-only">Escrever anotação</span>
-          <input
-            type="text"
-            value={rascunho}
-            onChange={(e) => setRascunho(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") enviar();
-            }}
-            placeholder="Escreva uma anotação"
-            maxLength={2000}
-            className="min-h-9 min-w-0 flex-1 border-0 bg-transparent text-[12px] text-marinho"
-          />
-        </label>
-        <button
-          type="button"
-          onClick={enviar}
-          disabled={!rascunho.trim() || anotar.isPending}
-          aria-label="Salvar anotação"
-          className="btn btn-primario h-9 min-h-0 w-9 flex-none rounded-[10px] p-0"
-        >
-          <ArrowRight size={16} strokeWidth={2} aria-hidden />
-        </button>
-      </div>
-    </aside>
+    </ModalColuna>
   );
 }

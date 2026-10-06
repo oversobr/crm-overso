@@ -1716,3 +1716,39 @@ export async function removerCliente(projectId: string): Promise<number> {
   if (error) throw new Error(error.message);
   return apagados;
 }
+
+/* ── Funil ──────────────────────────────────────────────────────────── */
+
+/** O que a tela de Funil precisa de cada lead: origem, etapa e onde parou. */
+export type LeadDoFunil = {
+  utms: Record<string, string> | null;
+  status: string;
+  completo: boolean;
+  /** Último campo preenchido por quem abandonou (30_portal_novo.sql). */
+  parou_em?: string | null;
+};
+
+/**
+ * Os leads do período, só com as colunas que os cards "Por origem" e "Onde
+ * param no formulário" agrupam. O agrupamento é feito na tela: são poucos
+ * milhares de linhas leves, e cada cliente usa utm_source diferentes.
+ */
+export const leadsDoFunilQuery = (projectId: string | undefined, de: string | null, ate: string | null) =>
+  queryOptions({
+    queryKey: ["leads-do-funil", projectId, de, ate],
+    enabled: Boolean(projectId),
+    staleTime: 60_000,
+    queryFn: async (): Promise<LeadDoFunil[]> => {
+      const buscar = (colunas: string) => {
+        let q = getSupabaseBrowserClient().from("leads").select(colunas).eq("project_id", projectId!);
+        if (de) q = q.gte("criado_em", inicioDoDia(de));
+        if (ate) q = q.lte("criado_em", fimDoDia(ate));
+        return q.order("criado_em", { ascending: false }).limit(5000);
+      };
+      let { data, error } = await buscar("utms, status, completo, parou_em");
+      // Banco sem o 30: o campo em que o lead parou ainda não existe.
+      if (error && colunaAusente(error)) ({ data, error } = await buscar("utms, status, completo"));
+      if (error) throw error;
+      return (data ?? []) as unknown as LeadDoFunil[];
+    },
+  });

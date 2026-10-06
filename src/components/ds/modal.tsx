@@ -1,10 +1,17 @@
 import { Check, X } from "lucide-react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 
 /**
- * Popup do design: cabeçalho em degradê profundo (ícone num círculo branco,
- * título, selo e uma linha de contexto), corpo que rola e rodapé de ações.
+ * Popup do design: horizontal, para ter o mínimo de rolagem. Cabeçalho em
+ * degradê profundo (ícone num círculo branco, título, selo e uma linha de
+ * contexto) e rodapé de ações ficam fixos; só o miolo rola.
+ *
+ * O popup nunca passa da altura da tela (100vh - 72px). O miolo pode ser:
+ *  - colunas (<ModalColunas> com <ModalColuna>): cada coluna rola por dentro,
+ *    e o popup em si não rola. É o formato dos popups grandes;
+ *  - conteúdo corrido (o padrão): o miolo inteiro rola quando não cabe.
+ *
  * Fecha no Esc e ao clicar fora; trava a rolagem do fundo enquanto aberto.
  */
 export function ModalDegrade({
@@ -17,7 +24,7 @@ export function ModalDegrade({
   acoes,
   faixa,
   rodape,
-  largura = 900,
+  largura = 1320,
   livre = false,
   children,
 }: {
@@ -35,9 +42,9 @@ export function ModalDegrade({
   faixa?: ReactNode;
   /** Botões do pé: Cancelar à esquerda, ação principal à direita. */
   rodape?: ReactNode;
-  /** Largura máxima em px (o design usa 900, 980 e 1040). */
+  /** Largura máxima em px. O design usa 1320 nos popups em colunas; os de confirmação passam uma menor. */
   largura?: number;
-  /** O corpo vem sem padding nem coluna: a tela monta o próprio miolo. */
+  /** O miolo vem sem padding nem rolagem próprios: quem chama monta as colunas (<ModalColunas>). */
   livre?: boolean;
   children: ReactNode;
 }) {
@@ -71,7 +78,7 @@ export function ModalDegrade({
   if (!aberto) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto p-4 sm:py-10">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 lg:px-[60px] lg:py-9">
       <div className="modal-backdrop fixed inset-0 bg-[rgba(28,46,69,0.55)]" onClick={onFechar} aria-hidden="true" />
       <div
         ref={painel}
@@ -79,19 +86,19 @@ export function ModalDegrade({
         aria-modal="true"
         aria-labelledby={idTitulo}
         tabIndex={-1}
-        className="modal-panel relative flex w-full flex-col rounded-[24px] bg-white text-marinho shadow-[var(--sombra-modal)] outline-none"
+        className="modal-panel relative flex max-h-[calc(100dvh-24px)] w-full flex-col rounded-[24px] bg-white text-marinho shadow-[var(--sombra-modal)] outline-none sm:max-h-[calc(100dvh-40px)] lg:max-h-[calc(100dvh-72px)]"
         style={{ maxWidth: largura }}
       >
         <div
-          className="flex flex-wrap items-center justify-between gap-4 rounded-t-[24px] px-5 py-6 text-white sm:px-7"
+          className="flex flex-none flex-wrap items-center justify-between gap-4 rounded-t-[24px] px-5 py-[18px] text-white sm:px-7"
           style={{ background: "var(--degrade-profundo)" }}
         >
           <div className="flex min-w-0 items-center gap-4">
-            <span className="flex h-[60px] w-[60px] flex-none items-center justify-center rounded-full bg-white text-[20px] font-extrabold text-[#1A57A6]">
+            <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-white text-[16px] font-extrabold text-[#1A57A6] [&>svg]:h-[22px] [&>svg]:w-[22px]">
               {icone}
             </span>
-            <div className="flex min-w-0 flex-col gap-1.5">
-              <h2 id={idTitulo} className="m-0 text-[22px] font-extrabold leading-tight">
+            <div className="flex min-w-0 flex-col gap-1">
+              <h2 id={idTitulo} className="m-0 text-[20px] font-extrabold leading-tight">
                 {titulo}
               </h2>
               {(selo || contexto) && (
@@ -119,16 +126,83 @@ export function ModalDegrade({
           </div>
         </div>
 
-        {faixa}
+        {faixa && <div className="flex-none">{faixa}</div>}
 
-        {livre ? children : <div className="flex flex-col gap-[22px] px-5 py-[22px] sm:px-7">{children}</div>}
+        {livre ? (
+          // Mesmo sem padding próprio, o miolo fica dentro da altura do popup:
+          // com <ModalColunas> são as colunas que rolam; sem elas, rola tudo.
+          <div className={`rolagem-fina flex min-h-0 flex-1 flex-col overflow-y-auto ${rodape ? "" : "rounded-b-[24px]"}`}>{children}</div>
+        ) : (
+          <div className="rolagem-fina flex min-h-0 flex-1 flex-col gap-[22px] overflow-y-auto px-5 py-[22px] sm:px-7">{children}</div>
+        )}
 
         {rodape && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-borda px-5 pb-[22px] pt-4 sm:px-7">
+          <div className="flex flex-none flex-wrap items-center justify-between gap-3 rounded-b-[24px] border-t border-borda px-5 py-3.5 sm:px-7 [&_.btn]:min-h-11">
             {rodape}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * O miolo em colunas dos popups grandes. No desktop cada coluna tem a altura
+ * que sobrar e rola por dentro; abaixo de 1024px as colunas empilham e é o
+ * miolo inteiro que rola, porque não há largura para três lado a lado.
+ *
+ * `colunas` é o grid-template-columns do desktop ("1fr 1.2fr 1fr").
+ */
+export function ModalColunas({ colunas, children, className = "" }: { colunas: string; children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={`rolagem-fina grid min-h-0 flex-1 grid-cols-1 overflow-y-auto lg:overflow-hidden lg:[grid-template-columns:var(--colunas)] ${className}`}
+      style={{ "--colunas": colunas } as CSSProperties}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * Uma coluna do popup. O conteúdo rola por dentro; o `rodape` fica preso
+ * embaixo, fora da rolagem: é onde vai o campo de escrever dos comentários
+ * e das anotações.
+ */
+export function ModalColuna({
+  children,
+  rodape,
+  fundo = false,
+  className = "",
+  ...resto
+}: {
+  children: ReactNode;
+  rodape?: ReactNode;
+  /** Fundo cinza claro, para a coluna que é apoio e não o assunto principal. */
+  fundo?: boolean;
+  className?: string;
+  "aria-label"?: string;
+}) {
+  return (
+    <section
+      className={`flex min-h-0 min-w-0 flex-col border-borda max-lg:border-b max-lg:last:border-b-0 lg:border-r lg:last:border-r-0 ${fundo ? "bg-superficie-2" : ""}`}
+      {...resto}
+    >
+      <div className={`rolagem-fina flex min-h-0 flex-1 flex-col gap-[18px] px-5 py-5 sm:px-6 lg:overflow-y-auto [section:first-child>&]:sm:pl-7 ${className}`}>{children}</div>
+      {rodape && <div className="flex-none px-5 pb-5 pt-1 sm:px-6">{rodape}</div>}
+    </section>
+  );
+}
+
+/**
+ * Faixa de uma linha entre o cabeçalho e o miolo: o rótulo à esquerda e, ao
+ * lado, o controle (status do lead, etapas do post). Vai na prop `faixa`.
+ */
+export function ModalFaixa({ rotulo, children }: { rotulo: string; children: ReactNode }) {
+  return (
+    <div className="grid items-center gap-x-3 gap-y-2 border-b border-borda px-5 py-3.5 sm:px-7 md:grid-cols-[90px_minmax(0,1fr)]">
+      <span className="text-[13px] font-bold">{rotulo}</span>
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }
@@ -140,7 +214,7 @@ export function ModalDegrade({
  */
 export function Stepper({ etapas, atual }: { etapas: string[]; atual: number }) {
   return (
-    <ol aria-label="Etapas" className="m-0 flex list-none items-center gap-3 border-b border-borda px-5 py-4 sm:px-7">
+    <ol aria-label="Etapas" className="m-0 flex list-none items-center gap-3 border-b border-borda px-5 py-3 sm:px-7">
       {etapas.map((nome, i) => {
         const feita = i < atual;
         const agora = i === atual;

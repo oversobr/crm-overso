@@ -74,6 +74,13 @@ export const IconeLeads: IconeMenu = ({ ativo, tamanho }) => (
   </Base>
 );
 
+/** O funil do Lucide ("filter"). */
+export const IconeFunil: IconeMenu = ({ ativo, tamanho }) => (
+  <Base ativo={ativo} tamanho={tamanho}>
+    <path d="M3 4h18l-7 8.5V19l-4 2v-8.5z" fill={ativo ? "currentColor" : "none"} />
+  </Base>
+);
+
 export const IconeConteudo: IconeMenu = ({ ativo, tamanho }) => (
   <Base ativo={ativo} tamanho={tamanho}>
     <rect x="3" y="3" width="18" height="18" rx="2" fill={ativo ? "currentColor" : "none"} />

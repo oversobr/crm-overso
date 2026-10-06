@@ -53,11 +53,14 @@ export function corDaCampanha(campanhas: Campaign[], id: string | undefined): st
 export function CampaignSelector({
   leadsDaCampanha,
   periodoPadrao,
+  assunto = "leads",
 }: {
   /** Leads enviados da campanha escolhida: alimenta a barra da meta. */
   leadsDaCampanha: number;
   /** O recorte quando nenhuma campanha está escolhida ("dos últimos 30 dias"). */
   periodoPadrao: string;
+  /** O que a tela mostra: muda a frase de quando nenhuma campanha está escolhida. */
+  assunto?: "leads" | "funil";
 }) {
   const { projeto, campanha, campanhas, setCampanhaId } = usePainel();
   const [aberto, setAberto] = useState(false);
@@ -189,8 +192,8 @@ export function CampaignSelector({
         </div>
       ) : (
         <span className="min-w-[min(220px,100%)] flex-1 text-[13px] text-texto-2">
-          Mostrando <strong className="text-marinho">todas as campanhas</strong> {periodoPadrao}. Escolha uma para ver só os
-          leads dela.
+          {assunto === "funil" ? "Funil de" : "Mostrando"} <strong className="text-marinho">todas as campanhas</strong> {periodoPadrao}.
+          Escolha uma para ver só {assunto === "funil" ? "o funil" : "os leads"} dela.
         </span>
       )}
 

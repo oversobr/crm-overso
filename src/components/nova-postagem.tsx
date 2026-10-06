@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 
 import { CommentThread } from "@/components/comment-thread";
-import { ModalDegrade } from "@/components/ds/modal";
+import { ModalColuna, ModalColunas, ModalDegrade } from "@/components/ds/modal";
 import { CampoArtes, PostPreview } from "@/components/post-pecas";
 import { hhmm } from "@/lib/datas";
 import { atualizarConteudo, comentar, criarConteudo, eventosQuery, removerMidias } from "@/lib/queries";
@@ -164,7 +164,6 @@ export function NovaPostagem({
       aberto
       onFechar={cancelar}
       livre
-      largura={1080}
       icone={editando ? <Pencil size={26} strokeWidth={1.8} aria-hidden /> : <CalendarPlus size={26} strokeWidth={1.8} aria-hidden />}
       titulo={editando ? "Editar postagem" : "Nova postagem"}
       selo={projeto.nome}
@@ -184,7 +183,7 @@ export function NovaPostagem({
                 type="button"
                 onClick={() => salvar.mutate("ideia")}
                 disabled={!valido || ocupado}
-                className="btn btn-secundario min-h-12 text-[14px] font-bold"
+                className="btn btn-secundario text-[14px] font-bold"
               >
                 Salvar como ideia
               </button>
@@ -193,7 +192,7 @@ export function NovaPostagem({
               type="button"
               onClick={() => salvar.mutate(f.status)}
               disabled={!valido || ocupado}
-              className="btn btn-primario min-h-12 px-5 text-[14px]"
+              className="btn btn-primario px-5 text-[14px]"
             >
               {salvar.isPending ? "Salvando…" : editando ? "Salvar alterações" : "Adicionar ao calendário"}
               {!editando && <ArrowRight size={16} strokeWidth={2} aria-hidden />}
@@ -202,8 +201,9 @@ export function NovaPostagem({
         </>
       }
     >
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex min-w-0 flex-col gap-[18px] px-5 py-[22px] sm:px-7">
+      <ModalColunas colunas="minmax(0,1fr) 380px 330px">
+        {/* Coluna 1: o formulário */}
+        <ModalColuna className="!gap-4">
           <div className="flex flex-col gap-2">
             <span className="flex items-center justify-between gap-3 text-[13px] font-bold">
               Formato
@@ -212,7 +212,7 @@ export function NovaPostagem({
                 <select
                   value={formatoFora ? f.formato : ""}
                   onChange={(e) => e.target.value && set("formato", e.target.value as Formato)}
-                  className="cursor-pointer rounded-lg border border-borda-campo bg-white px-1.5 py-1 text-[12px] font-bold text-marinho"
+                  className="cursor-pointer rounded-lg border border-borda-campo bg-white px-1.5 py-0.5 text-[12px] font-bold text-marinho"
                 >
                   <option value="">Escolher</option>
                   {OUTROS_FORMATOS.map((o) => (
@@ -233,7 +233,7 @@ export function NovaPostagem({
                     role="radio"
                     aria-checked={marcado}
                     onClick={() => set("formato", o)}
-                    className={`min-h-11 rounded-[11px] border-0 text-[13px] font-bold transition-[background-color,color,box-shadow] focus-visible:outline-offset-0 ${
+                    className={`min-h-10 rounded-[11px] border-0 text-[13px] font-bold transition-[background-color,color,box-shadow] focus-visible:outline-offset-0 ${
                       marcado ? "bg-white text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.14)]" : "bg-transparent text-texto-3 hover:text-marinho"
                     }`}
                   >
@@ -246,7 +246,7 @@ export function NovaPostagem({
 
           <div className="flex flex-col gap-2">
             <span className="text-[13px] font-bold">Redes</span>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
               {REDES.map((r) => {
                 const marcada = f.redes.includes(r);
                 return (
@@ -255,18 +255,18 @@ export function NovaPostagem({
                     type="button"
                     aria-pressed={marcada}
                     onClick={() => alternarRede(r)}
-                    className={`flex min-h-11 items-center gap-2 rounded-[12px] border-[1.5px] px-3.5 text-[13px] font-semibold text-marinho transition-colors ${
+                    className={`flex min-h-10 items-center justify-center gap-1.5 rounded-[12px] border-[1.5px] px-1.5 text-[12px] font-semibold text-marinho transition-colors ${
                       marcada ? "border-azul bg-azul-claro" : "border-borda-campo bg-white hover:border-borda-campo-hover"
                     }`}
                   >
                     <span
-                      className={`box-border flex h-[18px] w-[18px] items-center justify-center rounded-md border-[1.5px] text-white ${
+                      className={`box-border flex h-4 w-4 flex-none items-center justify-center rounded-[5px] border-[1.5px] text-white ${
                         marcada ? "border-azul bg-azul" : "border-nevoa bg-white"
                       }`}
                     >
-                      {marcada && <Check size={12} strokeWidth={3.5} aria-hidden />}
+                      {marcada && <Check size={10} strokeWidth={3.5} aria-hidden />}
                     </span>
-                    {REDE_LABEL[r]}
+                    <span className="truncate">{REDE_LABEL[r]}</span>
                   </button>
                 );
               })}
@@ -300,33 +300,35 @@ export function NovaPostagem({
             </Campo>
           </div>
 
-          <Campo rotulo="Título interno">
-            <input
-              type="text"
-              autoFocus
-              value={f.titulo}
-              onChange={(e) => set("titulo", e.target.value)}
-              placeholder="Ex.: 5 mitos sobre bioestimulador"
-              className="campo"
-            />
-          </Campo>
-
-          {(eventos.length > 0 || f.evento_id) && (
-            <Campo rotulo="Evento que este post divulga">
-              <select
-                value={f.evento_id ?? ""}
-                onChange={(e) => set("evento_id", e.target.value || null)}
-                className="campo cursor-pointer px-2.5"
-              >
-                <option value="">Nenhum (post avulso)</option>
-                {eventos.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.nome}
-                  </option>
-                ))}
-              </select>
+          {/* Com evento para escolher, ele divide a linha com o título: a coluna não cresce. */}
+          <div className={`grid gap-3 ${(eventos.length > 0 || Boolean(f.evento_id)) ? "sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]" : ""}`}>
+            <Campo rotulo="Título interno">
+              <input
+                type="text"
+                autoFocus
+                value={f.titulo}
+                onChange={(e) => set("titulo", e.target.value)}
+                placeholder="Ex.: 5 mitos sobre bioestimulador"
+                className="campo"
+              />
             </Campo>
-          )}
+            {(eventos.length > 0 || Boolean(f.evento_id)) && (
+              <Campo rotulo="Evento que divulga">
+                <select
+                  value={f.evento_id ?? ""}
+                  onChange={(e) => set("evento_id", e.target.value || null)}
+                  className="campo cursor-pointer px-2.5"
+                >
+                  <option value="">Nenhum (post avulso)</option>
+                  {eventos.map((e) => (
+                    <option key={e.id} value={e.id}>
+                      {e.nome}
+                    </option>
+                  ))}
+                </select>
+              </Campo>
+            )}
+          </div>
 
           <label className="flex flex-col gap-2 text-[13px] font-bold">
             <span className="flex justify-between">
@@ -341,30 +343,9 @@ export function NovaPostagem({
               value={f.legenda ?? ""}
               onChange={(e) => set("legenda", e.target.value)}
               placeholder="Escreva a legenda que vai para a rede"
-              className="campo resize-y py-3 font-normal leading-normal"
+              className="campo h-auto resize-none py-3 font-normal leading-normal"
             />
           </label>
-
-          <CampoArtes
-            projectId={projeto.id}
-            midias={f.midias}
-            onChange={(m) => set("midias", m)}
-            ativo={arteAtiva}
-            onAtivo={setArteAtiva}
-            enviando={enviando}
-            setEnviando={setEnviando}
-            onEnviada={(caminho) => enviadas.current.push(caminho)}
-          />
-
-          <Campo rotulo="Link do vídeo ou da pasta de artes (opcional)">
-            <input
-              type="url"
-              value={f.link ?? ""}
-              onChange={(e) => set("link", e.target.value)}
-              placeholder="https://drive.google.com/…"
-              className="campo"
-            />
-          </Campo>
 
           <button
             type="button"
@@ -373,7 +354,7 @@ export function NovaPostagem({
             // O pedido de aprovação É o status "Aprovação": ligar leva o post
             // para lá; desligar devolve para Produção.
             onClick={() => set("status", pedeAprovacao ? "producao" : "aprovacao")}
-            className="flex min-h-[60px] items-center justify-between gap-4 rounded-[14px] border-0 bg-superficie-2 px-4 py-3 text-left text-marinho transition-colors hover:bg-gelo"
+            className="flex min-h-14 flex-none items-center justify-between gap-4 rounded-[14px] border-0 bg-superficie-2 px-4 py-2.5 text-left text-marinho transition-colors hover:bg-gelo"
           >
             <span className="flex flex-col gap-[3px]">
               <span className="text-[14px] font-bold">Pedir aprovação do cliente</span>
@@ -387,12 +368,10 @@ export function NovaPostagem({
               <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
             </span>
           </button>
-        </div>
+        </ModalColuna>
 
-        <aside
-          aria-label="Prévia da postagem"
-          className="flex min-w-0 flex-col gap-3.5 border-t border-borda bg-superficie-2 px-5 py-[22px] sm:px-6 lg:border-l lg:border-t-0"
-        >
+        {/* Coluna 2: a prévia em cima, a arte embaixo */}
+        <ModalColuna aria-label="Prévia e arte" className="!gap-3">
           <PostPreview
             cliente={projeto.nome}
             data={f.data}
@@ -403,14 +382,38 @@ export function NovaPostagem({
             onAtivo={setArteAtiva}
             legenda={f.legenda}
           />
-          <CommentThread
-            conteudoId={editando?.id}
-            observacaoAntiga={editando?.observacoes ?? null}
-            pendentes={pendentes}
-            onPendentes={setPendentes}
+          <CampoArtes
+            projectId={projeto.id}
+            midias={f.midias}
+            onChange={(m) => set("midias", m)}
+            ativo={arteAtiva}
+            onAtivo={setArteAtiva}
+            enviando={enviando}
+            setEnviando={setEnviando}
+            onEnviada={(caminho) => enviadas.current.push(caminho)}
           />
-        </aside>
-      </div>
+          {/* Vídeo e pasta do Drive não sobem para o portal: entram como link. */}
+          <label className="flex flex-col">
+            <span className="sr-only">Link do vídeo ou da pasta de artes (opcional)</span>
+            <input
+              type="url"
+              value={f.link ?? ""}
+              onChange={(e) => set("link", e.target.value)}
+              placeholder="Link do vídeo ou da pasta de artes (opcional)"
+              className="campo text-[13px]"
+            />
+          </label>
+        </ModalColuna>
+
+        {/* Coluna 3: comentários */}
+        <CommentThread
+          variante="coluna"
+          conteudoId={editando?.id}
+          observacaoAntiga={editando?.observacoes ?? null}
+          pendentes={pendentes}
+          onPendentes={setPendentes}
+        />
+      </ModalColunas>
     </ModalDegrade>
   );
 }

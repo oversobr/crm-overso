@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, MessageCircle, X } from "lucide-react";
 import { useState } from "react";
 
+import { ModalColuna } from "@/components/ds/modal";
 import { chegouEm } from "@/lib/leads";
 import { apagarComentario, comentar, comentariosQuery, faltaTabelaComentarios } from "@/lib/queries";
 import { toast } from "@/lib/toast";
@@ -47,8 +48,10 @@ export function CommentThread({
    * "cartao": dentro de um card branco, com balões cinza (formulário do post).
    * "solta": direto sobre o painel cinza, com balões brancos e o campo de
    * escrever no pé (popup de detalhes).
+   * "coluna": a coluna de comentários de um popup. A lista rola sozinha e o
+   * campo de escrever fica preso embaixo.
    */
-  variante?: "cartao" | "solta";
+  variante?: "cartao" | "solta" | "coluna";
   /** Card do carrossel em exibição (1, 2, 3…): o comentário novo fica ligado a ele. */
   cardAtivo?: number | null;
 }) {
@@ -89,12 +92,12 @@ export function CommentThread({
   }
 
   const total = naFila ? pendentes.length : comentarios.length;
-  const solta = variante === "solta";
+  const solta = variante !== "cartao";
   const fundoDoBalao = solta ? "bg-white" : "bg-superficie-2";
 
   const cabecalho = (
     <div className="flex items-center justify-between">
-      {solta ? (
+      {variante === "solta" ? (
         <h3 className="m-0 text-[14px] font-bold">Comentários</h3>
       ) : (
         <span className="flex items-center gap-2 text-[13px] font-bold">
@@ -154,7 +157,7 @@ export function CommentThread({
                 sigla={iniciais(c.autor_nome || c.autor_email)}
                 meu={meu}
                 autor={c.autor_nome || c.autor_email}
-                {...(c.autor_papel ? { selo: c.autor_papel === "overso" ? "OVERSO" : "Cliente" } : {})}
+                {...(c.autor_papel ? { selo: c.autor_papel === "overso" ? "OVERSO" : "Cliente", tomDoSelo: c.autor_papel } : {})}
                 quando={chegouEm(c.criado_em)}
                 card={card}
                 texto={limpo}
@@ -166,7 +169,7 @@ export function CommentThread({
   );
 
   const campo = (
-    <div className={`campo flex min-h-0 items-center gap-2 py-1 pl-3 pr-1 ${solta ? "mt-auto" : ""}`}>
+    <div className={`campo flex min-h-0 items-center gap-2 py-1 pl-3 pr-1 ${variante === "solta" ? "mt-auto" : ""}`}>
       <label className="flex min-w-0 flex-1">
         <span className="sr-only">Escrever comentário</span>
         <input
@@ -189,12 +192,21 @@ export function CommentThread({
         onClick={mandar}
         disabled={!podeEnviar}
         aria-label="Enviar comentário"
-        className="btn btn-primario h-9 min-h-0 w-9 flex-none rounded-[10px] p-0"
+        className="btn btn-primario h-9 !min-h-0 w-9 flex-none rounded-[10px] p-0"
       >
         <ArrowRight size={16} strokeWidth={2} aria-hidden />
       </button>
     </div>
   );
+
+  if (variante === "coluna") {
+    return (
+      <ModalColuna aria-label="Comentários" fundo className="!gap-2.5" rodape={campo}>
+        {cabecalho}
+        {corpo}
+      </ModalColuna>
+    );
+  }
 
   if (solta) {
     return (
@@ -215,12 +227,19 @@ export function CommentThread({
   );
 }
 
+const TOM_DO_SELO = {
+  aviso: "bg-alerta-fundo text-alerta",
+  cliente: "bg-[#F3E8FB] text-[#6B3696]",
+  overso: "bg-azul-claro-2 text-[#1A57A6]",
+} as const;
+
 function Balao({
   fundo,
   sigla,
   meu,
   autor,
   selo,
+  tomDoSelo = "aviso",
   quando,
   card = null,
   texto,
@@ -232,6 +251,8 @@ function Balao({
   meu: boolean;
   autor: string;
   selo?: string;
+  /** Lilás para o cliente e azul para a OVERSO, como no design; "aviso" é o laranja de "Publica ao salvar". */
+  tomDoSelo?: "aviso" | "cliente" | "overso";
   quando?: string;
   /** Card do carrossel a que o comentário se refere. */
   card?: number | null;
@@ -250,7 +271,7 @@ function Balao({
       <div className={`flex min-w-0 flex-1 flex-col gap-1 rounded-[4px_12px_12px_12px] px-[11px] py-[9px] ${fundo}`}>
         <span className="flex flex-wrap items-center gap-1.5">
           <span className="text-[12px] font-bold">{autor}</span>
-          {selo && <span className="rounded-md bg-alerta-fundo px-1.5 py-px text-[10px] font-bold text-alerta">{selo}</span>}
+          {selo && <span className={`rounded-md px-1.5 py-px text-[10px] font-bold ${TOM_DO_SELO[tomDoSelo]}`}>{selo}</span>}
           {quando && <span className="text-[10px] text-texto-3">{quando}</span>}
           {onApagar && (
             <button
