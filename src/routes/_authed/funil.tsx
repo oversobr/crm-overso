@@ -81,7 +81,7 @@ function FunilPageTela() {
   if (error) {
     return (
       <>
-        <Cabecalho titulo="Funil" atualizavel />
+        <Cabecalho titulo="Funil" />
         <Card>
           <div className="py-8 text-center">
             <p className="text-sm text-rose-600 dark:text-rose-400">Não consegui carregar o funil.</p>
@@ -95,7 +95,7 @@ function FunilPageTela() {
   if (isLoading || !f) {
     return (
       <>
-        <Cabecalho titulo="Funil" atualizavel />
+        <Cabecalho titulo="Funil" />
         <Card>
           <Vazio>{isLoading ? "Carregando…" : "Sem dados ainda."}</Vazio>
         </Card>
@@ -112,7 +112,7 @@ function FunilPageTela() {
 
   return (
     <>
-      <Cabecalho titulo="Funil" atualizavel />
+      <Cabecalho titulo="Funil" />
 
       <DadosBlur>
       <Card

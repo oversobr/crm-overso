@@ -1,9 +1,12 @@
 import { useIsFetching, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowsClockwise, ChartBar } from "@phosphor-icons/react";
+import { ChartColumn, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { Dropdown } from "@/components/dropdown";
+import { TopBar } from "@/components/shell/top-bar";
+import { registrarAcesso, sincronizarConta } from "@/lib/conta";
+import { acessosPorCliente, primeiraTela, ultimoCliente } from "@/lib/guardado";
 import { campaignsQuery, projectsQuery } from "@/lib/queries";
 import { setAtualizando } from "@/lib/refresh";
 import { toast } from "@/lib/toast";
@@ -48,7 +51,11 @@ export function usePainel() {
 }
 
 export function PainelProvider({ children }: { children: ReactNode }) {
-  const [projetoId, setProjetoId] = useState<string | null>(null);
+  // Quem escolheu "Último cliente usado" em Configurações volta direto nele;
+  // sem isso (ou se aquele cliente não existir mais), vale o primeiro da lista.
+  const [projetoId, setProjetoId] = useState<string | null>(() =>
+    primeiraTela.ler() === "ultimo" ? ultimoCliente.ler() : null,
+  );
   const [campanhaId, setCampanhaId] = useState<string | null>(null);
 
   const { data: projetos = [] } = useQuery(projectsQuery());
@@ -58,9 +65,18 @@ export function PainelProvider({ children }: { children: ReactNode }) {
   const campanha = campanhas.find((c) => c.id === campanhaId) ?? null;
   const [trocas, setTrocas] = useState(0);
 
+  // Uma vez por sessão: o que a conta guardou em outro aparelho (lidas,
+  // avisos desligados, últimos acessos) entra neste navegador.
+  useEffect(() => {
+    void sincronizarConta().catch(() => {});
+  }, []);
+
   const valor = useMemo<Painel>(() => {
     function selecionar(id: string) {
       setProjetoId(id);
+      ultimoCliente.gravar(id);
+      acessosPorCliente.gravar({ ...acessosPorCliente.ler(), [id]: new Date().toISOString() });
+      registrarAcesso(id);
       // A campanha é do cliente anterior; levá-la adiante filtraria por nada.
       if (id !== projeto?.id) setCampanhaId(null);
     }
@@ -79,8 +95,10 @@ export function PainelProvider({ children }: { children: ReactNode }) {
 }
 
 /**
- * Título da página + seletor de campanha. `atualizavel` liga o botão de
- * buscar leads novos — só nas telas de dados (Dashboard, Leads, Funil).
+ * Topo das telas que ainda não foram refeitas no design novo: o TopBar
+ * (título, busca, sino, avatar) e, embaixo, a faixa com o que cada tela já
+ * tinha: recorte de campanha, botão de atualizar e as ações próprias.
+ * As telas novas usam o <TopBar> direto.
  */
 export function Cabecalho({
   titulo,
@@ -91,19 +109,19 @@ export function Cabecalho({
   children,
 }: {
   titulo: string;
-  /** Linha de contexto abaixo do título. Usada na saudação da Dashboard. */
+  /** Linha de contexto abaixo do título. */
   subtitulo?: string;
   atualizavel?: boolean;
   /** Complemento do botão e do aviso ("Atualizar Leads"); "" deixa só "Atualizar". */
   oQueAtualiza?: string;
   /** Campanha é recorte de leads; telas como o Calendário não usam. */
   comCampanha?: boolean;
-  /** Ações próprias da tela, alinhadas à direita do título. */
+  /** Ações próprias da tela, alinhadas à direita. */
   children?: ReactNode;
 }) {
   const { campanha, campanhas, setCampanhaId } = usePainel();
   const qc = useQueryClient();
-  // >0 enquanto qualquer query está buscando — anima o ícone e a barra.
+  // >0 enquanto qualquer query está buscando: anima o ícone e a barra.
   const buscando = useIsFetching() > 0;
 
   async function atualizar() {
@@ -118,50 +136,47 @@ export function Cabecalho({
     }
   }
 
+  const temCampanha = comCampanha && campanhas.length > 0;
+
   return (
-    <div className="mb-6">
-      {/* flex-wrap: no celular o seletor de campanha e o botão descem em vez
-          de espremer o título. A altura fixa só vale de sm pra cima. */}
-      <header className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="min-w-0">
-          <h1 className="display text-2xl font-bold tracking-tight text-ink sm:text-[28px]">
-            {titulo}
-          </h1>
-          {subtitulo && <p className="mt-0.5 text-sm text-muted">{subtitulo}</p>}
+    <div className="mb-5 flex flex-col gap-4">
+      <TopBar titulo={titulo} subtitulo={subtitulo} />
+
+      {(temCampanha || atualizavel || children) && (
+        <div className="flex flex-wrap items-center gap-2.5">
+          {temCampanha && (
+            <Dropdown
+              value={campanha?.id ?? ""}
+              onChange={(v) => setCampanhaId(v || null)}
+              options={[
+                { value: "", label: "Todo o período" },
+                ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
+              ]}
+              leading={<ChartColumn size={14} strokeWidth={1.8} className="shrink-0 text-azul" />}
+              triggerClassName="btn btn-secundario btn-40"
+            />
+          )}
+
+          {atualizavel && (
+            <button
+              onClick={atualizar}
+              disabled={buscando}
+              title="Busca os dados mais recentes do servidor, sem recarregar a página"
+              className="btn btn-secundario btn-40"
+            >
+              <RefreshCw size={14} strokeWidth={1.8} className={buscando ? "animate-spin" : ""} />
+              {buscando ? "Atualizando…" : oQueAtualiza ? `Atualizar ${oQueAtualiza}` : "Atualizar"}
+            </button>
+          )}
+
+          {children && <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>}
         </div>
-
-        {comCampanha && campanhas.length > 0 && (
-          <Dropdown
-            value={campanha?.id ?? ""}
-            onChange={(v) => setCampanhaId(v || null)}
-            options={[
-              { value: "", label: "Todo o período" },
-              ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
-            ]}
-            leading={<ChartBar size={14} className="shrink-0 text-accent" />}
-            triggerClassName="rounded-full border border-line/60 bg-surface px-3.5 py-2 text-sm text-ink transition hover:border-accent/50"
-          />
-        )}
-
-        {atualizavel && (
-          <button
-            onClick={atualizar}
-            disabled={buscando}
-            title="Busca os dados mais recentes do servidor, sem recarregar a página"
-            className="ml-auto flex items-center gap-2 rounded-full border border-line/60 bg-surface px-4 py-2 text-sm font-medium text-ink transition hover:border-accent/50 hover:bg-surface-2/50 disabled:opacity-60"
-          >
-            <ArrowsClockwise size={14} className={buscando ? "animate-spin" : ""} />
-            {buscando ? "Atualizando…" : oQueAtualiza ? `Atualizar ${oQueAtualiza}` : "Atualizar"}
-          </button>
-        )}
-
-        {children && <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div>}
-      </header>
+      )}
 
       {/* Barra indeterminada: sinaliza que os dados estão sendo atualizados. */}
       {atualizavel && (
-        <div className="mt-3 h-0.5 overflow-hidden rounded-full bg-transparent">
-          {buscando && <div className="bar-loading h-full w-1/4 rounded-full bg-gold" />}
+        <div className="h-0.5 overflow-hidden rounded-full bg-transparent">
+          {buscando && <div className="bar-loading h-full w-1/4 rounded-full bg-azul" />}
         </div>
       )}
     </div>

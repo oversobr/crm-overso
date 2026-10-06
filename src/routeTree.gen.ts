@@ -16,11 +16,14 @@ import { Route as AuthedCalendarioRouteImport } from './routes/_authed/calendari
 import { Route as AuthedClienteRouteImport } from './routes/_authed/cliente'
 import { Route as AuthedClientesRouteImport } from './routes/_authed/clientes'
 import { Route as AuthedConectarRouteImport } from './routes/_authed/conectar'
-import { Route as AuthedConfiguracaoRouteImport } from './routes/_authed/configuracao'
+import { Route as AuthedConfiguracoesRouteImport } from './routes/_authed/configuracoes'
+import { Route as AuthedEscolherClienteRouteImport } from './routes/_authed/escolher-cliente'
 import { Route as AuthedFunilRouteImport } from './routes/_authed/funil'
 import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
+import { Route as AuthedNotificacoesRouteImport } from './routes/_authed/notificacoes'
 import { Route as AuthedPerfilRouteImport } from './routes/_authed/perfil'
 import { Route as AuthedPostagensRouteImport } from './routes/_authed/postagens'
+import { Route as AuthedClientesClienteIdRouteImport } from './routes/_authed/clientes_.$clienteId'
 import { Route as AuthedEventosIndexRouteImport } from './routes/_authed/eventos/index'
 import { Route as AuthedEventosEventoIdRouteImport } from './routes/_authed/eventos/$eventoId'
 
@@ -58,9 +61,14 @@ const AuthedConectarRoute = AuthedConectarRouteImport.update({
   path: '/conectar',
   getParentRoute: () => AuthedRoute,
 } as any)
-const AuthedConfiguracaoRoute = AuthedConfiguracaoRouteImport.update({
-  id: '/configuracao',
-  path: '/configuracao',
+const AuthedConfiguracoesRoute = AuthedConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedEscolherClienteRoute = AuthedEscolherClienteRouteImport.update({
+  id: '/escolher-cliente',
+  path: '/escolher-cliente',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedFunilRoute = AuthedFunilRouteImport.update({
@@ -73,6 +81,11 @@ const AuthedLeadsRoute = AuthedLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedNotificacoesRoute = AuthedNotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedPerfilRoute = AuthedPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -81,6 +94,11 @@ const AuthedPerfilRoute = AuthedPerfilRouteImport.update({
 const AuthedPostagensRoute = AuthedPostagensRouteImport.update({
   id: '/postagens',
   path: '/postagens',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedClientesClienteIdRoute = AuthedClientesClienteIdRouteImport.update({
+  id: '/clientes_/$clienteId',
+  path: '/clientes/$clienteId',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedEventosIndexRoute = AuthedEventosIndexRouteImport.update({
@@ -101,11 +119,14 @@ export interface FileRoutesByFullPath {
   '/cliente': typeof AuthedClienteRoute
   '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
-  '/configuracao': typeof AuthedConfiguracaoRoute
+  '/configuracoes': typeof AuthedConfiguracoesRoute
+  '/escolher-cliente': typeof AuthedEscolherClienteRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/notificacoes': typeof AuthedNotificacoesRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
+  '/clientes/$clienteId': typeof AuthedClientesClienteIdRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos/': typeof AuthedEventosIndexRoute
 }
@@ -115,12 +136,15 @@ export interface FileRoutesByTo {
   '/cliente': typeof AuthedClienteRoute
   '/clientes': typeof AuthedClientesRoute
   '/conectar': typeof AuthedConectarRoute
-  '/configuracao': typeof AuthedConfiguracaoRoute
+  '/configuracoes': typeof AuthedConfiguracoesRoute
+  '/escolher-cliente': typeof AuthedEscolherClienteRoute
   '/funil': typeof AuthedFunilRoute
   '/leads': typeof AuthedLeadsRoute
+  '/notificacoes': typeof AuthedNotificacoesRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
   '/': typeof AuthedIndexRoute
+  '/clientes/$clienteId': typeof AuthedClientesClienteIdRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos': typeof AuthedEventosIndexRoute
 }
@@ -132,12 +156,15 @@ export interface FileRoutesById {
   '/_authed/cliente': typeof AuthedClienteRoute
   '/_authed/clientes': typeof AuthedClientesRoute
   '/_authed/conectar': typeof AuthedConectarRoute
-  '/_authed/configuracao': typeof AuthedConfiguracaoRoute
+  '/_authed/configuracoes': typeof AuthedConfiguracoesRoute
+  '/_authed/escolher-cliente': typeof AuthedEscolherClienteRoute
   '/_authed/funil': typeof AuthedFunilRoute
   '/_authed/leads': typeof AuthedLeadsRoute
+  '/_authed/notificacoes': typeof AuthedNotificacoesRoute
   '/_authed/perfil': typeof AuthedPerfilRoute
   '/_authed/postagens': typeof AuthedPostagensRoute
   '/_authed/': typeof AuthedIndexRoute
+  '/_authed/clientes_/$clienteId': typeof AuthedClientesClienteIdRoute
   '/_authed/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/_authed/eventos/': typeof AuthedEventosIndexRoute
 }
@@ -150,11 +177,14 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/clientes'
     | '/conectar'
-    | '/configuracao'
+    | '/configuracoes'
+    | '/escolher-cliente'
     | '/funil'
     | '/leads'
+    | '/notificacoes'
     | '/perfil'
     | '/postagens'
+    | '/clientes/$clienteId'
     | '/eventos/$eventoId'
     | '/eventos/'
   fileRoutesByTo: FileRoutesByTo
@@ -164,12 +194,15 @@ export interface FileRouteTypes {
     | '/cliente'
     | '/clientes'
     | '/conectar'
-    | '/configuracao'
+    | '/configuracoes'
+    | '/escolher-cliente'
     | '/funil'
     | '/leads'
+    | '/notificacoes'
     | '/perfil'
     | '/postagens'
     | '/'
+    | '/clientes/$clienteId'
     | '/eventos/$eventoId'
     | '/eventos'
   id:
@@ -180,12 +213,15 @@ export interface FileRouteTypes {
     | '/_authed/cliente'
     | '/_authed/clientes'
     | '/_authed/conectar'
-    | '/_authed/configuracao'
+    | '/_authed/configuracoes'
+    | '/_authed/escolher-cliente'
     | '/_authed/funil'
     | '/_authed/leads'
+    | '/_authed/notificacoes'
     | '/_authed/perfil'
     | '/_authed/postagens'
     | '/_authed/'
+    | '/_authed/clientes_/$clienteId'
     | '/_authed/eventos/$eventoId'
     | '/_authed/eventos/'
   fileRoutesById: FileRoutesById
@@ -246,11 +282,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedConectarRouteImport
       parentRoute: typeof AuthedRoute
     }
-    '/_authed/configuracao': {
-      id: '/_authed/configuracao'
-      path: '/configuracao'
-      fullPath: '/configuracao'
-      preLoaderRoute: typeof AuthedConfiguracaoRouteImport
+    '/_authed/configuracoes': {
+      id: '/_authed/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof AuthedConfiguracoesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/escolher-cliente': {
+      id: '/_authed/escolher-cliente'
+      path: '/escolher-cliente'
+      fullPath: '/escolher-cliente'
+      preLoaderRoute: typeof AuthedEscolherClienteRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/funil': {
@@ -267,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedLeadsRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/notificacoes': {
+      id: '/_authed/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AuthedNotificacoesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/perfil': {
       id: '/_authed/perfil'
       path: '/perfil'
@@ -279,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/postagens'
       fullPath: '/postagens'
       preLoaderRoute: typeof AuthedPostagensRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/clientes_/$clienteId': {
+      id: '/_authed/clientes_/$clienteId'
+      path: '/clientes/$clienteId'
+      fullPath: '/clientes/$clienteId'
+      preLoaderRoute: typeof AuthedClientesClienteIdRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/eventos/': {
@@ -303,12 +360,15 @@ interface AuthedRouteChildren {
   AuthedClienteRoute: typeof AuthedClienteRoute
   AuthedClientesRoute: typeof AuthedClientesRoute
   AuthedConectarRoute: typeof AuthedConectarRoute
-  AuthedConfiguracaoRoute: typeof AuthedConfiguracaoRoute
+  AuthedConfiguracoesRoute: typeof AuthedConfiguracoesRoute
+  AuthedEscolherClienteRoute: typeof AuthedEscolherClienteRoute
   AuthedFunilRoute: typeof AuthedFunilRoute
   AuthedLeadsRoute: typeof AuthedLeadsRoute
+  AuthedNotificacoesRoute: typeof AuthedNotificacoesRoute
   AuthedPerfilRoute: typeof AuthedPerfilRoute
   AuthedPostagensRoute: typeof AuthedPostagensRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
+  AuthedClientesClienteIdRoute: typeof AuthedClientesClienteIdRoute
   AuthedEventosEventoIdRoute: typeof AuthedEventosEventoIdRoute
   AuthedEventosIndexRoute: typeof AuthedEventosIndexRoute
 }
@@ -318,12 +378,15 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedClienteRoute: AuthedClienteRoute,
   AuthedClientesRoute: AuthedClientesRoute,
   AuthedConectarRoute: AuthedConectarRoute,
-  AuthedConfiguracaoRoute: AuthedConfiguracaoRoute,
+  AuthedConfiguracoesRoute: AuthedConfiguracoesRoute,
+  AuthedEscolherClienteRoute: AuthedEscolherClienteRoute,
   AuthedFunilRoute: AuthedFunilRoute,
   AuthedLeadsRoute: AuthedLeadsRoute,
+  AuthedNotificacoesRoute: AuthedNotificacoesRoute,
   AuthedPerfilRoute: AuthedPerfilRoute,
   AuthedPostagensRoute: AuthedPostagensRoute,
   AuthedIndexRoute: AuthedIndexRoute,
+  AuthedClientesClienteIdRoute: AuthedClientesClienteIdRoute,
   AuthedEventosEventoIdRoute: AuthedEventosEventoIdRoute,
   AuthedEventosIndexRoute: AuthedEventosIndexRoute,
 }

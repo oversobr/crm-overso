@@ -1,942 +1,549 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, ChartBar, PencilSimple, Target, Warning } from "@phosphor-icons/react";
+import { CalendarDays, Plus } from "lucide-react";
 import type { ReactNode } from "react";
-import type { ComponentType } from "react";
 import { useState } from "react";
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-import { COR_STATUS_CAL, PilulasConteudo, StatusConteudoBadge } from "@/components/conteudo";
-import { Dropdown } from "@/components/dropdown";
-import { Cabecalho, usePainel } from "@/components/painel";
-import { Modal } from "@/components/modal";
-import { Card, Pilula, StatusBadge, Vazio } from "@/components/ui";
-import { DadosBlur } from "@/components/dados-blur";
-import { deYmd, fmt, hhmm, SEMANA, semanaDe, somarDias, ymd } from "@/lib/datas";
+import { AreaChart } from "@/components/ds/area-chart";
+import { CampaignSelector, periodoDaCampanha } from "@/components/ds/campaign-selector";
+import { Card, EmptyState, HighlightCard, Variacao } from "@/components/ds/card";
+import { MenuSelect, Tabs } from "@/components/ds/controles";
+import { ListaStatus, SegmentedBars } from "@/components/ds/segmented-bars";
+import { StatusBadge } from "@/components/ds/status-badge";
+import { ModuloDesativado } from "@/components/modulo";
+import { usePainel } from "@/components/painel";
+import { TopBar } from "@/components/shell/top-bar";
+import { capitalizar, deYmd, fmt, hhmm, semanaDe, somarDias, ymd } from "@/lib/datas";
 import {
   conteudosQuery,
   faltaTabelaConteudos,
-  fonteQuery,
-  funilQuery,
-  leadsQuery,
+  resumoPeriodoQuery,
   serieQuery,
+  tarefasQuery,
 } from "@/lib/queries";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import { coresGrafico, useTema } from "@/lib/theme";
-import { toast } from "@/lib/toast";
-import type { Conteudo, Funil, StatusConteudo } from "@/lib/types";
-import { PARADOS, STATUS_CONTEUDO_LABEL } from "@/lib/types";
-import { ModuloDesativado } from "@/components/modulo";
-import { modulosDe } from "@/lib/types";
+import { COR_LEAD, COR_POST } from "@/lib/status";
+import type { Conteudo, Rede, Status, StatusConteudo, Tarefa } from "@/lib/types";
+import { FORMATO_LABEL, modulosDe, STATUS_CONTEUDO_LABEL, STATUS_LABEL } from "@/lib/types";
+import { useUsuario } from "@/lib/usuario";
 
 export const Route = createFileRoute("/_authed/")({ component: Dashboard });
 
-const diaCurto = (iso: string) =>
-  new Date(`${iso}T12:00:00`).toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+const STATUS_LEAD = Object.keys(STATUS_LABEL) as Status[];
+const STATUS_POST = Object.keys(STATUS_CONTEUDO_LABEL) as StatusConteudo[];
 
+/** Como as redes aparecem na tabela de próximas postagens. */
+const REDE_CURTA: Record<Rede, string> = {
+  instagram: "IG",
+  facebook: "FB",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  linkedin: "LinkedIn",
+  x: "X",
+  pinterest: "Pinterest",
+  outro: "Outra",
+};
+
+const PERIODOS = [7, 30, 90].map((d) => ({ valor: d, rotulo: `Últimos ${d} dias` }));
+const JANELAS = [7, 14, 30].map((d) => ({ valor: d, rotulo: `${d} dias` }));
+
+const inteiro = (n: number) => n.toLocaleString("pt-BR");
+/** "54,7%": uma casa, com vírgula. */
+const pct = (parte: number, todo: number) =>
+  `${(todo > 0 ? Math.min(100, (100 * parte) / todo) : 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })}%`;
+
+/** "Seg" a partir de "seg." */
+const semPonto = (s: string) => capitalizar(s.replace(".", ""));
 
 function Dashboard() {
-  const { projeto, campanha, campanhas, setCampanhaId } = usePainel();
-  // Área de módulo que o cliente não usa aparece desativada (com o botão de
-  // ativar pra quem pode), em vez de números zerados que parecem erro.
+  const { projeto } = usePainel();
   const mods = modulosDe(projeto);
-  const cor = coresGrafico(useTema());
-  const qc = useQueryClient();
-  const [dias, setDias] = useState(7);
-  const [editandoMeta, setEditandoMeta] = useState(false);
-  const [metaInput, setMetaInput] = useState("");
+  const usuario = useUsuario();
 
-  const salvarMeta = useMutation({
-    mutationFn: async ({ id, valor }: { id: string; valor: number | null }) => {
-      const { error } = await getSupabaseBrowserClient()
-        .from("campaigns")
-        .update({ meta_leads: valor })
-        .eq("id", id);
-      if (error) throw new Error(error.message);
-    },
-    onSuccess: async () => {
-      setEditandoMeta(false);
-      await qc.invalidateQueries({ queryKey: ["campaigns"] });
-      toast("Meta atualizada.", "success");
-    },
-  });
-
-  function abrirMeta() {
-    setMetaInput(campanha?.meta_leads != null ? String(campanha.meta_leads) : "");
-    setEditandoMeta(true);
-  }
-
-  const { data: funil } = useQuery(funilQuery(projeto?.id, campanha?.id ?? null));
-  const { data: serie = [] } = useQuery(serieQuery(projeto?.id, campanha?.id ?? null, dias));
-  const { data: fontes = [] } = useQuery(fonteQuery(projeto?.id, campanha?.id ?? null));
-  const { data: recentes } = useQuery(
-    leadsQuery({
-      projectId: projeto?.id,
-      campaignId: campanha?.id ?? null,
-      busca: "",
-      status: "",
-      tipo: "",
-      origem: "",
-      pagina: 0,
-    }),
-  );
-
-  // ── Conteúdo: uma consulta só cobre a semana, o mês e os próximos 30 dias.
   const hoje = ymd(new Date());
-  const semana = semanaDe(hoje);
-  const inicioMes = `${hoje.slice(0, 7)}-01`;
-  const fimMes = ymd(new Date(deYmd(hoje).getFullYear(), deYmd(hoje).getMonth() + 1, 0));
-  const daqui30 = somarDias(hoje, 30);
-  // A semana anterior entra na janela porque o KPI do topo compara com ela —
-  // sem isso o "Semana passada: N" leria sempre zero, por falta de dado.
-  const semanaAnterior = semanaDe(somarDias(hoje, -7));
-  const de = [semanaAnterior[0]!, semana[0]!, inicioMes].sort()[0]!;
-  const ate = [semana[6]!, fimMes, daqui30].sort().at(-1)!;
-  const { data: conteudos = [], error: erroConteudo, isLoading: carregandoConteudo } = useQuery(
-    conteudosQuery(projeto?.id, de, ate),
-  );
-
-  const daSemana = conteudos.filter((c) => c.data >= semana[0]! && c.data <= semana[6]!);
-  const doMes = conteudos.filter((c) => c.data.startsWith(hoje.slice(0, 7)));
-  // Tudo de hoje em diante, publicado ou não: a lista precisa bater com a
-  // semana ao lado. O status de cada item diz em que pé ele está.
-  const proximos = conteudos.filter((c) => c.data >= hoje).slice(0, 15);
-  const atrasados = conteudos.filter((c) => c.data < hoje && PARADOS.includes(c.status));
-  const publicadosSemana = daSemana.filter((c) => c.status === "publicado").length;
-  const publicadosSemanaAnterior = conteudos.filter(
-    (c) =>
-      c.data >= semanaAnterior[0]! && c.data <= semanaAnterior[6]! && c.status === "publicado",
-  ).length;
-  const emAprovacao = conteudos.filter((c) => c.data >= hoje && c.status === "aprovacao").length;
-
-  // ── "Precisa de você": o que está parado esperando alguém agir.
-  // `atualizado_em` é a última vez que o conteúdo mudou; num que está em
-  // aprovação, é há quanto tempo ele espera o cliente responder. Não é o
-  // instante exato em que entrou nesse status (o banco não guarda histórico),
-  // mas é a melhor aproximação sem migration — e erra para o lado seguro:
-  // qualquer mexida reinicia a contagem, então nada aparece como parado à toa.
-  const DIAS_PARADO = 3;
-  const limiteParado = somarDias(hoje, -DIAS_PARADO);
-  const paradosAprovacao = conteudos.filter(
-    (c) => c.status === "aprovacao" && (c.atualizado_em ?? "").slice(0, 10) <= limiteParado,
-  );
-  const pendencias = atrasados.length + paradosAprovacao.length;
-
-  // Mesma queryKey do bloco de usuário na sidebar: o react-query devolve do
-  // cache, sem uma segunda ida ao servidor.
-  const { data: usuario } = useQuery({
-    queryKey: ["auth-user"],
-    queryFn: async () => {
-      const { data } = await getSupabaseBrowserClient().auth.getUser();
-      return data.user;
-    },
-  });
-  const metaUsuario = (usuario?.user_metadata ?? {}) as { full_name?: string; name?: string };
-  const nomeUsuario =
-    metaUsuario.full_name || metaUsuario.name || usuario?.email?.split("@")[0] || "";
-
-  // Saudação pela hora do dia, como nas referências — o painel cumprimenta
-  // quem abriu em vez de anunciar "Dashboard", que a pessoa já sabe.
   const hora = new Date().getHours();
-  const primeiroNome = (nomeUsuario ?? "").trim().split(" ")[0] ?? "";
   const saudacao =
     (hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite") +
-    (primeiroNome ? `, ${primeiroNome}` : "");
-
-  // Dia de pico da série — é a barra que fica cheia no gráfico. Empate fica
-  // com o mais recente, que é o que interessa olhar.
-  const iPico = serie.reduce((melhor, d, i) => (d.total >= (serie[melhor]?.total ?? -1) ? i : melhor), 0);
-
-  const leads = recentes?.linhas ?? [];
-  const total = funil?.completos ?? 0;
-  const leadsHoje = serie.at(-1)?.total ?? 0;
-  const leadsOntem = serie.at(-2)?.total ?? 0;
-  const meta = campanha?.meta_leads ?? null;
-  const pctMeta = meta ? Math.min(100, Math.round((1000 * total) / meta) / 10) : null;
-
-  // O recorte que vale pros números de lead: a campanha escolhida no
-  // cabeçalho, ou tudo desde o começo quando nenhuma está selecionada.
-  const periodoDoKpi = campanha ? `Campanha ${campanha.nome}` : "Desde o início";
-
-  // As duas áreas viram blocos pra poder trocar a ordem: a de módulo
-  // ativo vem primeiro, e a desativada desce pro fim da página.
-  const areaConteudo = (primeira: boolean) => (
-    <>
-      {!mods.conteudo ? (
-        <ModuloDesativado modulo="conteudo" compacto />
-      ) : erroConteudo ? (
-        <Card>
-          <p className="py-4 text-center text-sm text-muted">
-            {faltaTabelaConteudos(erroConteudo)
-              ? "O calendário de conteúdo ainda não foi ativado no banco (supabase/18_calendario.sql)."
-              : `Não consegui carregar os conteúdos: ${(erroConteudo as Error).message}`}
-          </p>
-        </Card>
-      ) : (
-        <>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Card
-            className="lg:col-span-2"
-            titulo="Esta semana"
-            acao={<span className="text-xs text-muted">{intervaloSemana(semana)}</span>}
-          >
-            <SemanaResumo dias={semana} conteudos={daSemana} hoje={hoje} />
-            <StatusDoMes conteudos={doMes} atrasados={atrasados.length} />
-          </Card>
-
-          {/* No desktop quem manda na altura da linha é "Esta semana":
-              h-0 + min-h-full faz este card não contar pro tamanho da linha
-              e depois esticar até ela. A lista rola por dentro, então muitos
-              conteúdos aqui não deixam a semana ao lado esticada e vazia. */}
-          <Card
-            titulo={`Próximas publicações${proximos.length ? ` (${proximos.length})` : ""}`}
-            className="flex flex-col lg:h-0 lg:min-h-full"
-          >
-            {carregandoConteudo ? (
-              <Vazio>Carregando…</Vazio>
-            ) : proximos.length === 0 ? (
-              <Vazio>Nada programado de hoje até os próximos 30 dias.</Vazio>
-            ) : (
-              <div className="rolagem-fina -mr-2 max-h-[28rem] min-h-0 flex-1 space-y-2 overflow-y-auto pr-2 lg:max-h-none">
-                {proximos.map((c) => (
-                  <ItemProximo key={c.id} c={c} hoje={hoje} />
-                ))}
-              </div>
-            )}
-          </Card>
-        </div>
-        </>
-      )}
-
-    </>
-  );
-
-  const areaCrm = (primeira: boolean) => (
-    <>
-      {!mods.crm ? (
-        <ModuloDesativado modulo="crm" compacto />
-      ) : (
-      <>
-      {campanha && (
-        <div className="mb-4 rounded-2xl border border-line/70 bg-surface px-5 py-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 text-sm font-medium text-ink">
-              <Target size={16} className="text-accent" />
-              Meta da Campanha ({campanha.nome})
-            </p>
-            <div className="flex items-center gap-3">
-              {meta != null && (
-                <p className="text-sm text-muted">
-                  {total} / {meta} leads
-                </p>
-              )}
-              <button
-                onClick={abrirMeta}
-                title="Editar meta"
-                className="rounded-lg p-1.5 text-muted transition hover:bg-surface-2 hover:text-ink"
-              >
-                <PencilSimple size={14} />
-              </button>
-            </div>
-          </div>
-
-          {meta != null ? (
-            <>
-              <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-2">
-                <div
-                  className="h-full rounded-full bg-gold transition-all"
-                  style={{ width: `${pctMeta}%` }}
-                />
-              </div>
-              <p className="mt-1.5 text-right text-xs text-muted">{pctMeta}% da meta atingida</p>
-            </>
-          ) : (
-            <p className="mt-2 text-sm text-muted">
-              Nenhuma meta definida.{" "}
-              <button onClick={abrirMeta} className="font-medium text-accent hover:underline">
-                Definir meta
-              </button>
-            </p>
-          )}
-        </div>
-      )}
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Gráfico: completos vs parciais empilhados, com período. */}
-        <Card
-          className="lg:col-span-2"
-          titulo="Leads por dia"
-          acao={
-            <div className="flex gap-1 rounded-full border border-line/70 p-0.5">
-              {[7, 30].map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDias(d)}
-                  className={`rounded-full px-3 py-1 text-xs transition ${
-                    dias === d ? "bg-gold font-semibold text-white" : "text-muted hover:text-ink"
-                  }`}
-                >
-                  {d}d
-                </button>
-              ))}
-            </div>
-          }
-        >
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={serie} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
-                <CartesianGrid stroke={cor.grade} strokeDasharray="3 3" vertical={false} />
-                <XAxis
-                  dataKey="dia"
-                  tickFormatter={diaCurto}
-                  interval={dias > 7 ? 4 : 0}
-                  tick={{ fill: cor.eixo, fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  allowDecimals={false}
-                  tick={{ fill: cor.eixo, fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  labelFormatter={diaCurto}
-                  cursor={{ fill: cor.grade, opacity: 0.3 }}
-                  contentStyle={{
-                    background: cor.tooltipBg,
-                    border: `1px solid ${cor.tooltipLinha}`,
-                    borderRadius: 10,
-                    color: cor.ink,
-                  }}
-                />
-                {/* O dia de melhor resultado fica cheio e o resto esmaecido,
-                    como nas referências: a leitura vira "qual foi o pico"
-                    em vez de 30 barras de peso igual. O rótulo só aparece
-                    nele, e só quando houve algum lead. */}
-                <Bar dataKey="completos" name="Completos" stackId="a">
-                  {serie.map((d, i) => (
-                    <Cell
-                      key={d.dia}
-                      fill={cor.fill}
-                      fillOpacity={i === iPico ? 1 : 0.35}
-                    />
-                  ))}
-                </Bar>
-                <Bar dataKey="parciais" name="Parciais" stackId="a" radius={[4, 4, 0, 0]}>
-                  {serie.map((d, i) => (
-                    <Cell
-                      key={d.dia}
-                      fill={cor.fill2}
-                      fillOpacity={i === iPico ? 1 : 0.35}
-                    />
-                  ))}
-                  <LabelList dataKey="total" content={<RotuloPico indice={iPico} cor={cor} />} />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <Legenda cor={cor} />
-        </Card>
-
-        {/* Funil compacto — o sinal-chave do negócio, num olhar. */}
-        <Card titulo="Funil">
-          {funil ? <FunilCompacto f={funil} /> : <Vazio>Sem dados.</Vazio>}
-        </Card>
-      </div>
-
-      {/* Dashboard não esconde dado atrás de "ver mais": ou o número
-          merece a tela, ou não merece a dashboard. Estes merecem. */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <Card titulo="Fontes">
-          {fontes.length === 0 ? (
-            <Vazio>Sem leads ainda.</Vazio>
-          ) : (
-            <div className="space-y-3">
-              {fontes.slice(0, 6).map((f) => (
-                <BarraFonte key={f.fonte} fonte={f.fonte} total={f.total} max={fontes[0]?.total ?? 0} />
-              ))}
-            </div>
-          )}
-        </Card>
-
-        <Card titulo="Leads Recentes">
-          {leads.length === 0 ? (
-            <Vazio>Nenhum lead ainda.</Vazio>
-          ) : (
-            <div className="space-y-1">
-              {leads.slice(0, 5).map((l) => (
-                <div
-                  key={l.id}
-                  className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate text-ink">
-                      {l.nome ?? (l.completo ? "(sem nome)" : "Lead parcial")}
-                    </p>
-                    <p className="truncate text-xs text-muted">
-                      {l.whatsapp ?? "—"} · {l.utms.utm_source ?? "direto"}
-                    </p>
-                  </div>
-                  <StatusBadge status={l.status} />
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-      </div>
-      </>
-      )}
-    </>
-  );
-  const conteudoPrimeiro = mods.conteudo || !mods.crm;
-
+    (usuario.primeiroNome ? `, ${capitalizar(usuario.primeiroNome)}` : "");
+  // "Segunda, 5 de outubro"
+  const dataDeHoje = `${capitalizar(fmt(hoje, { weekday: "long" }).replace("-feira", ""))}, ${fmt(hoje, {
+    day: "numeric",
+    month: "long",
+  })}`;
 
   return (
-    <>
-      {/* O seletor de campanha mora aqui, e não dentro de um bloco: com as
-          seções fora, ele recorta a tela toda. */}
-      <Cabecalho
+    <div className="flex flex-col gap-5">
+      <TopBar
         titulo={saudacao}
         subtitulo={
           projeto
-            ? `Veja o que está acontecendo com ${projeto.nome} hoje.`
+            ? `${dataDeHoje} · o que está acontecendo com ${projeto.nome}`
             : "Escolha um cliente no menu para ver os números dele."
         }
-        atualizavel
-        comCampanha={mods.crm}
-        oQueAtualiza=""
       />
 
-      <DadosBlur>
-      {/* UMA linha de KPIs, cards idênticos. Antes eram três com chips de
-          cores diferentes (rosa, verde, azul) — cor que não significava
-          nada, só decorava, e três decorações diferentes numa linha é o
-          que faz a tela parecer montada aos pedaços. Nas referências o
-          KPI não tem ícone nenhum: rótulo, número, variação. */}
-      <div className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {mods.crm && (
-          <Kpi
-            rotulo="Leads hoje"
-            valor={leadsHoje}
-            delta={leadsHoje - leadsOntem}
-            comparacao={`Ontem: ${leadsOntem}`}
-          />
-        )}
-        {mods.crm && (
-          <Kpi rotulo="Total de leads" valor={total} comparacao={periodoDoKpi} />
-        )}
-        {mods.crm && (
-          <Kpi
-            rotulo="Taxa de conversão"
-            valor={funil?.tx_conversao != null ? `${funil.tx_conversao}%` : "—"}
-            comparacao={`${funil?.aberturas ?? 0} aberturas do formulário`}
-          />
-        )}
-        {mods.conteudo && (
-          <Kpi
-            rotulo="Publicados na semana"
-            valor={publicadosSemana}
-            comparacao={`de ${daSemana.length} programados · semana passada: ${publicadosSemanaAnterior}`}
-          />
-        )}
+      {/* Módulo não contratado: no lugar dos números, o aviso do que falta. */}
+      {mods.crm ? <AreaCrm comConteudo={mods.conteudo} /> : <ModuloDesativado modulo="crm" compacto />}
+      {mods.conteudo ? <AreaConteudo hoje={hoje} /> : <ModuloDesativado modulo="conteudo" compacto />}
+
+    </div>
+  );
+}
+
+/* ── CRM: campanha, leads de hoje, funil do formulário, série e status ──
+   As bases de flex (324, 526, 606, 366) são as do design somadas ao padding
+   e à borda: lá os cards são content-box, e `flex: 1 1 280px` mede só o
+   miolo. É o que decide em que largura um card desce para a linha de baixo. */
+
+function AreaCrm({ comConteudo }: { comConteudo: boolean }) {
+  const { projeto, campanha } = usePainel();
+  const hoje = ymd(new Date());
+
+  /** Recorte quando nenhuma campanha está escolhida. */
+  const [diasPeriodo, setDiasPeriodo] = useState(30);
+  const [diasSerie, setDiasSerie] = useState(14);
+  const [serieAtiva, setSerieAtiva] = useState<"enviados" | "parciais">("enviados");
+
+  // Com campanha, o período é o dela; sem, os últimos N dias até hoje.
+  const de = campanha ? campanha.inicio : somarDias(hoje, -(diasPeriodo - 1));
+  const ate = campanha ? campanha.fim : hoje;
+  const { data: resumo, isLoading: carregandoResumo } = useQuery(resumoPeriodoQuery(projeto?.id, de, ate));
+
+  // Mesmo tamanho, logo antes: é contra ele que a conversão sobe ou desce.
+  // Campanha de ponta aberta não tem "período anterior" que faça sentido.
+  const tamanho = de && ate ? Math.round((deYmd(ate).getTime() - deYmd(de).getTime()) / 864e5) + 1 : null;
+  const { data: anterior } = useQuery({
+    ...resumoPeriodoQuery(projeto?.id, de && tamanho ? somarDias(de, -tamanho) : null, de ? somarDias(de, -1) : null),
+    enabled: Boolean(projeto?.id) && tamanho != null,
+  });
+
+  const { data: serie = [] } = useQuery(serieQuery(projeto?.id, campanha?.id ?? null, diasSerie));
+  // "Hoje" é hoje, qualquer que seja a campanha escolhida no seletor.
+  const { data: doisDias = [] } = useQuery(serieQuery(projeto?.id, null, 2));
+  const leadsHoje = doisDias.at(-1)?.completos ?? 0;
+  const diferenca = leadsHoje - (doisDias.at(-2)?.completos ?? 0);
+
+  const aberturas = resumo?.aberturas ?? 0;
+  const iniciaram = resumo?.iniciaram ?? 0;
+  const enviaram = resumo?.enviaram ?? 0;
+  // Abertura sem registro (bloqueador de script) não pode gerar desistência negativa.
+  const desistiram = Math.max(0, aberturas - enviaram);
+  const conversao = aberturas > 0 ? Math.min(100, (100 * enviaram) / aberturas) : 0;
+  const conversaoAntes =
+    anterior && anterior.aberturas > 0 ? Math.min(100, (100 * anterior.enviaram) / anterior.aberturas) : null;
+  const pp = conversaoAntes != null && aberturas > 0 ? conversao - conversaoAntes : null;
+
+  const rotuloPeriodo = campanha ? periodoDaCampanha(campanha) : `${diasPeriodo} dias`;
+
+  const etapas = [
+    { rotulo: "Abriram", n: aberturas, taxa: "100%", ponto: "#1C2E45" },
+    { rotulo: "Começaram", n: iniciaram, taxa: `${pct(iniciaram, aberturas)} de quem abriu`, ponto: "#1A66C2" },
+    { rotulo: "Enviaram", n: enviaram, taxa: `${pct(enviaram, iniciaram)} de quem começou`, ponto: "#9CC0EA" },
+  ];
+
+  const fatias = STATUS_LEAD.map((s) => ({
+    rotulo: STATUS_LABEL[s],
+    valor: resumo?.porStatus[s] ?? 0,
+    cor: COR_LEAD[s].serie,
+  }));
+
+  const pontos = serie.map((d, i) => {
+    const virouMes = i === 0 || d.dia.slice(5, 7) !== serie[i - 1]!.dia.slice(5, 7);
+    return {
+      eixo: virouMes ? `${d.dia.slice(8, 10)}/${d.dia.slice(5, 7)}` : d.dia.slice(8, 10),
+      titulo: `${semPonto(fmt(d.dia, { weekday: "short" }))}, ${d.dia.slice(8, 10)} ${fmt(d.dia, { month: "short" }).replace(".", "")}`,
+      valor: serieAtiva === "enviados" ? d.completos : d.parciais,
+    };
+  });
+
+  return (
+    <>
+      <CampaignSelector leadsDaCampanha={enviaram} periodoPadrao={`dos últimos ${diasPeriodo} dias`} />
+
+      <div className="flex flex-wrap gap-4">
+        <HighlightCard className="flex-[1_1_324px]">
+          <span className="text-[13px] font-semibold text-[#DCE8F7]">Leads hoje</span>
+          <div className="flex items-baseline gap-2.5">
+            <span className="text-[40px] font-extrabold leading-none tracking-[-0.02em]">{inteiro(leadsHoje)}</span>
+            <Variacao sobreDegrade>
+              {diferenca === 0 ? "igual a ontem" : `${diferenca > 0 ? "+" : "−"}${Math.abs(diferenca)} vs ontem`}
+            </Variacao>
+          </div>
+          <div className="mt-auto flex gap-2.5">
+            <Link to="/leads" className="btn btn-claro btn-pilula flex-1">
+              Ver leads
+            </Link>
+            {comConteudo && (
+              <Link to="/calendario" search={{ novo: true }} className="btn btn-escuro btn-pilula flex-1">
+                Nova postagem
+              </Link>
+            )}
+          </div>
+        </HighlightCard>
+
+        <Card
+          className="flex-[2_1_526px]"
+          titulo="Formulário das landing pages"
+          acao={
+            campanha ? (
+              <span className="text-[12px] text-texto-3">{rotuloPeriodo}</span>
+            ) : (
+              <MenuSelect valor={diasPeriodo} opcoes={PERIODOS} onChange={setDiasPeriodo} rotulo="Período" />
+            )
+          }
+        >
+          <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(140px,100%),1fr))]">
+            {etapas.map((e) => (
+              <div key={e.rotulo} className="flex flex-col gap-2 rounded-[14px] border border-borda p-3.5">
+                <span className="flex items-center gap-2 text-[12px] font-semibold text-texto-3">
+                  <span className="h-2 w-2 rounded-full" style={{ background: e.ponto }} />
+                  {e.rotulo}
+                </span>
+                <span className="text-[24px] font-extrabold leading-tight tracking-[-0.02em]">
+                  <Numero carregando={carregandoResumo}>{inteiro(e.n)}</Numero>
+                </span>
+                <span className="self-start rounded-full bg-gelo px-2 py-[3px] text-[11px] font-bold text-texto-2">
+                  {e.taxa}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        <Card className="flex-[1_1_326px] gap-2.5" titulo="Conversão do formulário">
+          <span className="-mt-1 text-[12px] text-texto-3">Quem enviou, sobre quem abriu</span>
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[32px] font-extrabold leading-tight tracking-[-0.02em]">
+              <Numero carregando={carregandoResumo}>{pct(enviaram, aberturas)}</Numero>
+            </span>
+            {pp != null && Math.abs(pp) >= 0.05 && (
+              <Variacao tom={pp > 0 ? "bom" : "ruim"}>
+                {pp > 0 ? "↑" : "↓"} {Math.abs(pp).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} p.p.
+              </Variacao>
+            )}
+          </div>
+          <div className="mt-auto flex h-7 gap-1" aria-hidden="true">
+            {aberturas > 0 ? (
+              <>
+                <div className="min-w-1 rounded-lg bg-marinho" style={{ flex: Math.max(conversao, 1) }} />
+                <div className="min-w-1 rounded-lg bg-[#B9D2EF]" style={{ flex: Math.max(100 - conversao, 1) }} />
+              </>
+            ) : (
+              <div className="flex-1 rounded-lg bg-gelo" />
+            )}
+          </div>
+          <div className="flex justify-between gap-2 text-[11px] font-semibold text-texto-3">
+            {aberturas > 0 ? (
+              <>
+                <span>
+                  {inteiro(enviaram)} {enviaram === 1 ? "enviou" : "enviaram"}
+                </span>
+                <span>
+                  {inteiro(desistiram)} {desistiram === 1 ? "desistiu" : "desistiram"}
+                </span>
+              </>
+            ) : (
+              <span>Ninguém abriu o formulário neste período.</span>
+            )}
+          </div>
+        </Card>
       </div>
 
-      {mods.conteudo && pendencias > 0 && (
-        <div className="mb-4">
-          <PrecisaDeVoce atrasados={atrasados} parados={paradosAprovacao} hoje={hoje} />
-        </div>
-      )}
-
-      {conteudoPrimeiro ? (
-        <>
-          {areaConteudo(true)}
-          {areaCrm(false)}
-        </>
-      ) : (
-        <>
-          {areaCrm(true)}
-          {areaConteudo(false)}
-        </>
-      )}
-      </DadosBlur>
-
-      <Modal aberto={editandoMeta} onFechar={() => setEditandoMeta(false)} titulo="Meta da campanha">
-        <p className="text-sm text-muted">
-          Quantos leads você quer atingir em{" "}
-          <span className="font-semibold text-ink">{campanha?.nome}</span>?
-        </p>
-        <input
-          type="number"
-          min={0}
-          autoFocus
-          value={metaInput}
-          onChange={(e) => setMetaInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && campanha) {
-              const v = parseInt(metaInput, 10);
-              salvarMeta.mutate({ id: campanha.id, valor: Number.isFinite(v) ? v : null });
-            }
-          }}
-          placeholder="Ex.: 500"
-          className="mt-3 w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-accent/70"
-        />
-        {salvarMeta.isError && (
-          <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{(salvarMeta.error as Error).message}</p>
-        )}
-        <div className="mt-5 flex gap-2">
-          <button
-            onClick={() => {
-              if (!campanha) return;
-              const v = parseInt(metaInput, 10);
-              salvarMeta.mutate({ id: campanha.id, valor: Number.isFinite(v) ? v : null });
-            }}
-            disabled={salvarMeta.isPending}
-            className="flex-1 rounded-xl bg-gold py-2.5 text-sm font-semibold text-white transition hover:bg-gold-dim disabled:opacity-60"
-          >
-            {salvarMeta.isPending ? "Salvando…" : "Salvar meta"}
-          </button>
-          {campanha?.meta_leads != null && (
-            <button
-              onClick={() => salvarMeta.mutate({ id: campanha.id, valor: null })}
-              disabled={salvarMeta.isPending}
-              className="rounded-xl border border-line/70 px-4 py-2.5 text-sm text-muted transition hover:text-ink"
-            >
-              Remover
-            </button>
+      <div className="flex flex-wrap gap-4">
+        <Card
+          className="flex-[2_1_606px] gap-4"
+          titulo="Leads por dia"
+          acao={<MenuSelect valor={diasSerie} opcoes={JANELAS} onChange={setDiasSerie} rotulo="Janela do gráfico" />}
+        >
+          <Tabs
+            rotulo="Série"
+            valor={serieAtiva}
+            onChange={setSerieAtiva}
+            abas={[
+              { id: "enviados", rotulo: "Leads enviados" },
+              { id: "parciais", rotulo: "Leads parciais" },
+            ]}
+          />
+          {pontos.length >= 2 ? (
+            <AreaChart
+              pontos={pontos}
+              unidade={(n) =>
+                serieAtiva === "enviados"
+                  ? `${inteiro(n)} ${n === 1 ? "lead" : "leads"}`
+                  : `${inteiro(n)} ${n === 1 ? "parcial" : "parciais"}`
+              }
+              descricao={`${serieAtiva === "enviados" ? "Leads enviados" : "Leads parciais"} por dia nos últimos ${diasSerie} dias`}
+            />
+          ) : (
+            <div className="h-[204px]" />
           )}
-        </div>
-      </Modal>
+        </Card>
+
+        <Card
+          className="flex-[1_1_366px]"
+          titulo="Leads por status"
+          acao={<span className="text-[12px] text-texto-3">{rotuloPeriodo}</span>}
+        >
+          <SegmentedBars fatias={fatias} />
+          <div className="flex items-baseline gap-2">
+            <span className="text-[30px] font-extrabold leading-tight tracking-[-0.02em]">
+              <Numero carregando={carregandoResumo}>{inteiro(enviaram)}</Numero>
+            </span>
+            <span className="text-[13px] text-texto-3">{enviaram === 1 ? "lead no período" : "leads no período"}</span>
+          </div>
+          <ListaStatus fatias={fatias} />
+        </Card>
+      </div>
     </>
   );
 }
 
-/** Divisória entre as áreas da Dashboard (Conteúdo, Leads). */
-function Secao({ titulo, acao, primeira = false }: { titulo: string; acao?: ReactNode; primeira?: boolean }) {
+/* ── Conteúdo: semana do calendário, mês em números, próximas postagens ── */
+
+function AreaConteudo({ hoje }: { hoje: string }) {
+  const { projeto } = usePainel();
+
+  // Uma consulta só cobre a semana, o mês e as próximas postagens.
+  const semana = semanaDe(hoje);
+  const inicioMes = `${hoje.slice(0, 7)}-01`;
+  const fimMes = ymd(new Date(deYmd(hoje).getFullYear(), deYmd(hoje).getMonth() + 1, 0));
+  const de = [semana[0]!, inicioMes].sort()[0]!;
+  const ate = [semana[6]!, fimMes, somarDias(hoje, 30)].sort().at(-1)!;
+
+  const { data: conteudos = [], error, isLoading } = useQuery(conteudosQuery(projeto?.id, de, ate));
+  // Tarefa é complemento: se a tabela dela não existir, a semana segue só com os posts.
+  const { data: tarefas = [] } = useQuery(tarefasQuery(projeto?.id, semana[0]!, semana[6]!));
+
+  if (error) {
+    return (
+      <Card>
+        <EmptyState icone={<CalendarDays size={20} strokeWidth={1.8} aria-hidden />} titulo="Calendário indisponível">
+          {faltaTabelaConteudos(error)
+            ? "O calendário de conteúdo ainda não foi ativado no banco deste portal."
+            : `Não consegui carregar os conteúdos: ${(error as Error).message}`}
+        </EmptyState>
+      </Card>
+    );
+  }
+
+  const mes = hoje.slice(0, 7);
+  const doMes = conteudos.filter((c) => c.data.startsWith(mes));
+  const proximas = conteudos.filter((c) => c.data >= hoje).slice(0, 5);
+  const fatias = STATUS_POST.map((s) => ({
+    rotulo: STATUS_CONTEUDO_LABEL[s],
+    valor: doMes.filter((c) => c.status === s).length,
+    cor: COR_POST[s].serie,
+  }));
+  const publicados = doMes.filter((c) => c.status === "publicado").length;
+  const emAprovacao = doMes.filter((c) => c.status === "aprovacao").length;
+
+  // "Semana de 4 a 10 de outubro" · "Semana de 28 de setembro a 4 de outubro"
+  const [a, b] = [semana[0]!, semana[6]!];
+  const tituloSemana =
+    a.slice(0, 7) === b.slice(0, 7)
+      ? `Semana de ${deYmd(a).getDate()} a ${fmt(b, { day: "numeric", month: "long" })}`
+      : `Semana de ${fmt(a, { day: "numeric", month: "long" })} a ${fmt(b, { day: "numeric", month: "long" })}`;
+
   return (
-    <div className={`mb-3 ${primeira ? "" : "mt-8"} flex flex-wrap items-center justify-between gap-3 border-b border-line/70 pb-2`}>
-      <h2 className="display text-lg font-semibold text-ink">{titulo}</h2>
-      {acao}
-    </div>
+    <>
+      <Card
+        aria-label="Calendário de postagens"
+        className="gap-[18px]"
+        titulo="Calendário de postagens"
+        subtitulo={tituloSemana}
+        acao={
+          <div className="flex gap-2">
+            <Link to="/calendario" className="btn btn-secundario btn-40">
+              Abrir calendário
+            </Link>
+            <Link to="/calendario" search={{ novo: true }} className="btn btn-primario btn-40">
+              <Plus size={14} strokeWidth={2.2} aria-hidden />
+              Nova postagem
+            </Link>
+          </div>
+        }
+      >
+        <div className="overflow-x-auto">
+          <div className="grid min-w-[760px] grid-cols-7 gap-2.5">
+            {semana.map((dia) => (
+              <DiaDaSemana
+                key={dia}
+                dia={dia}
+                hoje={dia === hoje}
+                posts={conteudos.filter((c) => c.data === dia)}
+                tarefas={tarefas.filter((t) => t.data === dia)}
+              />
+            ))}
+          </div>
+        </div>
+      </Card>
+
+      <div className="flex flex-wrap gap-4">
+        <Card className="flex-[1_1_366px]" titulo={`${capitalizar(fmt(hoje, { month: "long" }))} em números`}>
+          <div className="flex items-baseline gap-2">
+            <span className="text-[30px] font-extrabold leading-tight tracking-[-0.02em]">
+              <Numero carregando={isLoading}>{inteiro(doMes.length)}</Numero>
+            </span>
+            <span className="text-[13px] text-texto-3">{doMes.length === 1 ? "post planejado" : "posts planejados"}</span>
+          </div>
+          <SegmentedBars fatias={fatias} />
+          <ListaStatus fatias={fatias} />
+          <span className="mt-auto border-t border-borda-campo pt-2.5 text-[12px] leading-normal text-texto-2">
+            {doMes.length === 0 ? (
+              "Nada planejado para este mês ainda."
+            ) : (
+              <>
+                <strong className="text-marinho">
+                  {publicados} de {doMes.length}
+                </strong>{" "}
+                já {publicados === 1 ? "publicado" : "publicados"}.{" "}
+                {emAprovacao > 0 && (
+                  <>
+                    <strong className="text-marinho">{emAprovacao}</strong>{" "}
+                    {emAprovacao === 1 ? "espera" : "esperam"} o cliente aprovar.
+                  </>
+                )}
+              </>
+            )}
+          </span>
+        </Card>
+
+        <Card
+          className="flex-[2_1_606px]"
+          titulo="Próximas postagens"
+          acao={
+            <Link to="/calendario" className="btn btn-secundario btn-36">
+              Abrir calendário
+            </Link>
+          }
+        >
+          {proximas.length === 0 ? (
+            <EmptyState icone={<CalendarDays size={20} strokeWidth={1.8} aria-hidden />} titulo="Nenhuma postagem pela frente">
+              {isLoading ? "Carregando…" : "Nada programado de hoje até os próximos 30 dias."}
+            </EmptyState>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="flex min-w-[600px] flex-col" role="table" aria-label="Próximas postagens">
+                <div
+                  role="row"
+                  className="grid grid-cols-[90px_2.4fr_1fr_1fr_1.1fr] gap-3.5 rounded-[10px] bg-superficie-2 px-3.5 py-2.5 text-[11px] font-bold text-texto-3"
+                >
+                  {["Data", "Post", "Formato", "Redes", "Status"].map((c) => (
+                    <span key={c} role="columnheader">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+                {proximas.map((c) => (
+                  <LinhaPost key={c.id} c={c} />
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      </div>
+    </>
   );
 }
 
-/** "20 – 26 de set." */
-function intervaloSemana(semana: string[]) {
-  const [a, b] = [semana[0]!, semana[6]!];
-  return a.slice(0, 7) === b.slice(0, 7)
-    ? `${deYmd(a).getDate()} – ${fmt(b, { day: "numeric", month: "short" })}`
-    : `${fmt(a, { day: "numeric", month: "short" })} – ${fmt(b, { day: "numeric", month: "short" })}`;
-}
-
-/** Quantos cabem por dia antes de virar "+N". */
-const POR_DIA = 3;
-
-/**
- * A semana em 7 colunas, cada conteúdo na cor do status (as mesmas do
- * Calendário). No celular os dias viram linhas. Clicar leva ao Calendário.
- */
-function SemanaResumo({ dias, conteudos, hoje }: { dias: string[]; conteudos: Conteudo[]; hoje: string }) {
+function DiaDaSemana({
+  dia,
+  hoje,
+  posts,
+  tarefas,
+}: {
+  dia: string;
+  hoje: boolean;
+  posts: Conteudo[];
+  tarefas: Tarefa[];
+}) {
+  const vazio = posts.length === 0 && tarefas.length === 0;
   return (
-    <div className="grid gap-2 sm:grid-cols-7">
-      {dias.map((dia) => {
-        const doDia = conteudos.filter((c) => c.data === dia);
-        const passou = dia < hoje;
+    <div
+      className={`flex min-h-[220px] flex-col gap-2 rounded-[14px] border p-3 ${
+        hoje ? "border-azul bg-azul-claro" : "border-borda bg-white"
+      }`}
+      aria-current={hoje ? "date" : undefined}
+    >
+      <span className="flex flex-col gap-0.5">
+        <span className={`text-[10px] font-bold tracking-[0.08em] ${hoje ? "text-azul" : "text-texto-3"}`}>
+          {fmt(dia, { weekday: "short" }).replace(".", "").toUpperCase()}
+        </span>
+        <span className={`text-[20px] font-extrabold leading-tight ${hoje ? "text-azul" : "text-marinho"}`}>
+          {dia.slice(8, 10)}
+        </span>
+      </span>
+
+      {posts.map((c) => {
+        const cor = COR_POST[c.status];
+        const meta = [hhmm(c.hora), FORMATO_LABEL[c.formato].toUpperCase()].filter(Boolean).join(" · ");
         return (
           <Link
-            key={dia}
+            key={c.id}
             to="/postagens"
-            className={`flex gap-2 rounded-xl border p-2 transition hover:border-gold/40 sm:min-h-36 sm:flex-col ${
-              dia === hoje ? "border-gold/60 bg-gold/5" : "border-line/60"
-            } ${passou ? "opacity-70" : ""}`}
+            search={{ abrir: c.id }}
+            title={`${c.titulo} (${STATUS_CONTEUDO_LABEL[c.status]})`}
+            className="chip-post flex flex-col gap-[3px] rounded-[10px] border px-2.5 py-2 no-underline"
+            style={{ background: cor.fundo, color: cor.texto, borderColor: cor.fundo }}
           >
-            <div className="flex w-14 shrink-0 items-center gap-1.5 sm:w-auto">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
-                {SEMANA[deYmd(dia).getDay()]}
-              </span>
-              <span
-                className={`flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs ${
-                  dia === hoje ? "bg-gold font-semibold text-white" : "font-medium text-ink"
-                }`}
-              >
-                {deYmd(dia).getDate()}
-              </span>
-            </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              {doDia.length === 0 && <span className="text-[11px] text-muted sm:mt-1">—</span>}
-              {doDia.slice(0, POR_DIA).map((c) => (
-                <span
-                  key={c.id}
-                  title={c.titulo}
-                  className={`flex items-center gap-1 rounded-md px-1.5 py-1 text-[11px] leading-tight ${COR_STATUS_CAL[c.status].chip}`}
-                >
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${COR_STATUS_CAL[c.status].ponto}`} />
-                  {hhmm(c.hora) && <span className="shrink-0 font-semibold tabular-nums">{hhmm(c.hora)}</span>}
-                  <span className="truncate">{c.titulo}</span>
-                </span>
-              ))}
-              {doDia.length > POR_DIA && (
-                <span className="px-1.5 text-[11px] font-medium text-muted">+{doDia.length - POR_DIA} mais</span>
-              )}
-            </div>
+            <span className="text-[10px] font-bold">{meta}</span>
+            <span className="line-clamp-4 text-[12px] font-semibold leading-[1.35]">{c.titulo}</span>
           </Link>
         );
       })}
+
+      {/* Tarefa não é post: contorno tracejado, sem cor de status. */}
+      {tarefas.map((t) => (
+        <Link
+          key={t.id}
+          to="/calendario"
+          title={t.titulo}
+          className="chip-post flex flex-col gap-[3px] rounded-[10px] border border-dashed border-nevoa bg-white px-2.5 py-2 text-[#4A5868] no-underline"
+        >
+          <span className="text-[10px] font-bold">TAREFA</span>
+          <span className="line-clamp-4 text-[12px] font-semibold leading-[1.35]">{t.titulo}</span>
+        </Link>
+      ))}
+
+      {vazio && <span className="text-[11px] text-texto-4">Sem posts</span>}
     </div>
   );
 }
 
-/** Barra única com a divisão do mês por status — o andamento da produção. */
-function StatusDoMes({ conteudos, atrasados }: { conteudos: Conteudo[]; atrasados: number }) {
-  const total = conteudos.length;
-  const status = Object.keys(STATUS_CONTEUDO_LABEL) as StatusConteudo[];
-  const nomeMes = new Intl.DateTimeFormat("pt-BR", { month: "long" }).format(new Date());
-
-  return (
-    <div className="mt-5 border-t border-line/70 pt-4">
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-medium text-ink">
-          Em {nomeMes}: {total} {total === 1 ? "conteúdo" : "conteúdos"}
-        </p>
-        {atrasados > 0 && (
-          <Link
-            to="/postagens"
-            className="flex items-center gap-1.5 rounded-full bg-rose-500/10 px-2.5 py-1 text-xs font-medium text-rose-600 ring-1 ring-inset ring-rose-500/25 transition hover:bg-rose-500/15 dark:text-rose-300"
-          >
-            <Warning size={12} />
-            {atrasados} atrasado{atrasados === 1 ? "" : "s"}
-          </Link>
-        )}
-      </div>
-
-      {total === 0 ? (
-        <p className="text-xs text-muted">Nada planejado para este mês ainda.</p>
-      ) : (
-        <>
-          <div className="flex h-2.5 overflow-hidden rounded-full bg-surface-2">
-            {status.map((s) => {
-              const n = conteudos.filter((c) => c.status === s).length;
-              return n ? (
-                <div
-                  key={s}
-                  title={`${STATUS_CONTEUDO_LABEL[s]}: ${n}`}
-                  className={COR_STATUS_CAL[s].ponto}
-                  style={{ width: `${(100 * n) / total}%` }}
-                />
-              ) : null;
-            })}
-          </div>
-          <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
-            {status.map((s) => (
-              <span key={s} className="flex items-center gap-1.5">
-                <span className={`h-2 w-2 rounded-full ${COR_STATUS_CAL[s].ponto}`} />
-                {STATUS_CONTEUDO_LABEL[s]}
-                <span className="font-semibold text-ink">{conteudos.filter((c) => c.status === s).length}</span>
-              </span>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-/** Uma linha da lista de próximas publicações: quando, o quê e em que pé está. */
-function ItemProximo({ c, hoje }: { c: Conteudo; hoje: string }) {
-  const quando =
-    c.data === hoje
-      ? "Hoje"
-      : c.data === somarDias(hoje, 1)
-        ? "Amanhã"
-        : fmt(c.data, { weekday: "short" }).replace(".", "");
+function LinhaPost({ c }: { c: Conteudo }) {
   return (
     <Link
       to="/postagens"
-      // Abre o formulário daquele post direto.
       search={{ abrir: c.id }}
-      // Fundo na cor do status (as mesmas do Calendário): o andamento se lê
-      // de longe, antes do selo. items-center deixa a data no meio do item.
-      className={`flex items-center gap-3 rounded-xl px-2.5 py-2.5 transition hover:brightness-95 ${COR_STATUS_CAL[c.status].fundo}`}
+      role="row"
+      className="linha-tabela grid min-h-[58px] grid-cols-[90px_2.4fr_1fr_1fr_1.1fr] items-center gap-3.5 border-b border-gelo px-3.5 py-1.5 text-[13px] text-marinho no-underline"
     >
-      <div className="flex w-14 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg bg-surface py-2.5 shadow-sm shadow-black/5">
-        <span className="text-[10px] font-semibold uppercase text-muted">{quando}</span>
-        <span className="text-lg font-bold leading-tight text-ink">{deYmd(c.data).getDate()}</span>
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <p className="truncate text-sm font-medium text-ink">{c.titulo}</p>
-        </div>
-        <p className="mt-0.5 text-xs text-muted">{hhmm(c.hora) ?? "Sem horário"}</p>
-        <div className="mt-1.5 flex flex-wrap items-center gap-1">
-          <StatusConteudoBadge status={c.status} />
-          <PilulasConteudo c={c} />
-        </div>
-      </div>
+      <span role="cell" className="flex flex-col gap-0.5">
+        <strong className="font-bold">
+          {semPonto(fmt(c.data, { weekday: "short" }))}, {c.data.slice(8, 10)}/{c.data.slice(5, 7)}
+        </strong>
+        <span className="text-[11px] text-texto-3">{hhmm(c.hora) ?? "Sem horário"}</span>
+      </span>
+      <span role="cell" className="truncate font-semibold">
+        {c.titulo}
+      </span>
+      <span role="cell" className="text-texto-2">
+        {FORMATO_LABEL[c.formato]}
+      </span>
+      <span role="cell" className="text-texto-2">
+        {c.redes.map((r) => REDE_CURTA[r]).join(" · ") || "Sem rede"}
+      </span>
+      <span role="cell">
+        <StatusBadge tipo="post" status={c.status} />
+      </span>
     </Link>
   );
 }
 
-/**
- * O que está parado esperando alguém agir. É a única parte da Dashboard que
- * pede ação em vez de informar estado — por isso fica no topo, e cada linha
- * leva direto pra programação, onde o problema se resolve.
- */
-function PrecisaDeVoce({
-  atrasados,
-  parados,
-  hoje,
-}: {
-  atrasados: Conteudo[];
-  parados: Conteudo[];
-  hoje: string;
-}) {
-  const diasDesde = (dia: string) =>
-    Math.round((deYmd(hoje).getTime() - deYmd(dia).getTime()) / 864e5);
-
-  const itens = [
-    ...atrasados.map((c) => ({
-      c,
-      motivo: `atrasado há ${diasDesde(c.data)} dia${diasDesde(c.data) === 1 ? "" : "s"}`,
-    })),
-    ...parados.map((c) => ({ c, motivo: "parado em aprovação" })),
-  ];
-
-  return (
-    <Card
-      titulo={`Precisa de você (${itens.length})`}
-      acao={
-        <Link
-          to="/postagens"
-          className="flex items-center gap-1.5 text-xs text-muted transition hover:text-ink"
-        >
-          Ver tudo <ArrowRight size={13} />
-        </Link>
-      }
-    >
-      <div className="space-y-1">
-        {itens.slice(0, 5).map(({ c, motivo }) => (
-          <Link
-            key={c.id}
-            to="/postagens"
-            className="flex items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm transition hover:bg-surface-2/60"
-          >
-            <span className="min-w-0 truncate text-ink">{c.titulo}</span>
-            <span className="shrink-0 text-xs text-rose-600 dark:text-rose-400">{motivo}</span>
-          </Link>
-        ))}
-        {itens.length > 5 && (
-          <p className="px-2 pt-1 text-xs text-muted">e mais {itens.length - 5}…</p>
-        )}
-      </div>
-    </Card>
-  );
-}
-
-/**
- * Etiqueta flutuante sobre a barra de pico — o detalhe que as referências
- * usam pra dizer "foi aqui". Só desenha no índice do pico e só se houve
- * lead; em série zerada não há pico nenhum a apontar.
- */
-function RotuloPico({
-  indice,
-  cor,
-  x,
-  y,
-  width,
-  value,
-  index,
-}: {
-  indice: number;
-  cor: { fill: string };
-  x?: number;
-  y?: number;
-  width?: number;
-  value?: number;
-  index?: number;
-}) {
-  if (index !== indice || !value || x == null || y == null || width == null) return null;
-
-  const texto = String(value);
-  const largura = texto.length * 8 + 16;
-
-  return (
-    <g transform={`translate(${x + width / 2}, ${y - 10})`}>
-      <rect x={-largura / 2} y={-18} width={largura} height={20} rx={10} fill={cor.fill} />
-      <text textAnchor="middle" y={-4} fontSize={11} fontWeight={600} fill="#fff">
-        {texto}
-      </text>
-    </g>
-  );
-}
-
-/* Cada KPI tem seu chip de cor, como nas referências — é o que dá identidade
-   a cada número de relance, sem precisar ler o rótulo. Os pares são
-   claro/escuro porque um `bg-rose-500/12` que funciona no navy some no branco. */
-const CHIPS = {
-  acento: "bg-gold/12 text-accent ring-gold/20",
-  verde: "bg-emerald-500/12 text-emerald-700 ring-emerald-600/20 dark:text-emerald-400",
-  rosa: "bg-rose-500/12 text-rose-600 ring-rose-600/20 dark:text-rose-400",
-  ambar: "bg-amber-500/12 text-amber-700 ring-amber-600/20 dark:text-amber-400",
-} as const;
-
-function Kpi({
-  rotulo,
-  valor,
-  sub,
-  delta,
-  destaque = false,
-  alerta = false,
-  Icone,
-  chip = "acento",
-  comparacao,
-}: {
-  rotulo: string;
-  valor: React.ReactNode;
-  sub?: string;
-  delta?: number;
-  destaque?: boolean;
-  /** Pinta de vermelho quando o número pede atenção (ex.: atrasados). */
-  alerta?: boolean;
-  /** Ícone do chip colorido no canto. */
-  Icone?: ComponentType<{ size?: number; className?: string }>;
-  chip?: keyof typeof CHIPS;
-  /** Linha de referência embaixo ("Semana passada: 12"), como nas refs. */
-  comparacao?: string;
-}) {
-  return (
-    <div
-      className={
-        destaque
-          ? "rounded-3xl bg-gold px-5 py-5 text-white"
-          : alerta
-            ? "rounded-3xl border border-rose-500/40 bg-rose-500/5 px-5 py-5"
-            : "rounded-3xl border border-line/70 bg-surface px-5 py-5 shadow-sm shadow-black/5"
-      }
-    >
-      <div className="flex items-start justify-between gap-3">
-        <p
-          className={`text-[11px] font-medium uppercase tracking-wider ${
-            destaque ? "text-white" : "text-muted"
-          }`}
-        >
-          {rotulo}
-        </p>
-        {Icone && (
-          <span
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset ${
-              destaque ? "bg-white/15 text-white ring-white/25" : CHIPS[chip]
-            }`}
-          >
-            <Icone size={16} />
-          </span>
-        )}
-      </div>
-
-      <p
-        className={`mt-2 text-4xl font-semibold tracking-tight ${
-          destaque ? "text-white" : alerta ? "text-rose-600 dark:text-rose-400" : "text-ink"
-        }`}
-      >
-        {valor}
-      </p>
-
-      {sub && <p className={`mt-1 text-xs ${destaque ? "text-white" : "text-muted"}`}>{sub}</p>}
-
-      {/* Linha de referência separada por um fio, como nos cards das refs:
-          o número sozinho não diz se está bom — o de antes diz. */}
-      {(delta != null || comparacao) && (
-        <div
-          className={`mt-3 flex flex-wrap items-center gap-2 border-t pt-3 text-xs ${
-            destaque ? "border-white/20 text-white" : "border-line/40 text-muted"
-          }`}
-        >
-          {delta != null && <Pilula valor={delta} sufixo="" />}
-          {comparacao && <span className="min-w-0 truncate">{comparacao}</span>}
-        </div>
-      )}
-    </div>
-  );
-}
-
-
-function Legenda({ cor }: { cor: { fill: string; fill2: string } }) {
-  return (
-    <div className="mt-1 flex justify-center gap-4 text-xs text-muted">
-      <span className="flex items-center gap-1.5">
-        <i className="h-2.5 w-2.5 rounded-sm" style={{ background: cor.fill }} /> Completos
-      </span>
-      <span className="flex items-center gap-1.5">
-        <i className="h-2.5 w-2.5 rounded-sm" style={{ background: cor.fill2 }} /> Parciais
-      </span>
-    </div>
-  );
-}
-
-function FunilCompacto({ f }: { f: Funil }) {
-  const etapas = [
-    { rot: "Abriram o formulário", v: f.aberturas },
-    { rot: "Começaram a preencher", v: f.iniciaram },
-    { rot: "Completaram", v: f.completos },
-  ];
-  // Maior perda entre etapas consecutivas — onde focar.
-  const perdaAbrir = f.aberturas - f.iniciaram;
-  const perdaConcluir = f.iniciaram - f.completos;
-  const maior =
-    perdaAbrir >= perdaConcluir
-      ? { entre: "abrir e preencher", n: perdaAbrir }
-      : { entre: "preencher e concluir", n: perdaConcluir };
-
-  return (
-    <div className="space-y-3">
-      {etapas.map((e, i) => (
-        <div key={e.rot}>
-          <div className="flex items-baseline justify-between">
-            <p className="text-sm text-ink">{e.rot}</p>
-            <p className="text-sm font-semibold text-ink">{e.v}</p>
-          </div>
-          <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-2">
-            <div
-              className="h-full rounded-full bg-gold transition-all"
-              style={{
-                width: `${f.aberturas ? Math.max(3, (100 * e.v) / f.aberturas) : 0}%`,
-                // Cada etapa um pouco mais clara, pra ler como um funil afunilando.
-                opacity: 1 - i * 0.28,
-              }}
-            />
-          </div>
-        </div>
-      ))}
-      <div className="mt-4 rounded-lg border border-line/60 bg-surface-2/50 p-3 text-xs">
-        <p className="text-muted">
-          Conversão geral:{" "}
-          <span className="font-semibold text-ink">
-            {f.tx_conversao != null ? `${f.tx_conversao}%` : "—"}
-          </span>
-        </p>
-        {maior.n > 0 && (
-          <p className="mt-1 text-muted">
-            Maior perda: <span className="font-semibold text-ink">{maior.n} leads</span> entre{" "}
-            {maior.entre}.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function BarraFonte({ fonte, total, max }: { fonte: string; total: number; max: number }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between text-sm">
-        <span className="text-ink">{fonte}</span>
-        <span className="text-muted">{total}</span>
-      </div>
-      <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-2">
-        <div
-          className="h-full rounded-full bg-gold transition-all"
-          style={{ width: `${max ? Math.max(4, (100 * total) / max) : 0}%` }}
-        />
-      </div>
-    </div>
-  );
+/** Número que ainda está chegando: um traço pulsando no lugar, do mesmo tamanho. */
+function Numero({ carregando, children }: { carregando: boolean; children: ReactNode }) {
+  if (!carregando) return <>{children}</>;
+  return <span className="atualizando inline-block h-[0.8em] w-[2.2em] rounded-md bg-gelo align-baseline" aria-label="Carregando" />;
 }

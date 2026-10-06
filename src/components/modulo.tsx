@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Lock } from "@phosphor-icons/react";
+import { Lock } from "lucide-react";
 
 import { usePainel } from "@/components/painel";
 import { atualizarModulos, podeConectarQuery, type ModulosSalvos } from "@/lib/queries";
@@ -69,7 +69,7 @@ export function ModuloDesativado({ modulo, compacto = false }: { modulo: Modulo;
     <button
       onClick={() => ativar.mutate()}
       disabled={ativar.isPending}
-      className="shrink-0 rounded-full bg-gold px-4 py-2 text-sm font-medium text-white transition hover:bg-gold-dim disabled:opacity-60"
+      className="btn btn-primario btn-40 shrink-0"
     >
       {ativar.isPending ? "Ativando…" : `Ativar ${MODULO_LABEL[modulo]}`}
     </button>
@@ -77,10 +77,10 @@ export function ModuloDesativado({ modulo, compacto = false }: { modulo: Modulo;
 
   if (compacto) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-line bg-surface/60 px-5 py-4">
-        <Lock size={16} className="shrink-0 text-muted" />
-        <p className="min-w-0 flex-1 text-sm text-muted">
-          <span className="font-medium text-ink">{MODULO_LABEL[modulo]} não está ativado</span> para este cliente.
+      <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-dashed border-nevoa bg-white/60 px-[22px] py-4">
+        <Lock size={18} strokeWidth={1.8} className="shrink-0 text-texto-3" />
+        <p className="min-w-0 flex-1 text-[13px] text-texto-2">
+          <span className="font-bold text-marinho">{MODULO_LABEL[modulo]} não está ativado</span> para este cliente.
         </p>
         {botao}
       </div>
@@ -88,14 +88,14 @@ export function ModuloDesativado({ modulo, compacto = false }: { modulo: Modulo;
   }
 
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-line bg-surface/60 px-6 py-14 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-surface-2 text-muted">
-        <Lock size={20} />
+    <div className="flex flex-col items-center rounded-[20px] border border-dashed border-nevoa bg-white/60 px-6 py-14 text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-superficie-2 text-texto-3">
+        <Lock size={20} strokeWidth={1.8} />
       </div>
-      <h2 className="display mt-4 text-lg font-semibold text-ink">
+      <h2 className="mt-4 text-[16px] font-bold text-marinho">
         {MODULO_LABEL[modulo]} não está ativado para {projeto?.nome ?? "este cliente"}
       </h2>
-      <p className="mt-1.5 max-w-md text-sm text-muted">{O_QUE_FAZ[modulo]}</p>
+      <p className="mt-1.5 max-w-md text-[13px] leading-normal text-texto-3">{O_QUE_FAZ[modulo]}</p>
       <div className="mt-5">
         {botao || (
           <p className="text-xs text-muted">Fale com a equipe OVERSO para ativar este módulo.</p>

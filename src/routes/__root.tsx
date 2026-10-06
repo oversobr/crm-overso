@@ -13,16 +13,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Portal OVERSO" },
     ],
     links: [
-      // A Inter vem por <link>, não por @import no CSS. O @import ficava
-      // DEPOIS das regras que o `@import "tailwindcss"` expande, e @import
-      // fora do topo é inválido: o bundler descartava a linha e o portal
-      // caía na fonte do sistema sem avisar. Por <link> também carrega em
-      // paralelo com o CSS, em vez de esperar ele ser baixado e analisado.
+      // A Montserrat vem por <link>, não por @import no CSS: o @import ficaria
+      // DEPOIS das regras que o `@import "tailwindcss"` expande, o que é
+      // inválido, e o bundler descartava a linha sem avisar.
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap",
       },
       { rel: "stylesheet", href: styles },
     ],
@@ -38,16 +36,9 @@ function RootDocument({ children }: { children: ReactNode }) {
   const { queryClient } = Route.useRouteContext();
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" data-theme="light">
       <head>
         <HeadContent />
-        {/* Aplica o tema salvo ANTES da tela pintar, senão pisca escuro→claro. */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{var t=localStorage.getItem('overso:tema');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}",
-          }}
-        />
       </head>
       <body>
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

@@ -10,6 +10,7 @@ import { ajustarLogo } from "@/lib/imagem";
 import { perfilClienteQuery, podeGerenciarQuery, salvarLogoCliente, salvarPerfilCliente } from "@/lib/queries";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
+import { urlSegura } from "@/lib/url";
 import type { LinkCliente, PerfilCliente } from "@/lib/types";
 
 const BUCKET_LOGO = "logos-cliente";
@@ -435,7 +436,7 @@ function Links({
         {validos.map((l, i) => (
           <a
             key={i}
-            href={l.url}
+            href={urlSegura(l.url) ?? undefined}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-2 rounded-xl border border-line/70 bg-surface-2/40 px-3 py-2.5 text-sm text-ink transition hover:border-accent/50"

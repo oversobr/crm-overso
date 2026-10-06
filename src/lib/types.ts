@@ -2,8 +2,8 @@ export type Status = "novo" | "contato_feito" | "entrou_no_grupo" | "convertido"
 
 export const STATUS_LABEL: Record<Status, string> = {
   novo: "Novo",
-  contato_feito: "Contato Feito",
-  entrou_no_grupo: "Entrou no Grupo",
+  contato_feito: "Contato feito",
+  entrou_no_grupo: "Entrou no grupo",
   convertido: "Convertido",
   perdido: "Perdido",
 };
@@ -24,6 +24,8 @@ export type Lead = {
   completo: boolean;
   criado_em: string;
   completado_em: string | null;
+  /** Último campo preenchido por quem abandonou o formulário (30_portal_novo.sql). */
+  parou_em?: string | null;
 };
 
 export type Project = {
@@ -60,13 +62,18 @@ export type PerfilCliente = {
   /** 29_logo_cliente.sql. O caminho fica junto pra dar pra apagar o antigo. */
   logo_url: string | null;
   logo_caminho: string | null;
+  /* Do 30_portal_novo.sql. Ausentes = banco antigo. */
+  /** "Estética", "Odontologia"… */
+  segmento?: string | null;
+  /** Quem mexeu na ficha por último. */
+  atualizado_por_nome?: string | null;
 };
 
 /** O que o formulário da ficha envia — o resto da linha não se toca. */
 export type PerfilClienteEntrada = Pick<
   PerfilCliente,
   "contato_nome" | "contato_email" | "contato_telefone" | "observacoes" | "links"
->;
+> & { segmento?: string | null };
 
 export type Modulo = "crm" | "conteudo" | "eventos";
 
@@ -89,6 +96,9 @@ export function modulosDe(p: Project | undefined): Record<Modulo, boolean> {
  */
 export type ProjetoGerenciavel = Project & { ingest_key: string };
 
+/** Como a campanha decide quais leads são dela. */
+export type RegraCampanha = "data" | "utm";
+
 export type Campaign = {
   id: string;
   project_id: string;
@@ -96,6 +106,17 @@ export type Campaign = {
   inicio: string | null;
   fim: string | null;
   meta_leads: number | null;
+  /* Os campos abaixo vêm do popup "Nova campanha" e dependem de colunas que
+     o banco ainda pode não ter. Ausentes = banco antigo: a tela usa o padrão. */
+  /** Cor escolhida (hex). */
+  cor?: string | null;
+  /** Verba prevista, em reais: base do custo por lead. */
+  investimento?: number | null;
+  regra?: RegraCampanha | null;
+  /** Valor do utm_campaign, quando a regra é "utm". */
+  utm_campaign?: string | null;
+  /** Endereços (domínio + caminho) das landing pages da campanha. */
+  landing_pages?: string[] | null;
 };
 
 export type Funil = {
@@ -117,9 +138,9 @@ export type Funil = {
 export type Formato = "post" | "carrossel" | "story" | "reels" | "youtube" | "shorts" | "tiktok" | "outro";
 
 export const FORMATO_LABEL: Record<Formato, string> = {
-  post: "Post",
+  post: "Feed",
   carrossel: "Carrossel",
-  story: "Story",
+  story: "Stories",
   reels: "Reels",
   youtube: "Vídeo YouTube",
   shorts: "Shorts",
@@ -144,8 +165,8 @@ export type StatusConteudo = "ideia" | "producao" | "aprovacao" | "agendado" | "
 
 export const STATUS_CONTEUDO_LABEL: Record<StatusConteudo, string> = {
   ideia: "Ideia",
-  producao: "Em produção",
-  aprovacao: "Em aprovação",
+  producao: "Produção",
+  aprovacao: "Aprovação",
   agendado: "Agendado",
   publicado: "Publicado",
 };
@@ -179,6 +200,10 @@ export type Conteudo = {
   criado_por?: string | null;
   criado_por_nome?: string | null;
   criado_por_email?: string | null;
+  /* Carimbos da aprovação (30_portal_novo.sql). Ausentes = banco antigo. */
+  em_aprovacao_desde?: string | null;
+  aprovado_em?: string | null;
+  aprovado_por_nome?: string | null;
   criado_em: string;
   atualizado_em: string;
 };
@@ -196,6 +221,8 @@ export type Comentario = {
   autor_id: string | null;
   autor_nome: string;
   autor_email: string;
+  /** Se quem comentou é da OVERSO ou do cliente (30_portal_novo.sql). */
+  autor_papel?: "overso" | "cliente" | null;
   texto: string;
   criado_em: string;
 };

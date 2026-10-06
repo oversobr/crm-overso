@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, Tray } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
+import { COR_LEAD } from "@/lib/status";
 import type { Status } from "@/lib/types";
 import { STATUS_LABEL } from "@/lib/types";
 
@@ -23,11 +24,11 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-3xl border border-line/40 bg-surface p-6 shadow-sm shadow-black/5 ${className}`}
+      className={`rounded-[20px] border border-borda bg-white p-[22px] ${className}`}
     >
       {(titulo || acao) && (
         <header className="mb-5 flex items-center justify-between gap-4">
-          {titulo && <h2 className="display text-base font-semibold text-ink">{titulo}</h2>}
+          {titulo && <h2 className="text-[16px] font-bold text-marinho">{titulo}</h2>}
           {acao}
         </header>
       )}
@@ -109,22 +110,13 @@ export function StatCard({
   );
 }
 
-/* Cores dos badges pensadas pros dois temas: no claro, texto forte sobre
-   fundo suave; no escuro, texto claro. Sem isso, o texto some no branco. */
-const CORES: Record<Status, string> = {
-  novo: "bg-amber-500/12 text-amber-700 ring-amber-600/25 dark:text-amber-300 dark:ring-amber-500/30",
-  contato_feito: "bg-sky-500/12 text-sky-700 ring-sky-600/25 dark:text-sky-300 dark:ring-sky-500/30",
-  entrou_no_grupo:
-    "bg-violet-500/12 text-violet-700 ring-violet-600/25 dark:text-violet-300 dark:ring-violet-500/30",
-  convertido:
-    "bg-emerald-500/12 text-emerald-700 ring-emerald-600/25 dark:text-emerald-300 dark:ring-emerald-500/30",
-  perdido: "bg-rose-500/12 text-rose-700 ring-rose-600/25 dark:text-rose-300 dark:ring-rose-500/30",
-};
-
+/** Selo de status do lead nas telas antigas: mesmas cores do design novo. */
 export function StatusBadge({ status }: { status: Status }) {
+  const cor = COR_LEAD[status];
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${CORES[status]}`}
+      className="inline-flex whitespace-nowrap rounded-lg px-2.5 py-[5px] text-[12px] font-bold"
+      style={{ background: cor.fundo, color: cor.texto }}
     >
       {STATUS_LABEL[status]}
     </span>

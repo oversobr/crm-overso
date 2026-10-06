@@ -1,23 +1,56 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { Buildings, CalendarDots, Camera, CircleNotch, Clock, Eye, EyeSlash, Key, ShieldCheck, SignOut, Trash, User } from "@phosphor-icons/react";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { Camera, LoaderCircle, LogOut, Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
+import { Card } from "@/components/ds/card";
+import { usePainel } from "@/components/painel";
+import { MarcaOverso } from "@/components/shell/icones-menu";
+import { TopBar } from "@/components/shell/top-bar";
+import { useAcesso } from "@/lib/acesso";
+import type { Nivel } from "@/lib/acesso";
 import { recortarQuadrado } from "@/lib/imagem";
-import { Cabecalho } from "@/components/painel";
-import { Card } from "@/components/ui";
-import { podeConectarQuery, projectsQuery } from "@/lib/queries";
+import { esquecerSessaoCurta } from "@/lib/sessao";
+import { CORES_CAMPANHA } from "@/lib/status";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast";
+import type { Modulo, Project } from "@/lib/types";
+import { MODULO_LABEL, modulosDe } from "@/lib/types";
+import { iniciais } from "@/lib/usuario";
 
 export const Route = createFileRoute("/_authed/perfil")({ component: Perfil });
 
-type Meta = { full_name?: string; name?: string; avatar_url?: string; avatar_caminho?: string };
+/** O que a conta guarda sobre a pessoa (user_metadata do login). */
+type Meta = {
+  full_name?: string;
+  name?: string;
+  avatar_url?: string | null;
+  avatar_caminho?: string | null;
+  whatsapp?: string;
+  cargo?: string;
+};
 
 const BUCKET = "avatares";
 /** Lado da foto salva: o suficiente pra tela Retina, leve pra carregar. */
 const LADO_FOTO = 320;
+const MIN_SENHA = 8;
+const MODULOS: Modulo[] = ["crm", "conteudo", "eventos"];
+
+const NIVEL: Record<Nivel, { rotulo: string; descricao: (cliente: string) => string }> = {
+  super: {
+    rotulo: "Super-admin",
+    descricao: () => "Equipe OVERSO · enxerga todos os clientes, cadastra contas e liga módulos",
+  },
+  admin: {
+    rotulo: "Admin do cliente",
+    descricao: (c) => `Admin de ${c} · apaga leads, edita a ficha e gerencia os acessos`,
+  },
+  membro: {
+    rotulo: "Membro",
+    descricao: (c) => `Membro de ${c} · vê e trabalha os leads e o conteúdo`,
+  },
+};
 
 function Perfil() {
   const qc = useQueryClient();
@@ -29,37 +62,31 @@ function Perfil() {
   const meta = (user?.user_metadata ?? {}) as Meta;
   const email = user?.email ?? "";
 
-  // Atualiza o menu (e quem mais lê \"auth-user\") com o que acabou de salvar.
+  // Atualiza o topo (e quem mais lê "auth-user") com o que acabou de salvar.
   const recarregar = () => qc.invalidateQueries({ queryKey: ["auth-user"] });
 
   return (
-    <>
-      <Cabecalho titulo="Meu perfil" comCampanha={false} />
-      {/* Capa em largura total com a foto e os dados da conta; embaixo,
-          os dois formulários lado a lado e da mesma altura. */}
-      <Capa
-        meta={meta}
-        email={email}
-        userId={user?.id}
-        criadoEm={user?.created_at}
-        ultimoAcesso={user?.last_sign_in_at}
-        onSalvo={recarregar}
+    <div className="flex flex-col gap-5">
+      <TopBar
+        titulo="Perfil"
+        subtitulo="Seus dados, sua senha e os clientes que você acessa"
+        noLugarDoAvatar={<Sair />}
       />
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <Nome meta={meta} email={email} onSalvo={recarregar} />
-        <Senha />
-      </div>
 
-      <Sair />
-    </>
+      <Capa meta={meta} email={email} userId={user?.id} onSalvo={recarregar} />
+
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="flex min-w-0 flex-[1_1_466px] flex-col gap-4">
+          <DadosPessoais meta={meta} email={email} onSalvo={recarregar} />
+          <Senha email={email} />
+        </div>
+        <Clientes />
+      </div>
+    </div>
   );
 }
 
-/**
- * Encerrar a sessão é ação de conta, então mora na página da conta — e não
- * mais no rodapé da sidebar, onde ocupava espaço fixo para um clique raro.
- * O menu do avatar, no topo, é o atalho.
- */
+/** Encerra a sessão neste navegador. Mora no topo da tela da conta. */
 function Sair() {
   const router = useRouter();
   const [saindo, setSaindo] = useState(false);
@@ -67,53 +94,37 @@ function Sair() {
   async function sair() {
     setSaindo(true);
     await getSupabaseBrowserClient().auth.signOut();
+    esquecerSessaoCurta();
     await router.invalidate();
     await router.navigate({ to: "/login" });
   }
 
   return (
-    <Card className="mt-4" titulo="Sessão">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-muted">
-          Encerra a sessão neste navegador. Você vai precisar entrar de novo.
-        </p>
-        <button
-          onClick={() => void sair()}
-          disabled={saindo}
-          className="flex shrink-0 items-center gap-2 rounded-xl border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-60 dark:text-rose-400"
-        >
-          <SignOut size={15} />
-          {saindo ? "Saindo…" : "Sair da conta"}
-        </button>
-      </div>
-    </Card>
+    <button type="button" onClick={() => void sair()} disabled={saindo} className="btn btn-secundario px-4">
+      <LogOut size={16} strokeWidth={1.8} aria-hidden />
+      {saindo ? "Saindo…" : "Sair"}
+    </button>
   );
 }
 
-function nomeDe(meta: Meta, email: string) {
-  return meta.full_name || meta.name || (email ? email.split("@")[0]! : "Usuário");
-}
+const nomeDe = (meta: Meta, email: string) => meta.full_name || meta.name || (email ? email.split("@")[0]! : "Usuário");
 
-/* ── Foto ───────────────────────────────────────────────────────── */
+/* ── Capa: foto, nome, nível e os números da conta ──────────────── */
 
 function Capa({
   meta,
   email,
   userId,
-  criadoEm,
-  ultimoAcesso,
   onSalvo,
 }: {
   meta: Meta;
   email: string;
   userId: string | undefined;
-  criadoEm: string | undefined;
-  ultimoAcesso: string | undefined;
   onSalvo: () => Promise<void>;
 }) {
   const sb = getSupabaseBrowserClient();
-  const { data: projetos = [] } = useQuery(projectsQuery());
-  const { data: equipe } = useQuery(podeConectarQuery());
+  const { projeto, projetos } = usePainel();
+  const { nivel } = useAcesso(projeto?.id);
   const input = useRef<HTMLInputElement>(null);
   const nome = nomeDe(meta, email);
 
@@ -127,7 +138,7 @@ function Capa({
       const up = await sb.storage.from(BUCKET).upload(caminho, foto, { contentType: "image/jpeg" });
       if (up.error) {
         if (/bucket not found/i.test(up.error.message)) {
-          throw new Error("As fotos de perfil ainda não foram ativadas: rode o supabase/27_avatares.sql.");
+          throw new Error("As fotos de perfil ainda não foram ativadas no banco deste portal.");
         }
         throw up.error;
       }
@@ -158,86 +169,54 @@ function Capa({
   });
 
   const ocupado = trocar.isPending || remover.isPending;
-  const data = (iso: string | undefined, hora = false) =>
-    iso
-      ? new Date(iso).toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          ...(hora ? { hour: "2-digit", minute: "2-digit" } : {}),
-        })
-      : "—";
+  const modulosAtivos = projetos.reduce((t, p) => t + MODULOS.filter((m) => modulosDe(p)[m]).length, 0);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-line/70 bg-surface shadow-sm shadow-black/5">
-      {/* Faixa da marca (a mesma identidade do login). */}
-      <div className="relative h-28 overflow-hidden bg-brand-950 sm:h-32">
-        <div aria-hidden className="pointer-events-none absolute -left-16 -top-24 h-64 w-64 rounded-full bg-brand-500/40 blur-[90px]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-10 h-64 w-64 rounded-full bg-brand-700/60 blur-[100px]" />
-      </div>
+    <section
+      className="relative flex flex-wrap items-center gap-[22px] overflow-hidden rounded-[20px] p-7 text-white"
+      style={{ background: "var(--degrade-profundo)" }}
+    >
+      <MarcaOverso largura={260} altura={235} className="pointer-events-none absolute -top-[30px] right-[30px] opacity-[0.08]" />
 
-      {/* Linha única que quebra sozinha em tela estreita: foto e nome sempre à
-          esquerda, botões empurrados pra direita (ml-auto). */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 pb-10 sm:px-6">
-        {/* Foto sobreposta à faixa; clicar troca. */}
+      <div className="relative flex flex-col items-center gap-1.5">
         <button
           type="button"
           onClick={() => input.current?.click()}
           disabled={ocupado}
-          title="Trocar foto"
-          className="group relative -mt-4 h-28 w-28 shrink-0 overflow-hidden rounded-full bg-gold text-4xl font-semibold text-white shadow-lg shadow-black/20 ring-4 ring-surface"
+          aria-label={meta.avatar_url ? "Trocar foto de perfil" : "Enviar foto de perfil"}
+          title={meta.avatar_url ? "Trocar foto" : "Enviar foto"}
+          className="group relative flex h-[88px] w-[88px] items-center justify-center overflow-hidden rounded-full border-4 border-white/35 bg-nevoa p-0 text-[28px] font-extrabold text-marinho focus-visible:outline-white"
         >
-          {meta.avatar_url ? (
-            <img src={meta.avatar_url} alt={nome} className="h-full w-full object-cover" />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center">{(nome.trim()[0] ?? "?").toUpperCase()}</span>
-          )}
-          <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/50 text-[11px] font-medium text-white opacity-0 transition group-hover:opacity-100">
-            {ocupado ? <CircleNotch size={20} className="animate-spin" /> : <Camera size={20} />}
-            {ocupado ? "Enviando…" : "Trocar foto"}
+          {meta.avatar_url ? <img src={meta.avatar_url} alt="" className="h-full w-full object-cover" /> : iniciais(nome)}
+          <span className="absolute inset-0 flex items-center justify-center bg-[rgba(28,46,69,0.6)] text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            {ocupado ? <LoaderCircle size={22} className="animate-spin" aria-hidden /> : <Camera size={22} strokeWidth={1.8} aria-hidden />}
           </span>
         </button>
-
-        <div className="min-w-[12rem] flex-1 text-left">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="display truncate text-xl font-bold text-ink">{nome}</h2>
-            {equipe && (
-              <span className="inline-flex h-5 items-center gap-1 rounded-full bg-gold/10 px-2 text-[10px] font-medium leading-none text-accent">
-                <ShieldCheck size={10} /> Equipe OVERSO
-              </span>
-            )}
-          </div>
-          <p className="truncate text-sm text-muted">{email}</p>
-        </div>
-
-        <div className="ml-auto flex shrink-0 flex-wrap gap-2">
+        {meta.avatar_url && (
           <button
             type="button"
-            onClick={() => input.current?.click()}
+            onClick={() => remover.mutate()}
             disabled={ocupado}
-            className="flex items-center gap-1.5 rounded-full bg-gold px-4 py-2 text-sm font-medium text-white transition hover:bg-gold-dim disabled:opacity-60"
+            className="border-0 bg-transparent p-0 text-[11px] font-semibold text-azul-claro-2 underline underline-offset-2 hover:text-white focus-visible:outline-white"
           >
-            <Camera size={14} /> {meta.avatar_url ? "Trocar foto" : "Enviar foto"}
+            Remover foto
           </button>
-          {meta.avatar_url && (
-            <button
-              type="button"
-              onClick={() => remover.mutate()}
-              disabled={ocupado}
-              className="flex items-center gap-1.5 rounded-full border border-line/70 px-4 py-2 text-sm text-muted transition hover:border-rose-400/60 hover:text-rose-500 disabled:opacity-60"
-            >
-              <Trash size={14} /> Remover
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Dados da conta: dão contexto e ocupam a faixa com o que importa. */}
-      <dl className="grid grid-cols-1 divide-y divide-line/50 border-t border-line/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-        <Dado icone={<Buildings size={15} />} rotulo="Clientes com acesso" valor={String(projetos.length)} />
-        <Dado icone={<CalendarDots size={15} />} rotulo="Membro desde" valor={data(criadoEm)} />
-        <Dado icone={<Clock size={15} />} rotulo="Último acesso" valor={data(ultimoAcesso, true)} />
-      </dl>
+      <div className="relative flex min-w-[220px] flex-1 flex-col gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-[24px] font-extrabold leading-tight">{nome}</span>
+          <span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-[#1A57A6]">{NIVEL[nivel].rotulo}</span>
+        </div>
+        <span className="text-[14px] text-azul-claro-2">{NIVEL[nivel].descricao(projeto?.nome ?? "seu cliente")}</span>
+      </div>
+
+      <div className="relative flex gap-3">
+        <Numero valor={projetos.length} rotulo={projetos.length === 1 ? "cliente" : "clientes"} />
+        <Numero valor={modulosAtivos} rotulo={modulosAtivos === 1 ? "módulo ativo" : "módulos ativos"} />
+      </div>
+
       <input
         ref={input}
         type="file"
@@ -253,87 +232,100 @@ function Capa({
   );
 }
 
-function Dado({ icone, rotulo, valor }: { icone: ReactNode; rotulo: string; valor: string }) {
+function Numero({ valor, rotulo }: { valor: number; rotulo: string }) {
   return (
-    <div className="flex items-center gap-3 px-5 py-3.5 sm:px-6">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-2 text-muted">{icone}</span>
-      <div className="min-w-0">
-        <dt className="text-[11px] font-medium uppercase tracking-wider text-muted">{rotulo}</dt>
-        <dd className="truncate text-sm font-semibold text-ink">{valor}</dd>
-      </div>
+    <div className="flex flex-col gap-1 rounded-[14px] border border-white/[0.22] bg-white/[0.14] px-4 py-3 backdrop-blur-md">
+      <span className="text-[22px] font-extrabold leading-tight">{valor}</span>
+      <span className="text-[12px] text-azul-claro-2">{rotulo}</span>
     </div>
   );
 }
 
-/* ── Nome ───────────────────────────────────────────────────────── */
+/* ── Dados pessoais ─────────────────────────────────────────────── */
 
-const campo =
-  "w-full rounded-xl border border-line/70 bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent/70";
-
-function Rotulo({ texto, children, dica }: { texto: string; children: ReactNode; dica?: string }) {
+function Campo({ rotulo, dica, children }: { rotulo: string; dica?: string; children: ReactNode }) {
   return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-muted">{texto}</span>
+    <label className="flex min-w-0 flex-col gap-2 text-[13px] font-bold [&>.campo]:font-medium">
+      {rotulo}
       {children}
-      {dica && <span className="mt-1.5 block text-[11px] text-muted">{dica}</span>}
+      {dica && <span className="-mt-1 text-[11px] font-normal text-texto-3">{dica}</span>}
     </label>
   );
 }
 
-function Nome({ meta, email, onSalvo }: { meta: Meta; email: string; onSalvo: () => Promise<void> }) {
+function DadosPessoais({ meta, email, onSalvo }: { meta: Meta; email: string; onSalvo: () => Promise<void> }) {
   const sb = getSupabaseBrowserClient();
-  const atual = meta.full_name || meta.name || "";
-  const [nome, setNome] = useState(atual);
-  // Quando os dados chegam (ou mudam por outra aba), o campo acompanha.
-  useEffect(() => setNome(atual), [atual]);
+  const atual = { nome: meta.full_name || meta.name || "", whatsapp: meta.whatsapp ?? "", cargo: meta.cargo ?? "" };
+  const [f, setF] = useState(atual);
+  // Quando os dados chegam (ou mudam por outra aba), os campos acompanham.
+  useEffect(() => setF(atual), [atual.nome, atual.whatsapp, atual.cargo]);
 
   const salvar = useMutation({
     mutationFn: async () => {
-      const { error } = await sb.auth.updateUser({ data: { full_name: nome.trim() } });
+      const { error } = await sb.auth.updateUser({
+        data: { full_name: f.nome.trim(), whatsapp: f.whatsapp.trim(), cargo: f.cargo.trim() },
+      });
       if (error) throw error;
     },
     onSuccess: async () => {
       await onSalvo();
-      toast("Nome atualizado.");
+      toast("Dados atualizados.");
     },
     onError: (e) => toast((e as Error).message, "error"),
   });
 
-  const mudou = nome.trim() !== atual && nome.trim().length > 0;
+  const mudou =
+    f.nome.trim().length > 0 &&
+    (f.nome.trim() !== atual.nome || f.whatsapp.trim() !== atual.whatsapp || f.cargo.trim() !== atual.cargo);
 
   return (
-    <Card titulo="Dados do perfil" className="flex flex-col">
+    <Card titulo="Dados pessoais" className="gap-4">
       <form
-        className="flex flex-1 flex-col gap-4"
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
           if (mudou) salvar.mutate();
         }}
       >
-        <Rotulo
-          texto="Nome de exibição"
-          dica="É o nome que aparece no menu, nos comentários e em “Criado por” nas próximas coisas que você criar."
-        >
-          <div className="relative">
-            <User size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+          <Campo rotulo="Nome">
             <input
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex.: Carol Oliveira"
-              className={`${campo} pl-9`}
+              type="text"
+              value={f.nome}
+              onChange={(e) => setF({ ...f, nome: e.target.value })}
+              placeholder="Como você quer aparecer"
+              autoComplete="name"
+              className="campo"
             />
-          </div>
-        </Rotulo>
-        <Rotulo texto="Email" dica="O email é o login da conta e não muda por aqui.">
-          <input value={email} disabled className={`${campo} cursor-not-allowed opacity-70`} />
-        </Rotulo>
-        <div className="mt-auto flex justify-end">
-          <button
-            type="submit"
-            disabled={!mudou || salvar.isPending}
-            className="rounded-full bg-gold px-4 py-2 text-sm font-medium text-white transition hover:bg-gold-dim disabled:opacity-40"
-          >
-            {salvar.isPending ? "Salvando…" : "Salvar"}
+          </Campo>
+          <Campo rotulo="E-mail de acesso">
+            <input type="email" value={email} disabled title="O e-mail é o login da conta e não muda por aqui" className="campo" />
+          </Campo>
+          <Campo rotulo="WhatsApp">
+            <input
+              type="tel"
+              value={f.whatsapp}
+              onChange={(e) => setF({ ...f, whatsapp: e.target.value })}
+              placeholder="(11) 90000-0000"
+              autoComplete="tel"
+              className="campo"
+            />
+          </Campo>
+          <Campo rotulo="Cargo">
+            <input
+              type="text"
+              value={f.cargo}
+              onChange={(e) => setF({ ...f, cargo: e.target.value })}
+              placeholder="Ex.: Social media"
+              autoComplete="organization-title"
+              className="campo"
+            />
+          </Campo>
+        </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[12px] text-texto-3">O nome aparece nos comentários e no que você criar daqui em diante.</span>
+          <button type="submit" disabled={!mudou || salvar.isPending} className="btn btn-primario ml-auto px-5">
+            {salvar.isPending ? "Salvando…" : "Salvar alterações"}
           </button>
         </div>
       </form>
@@ -343,89 +335,157 @@ function Nome({ meta, email, onSalvo }: { meta: Meta; email: string; onSalvo: ()
 
 /* ── Senha ──────────────────────────────────────────────────────── */
 
-const MIN_SENHA = 8;
-
-function Senha() {
+function Senha({ email }: { email: string }) {
   const sb = getSupabaseBrowserClient();
-  const [senha, setSenha] = useState("");
-  const [confirma, setConfirma] = useState("");
-  const [ver, setVer] = useState(false);
+  const [atual, setAtual] = useState("");
+  const [nova, setNova] = useState("");
 
-  const curta = senha.length > 0 && senha.length < MIN_SENHA;
-  const diferente = confirma.length > 0 && confirma !== senha;
-  const valida = senha.length >= MIN_SENHA && senha === confirma;
+  const curta = nova.length > 0 && nova.length < MIN_SENHA;
+  const igual = nova.length >= MIN_SENHA && nova === atual;
+  const valida = atual.length > 0 && nova.length >= MIN_SENHA && !igual;
 
-  const salvar = useMutation({
+  const trocar = useMutation({
     mutationFn: async () => {
-      const { error } = await sb.auth.updateUser({ password: senha });
+      // A senha atual é conferida entrando de novo com ela: sem isso, quem
+      // pegasse o computador aberto trocaria a senha sem saber a antiga.
+      const login = await sb.auth.signInWithPassword({ email, password: atual });
+      if (login.error) throw new Error("A senha atual não confere.");
+      const { error } = await sb.auth.updateUser({ password: nova });
       if (error) {
         if (/different from the old/i.test(error.message)) throw new Error("A nova senha precisa ser diferente da atual.");
         throw error;
       }
     },
     onSuccess: () => {
-      setSenha("");
-      setConfirma("");
-      toast("Senha alterada. Use a nova no próximo login.");
+      setAtual("");
+      setNova("");
+      toast("Senha trocada. Use a nova no próximo login.");
     },
     onError: (e) => toast((e as Error).message, "error"),
   });
 
   return (
-    <Card titulo="Senha" className="flex flex-col">
+    <Card titulo="Senha" className="gap-4">
       <form
-        className="flex flex-1 flex-col gap-4"
+        className="flex flex-col gap-4"
         onSubmit={(e) => {
           e.preventDefault();
-          if (valida) salvar.mutate();
+          if (valida) trocar.mutate();
         }}
       >
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Rotulo texto="Nova senha">
-            <div className="relative">
-              <Key size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input
-                type={ver ? "text" : "password"}
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                autoComplete="new-password"
-                className={`${campo} pl-9 pr-10`}
-              />
-              <button
-                type="button"
-                onClick={() => setVer((v) => !v)}
-                aria-label={ver ? "Esconder senha" : "Mostrar senha"}
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-muted hover:text-ink"
-              >
-                {ver ? <EyeSlash size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-          </Rotulo>
-          <Rotulo texto="Confirmar nova senha">
+        <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+          <Campo rotulo="Senha atual">
             <input
-              type={ver ? "text" : "password"}
-              value={confirma}
-              onChange={(e) => setConfirma(e.target.value)}
-              autoComplete="new-password"
-              className={campo}
+              type="password"
+              value={atual}
+              onChange={(e) => setAtual(e.target.value)}
+              autoComplete="current-password"
+              className="campo"
             />
-          </Rotulo>
+          </Campo>
+          <Campo rotulo="Nova senha">
+            <input
+              type="password"
+              value={nova}
+              onChange={(e) => setNova(e.target.value)}
+              placeholder={`Mínimo de ${MIN_SENHA} caracteres`}
+              autoComplete="new-password"
+              aria-invalid={curta || igual}
+              className="campo"
+            />
+          </Campo>
         </div>
-        {(curta || diferente) && (
-          <p className="text-xs text-rose-600 dark:text-rose-400">
-            {curta ? `A senha precisa ter ao menos ${MIN_SENHA} caracteres.` : "As duas senhas não são iguais."}
-          </p>
-        )}
-        <div className="mt-auto flex justify-end">
-          <button
-            type="submit"
-            disabled={!valida || salvar.isPending}
-            className="rounded-full bg-gold px-4 py-2 text-sm font-medium text-white transition hover:bg-gold-dim disabled:opacity-40"
-          >
-            {salvar.isPending ? "Alterando…" : "Alterar senha"}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-[12px] font-semibold text-erro-texto" role="status">
+            {curta
+              ? `A senha precisa ter ao menos ${MIN_SENHA} caracteres.`
+              : igual
+                ? "A nova senha precisa ser diferente da atual."
+                : ""}
+          </span>
+          <button type="submit" disabled={!valida || trocar.isPending} className="btn btn-secundario ml-auto px-5 font-bold">
+            {trocar.isPending ? "Trocando…" : "Trocar senha"}
           </button>
         </div>
       </form>
     </Card>
+  );
+}
+
+/* ── Clientes que a conta acessa ────────────────────────────────── */
+
+function Clientes() {
+  const router = useRouter();
+  const { projeto, projetos, trocarCliente } = usePainel();
+  const { superAdmin } = useAcesso(projeto?.id);
+
+  function abrir(p: Project) {
+    // Trocar de cliente recarrega a tela inteira e volta para o Dashboard.
+    void router.navigate({ to: "/" });
+    trocarCliente(p.id);
+  }
+
+  return (
+    <section className="flex min-w-0 flex-[1_1_466px] flex-col gap-3 rounded-[20px] border border-borda bg-white p-[22px]">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="m-0 text-[16px] font-bold">Clientes que você acessa</h2>
+        {superAdmin && (
+          <Link to="/clientes" className="btn btn-secundario btn-40 font-bold">
+            <Plus size={14} strokeWidth={2.2} aria-hidden />
+            Novo cliente
+          </Link>
+        )}
+      </div>
+
+      {projetos.length === 0 && (
+        <p className="m-0 text-[13px] text-texto-3">Sua conta ainda não tem acesso a nenhum cliente. Fale com a equipe OVERSO.</p>
+      )}
+
+      {projetos.map((p, i) => {
+        const aberto = p.id === projeto?.id;
+        const mods = modulosDe(p);
+        const miolo = (
+          <>
+            <span
+              className="flex h-10 w-10 flex-none items-center justify-center rounded-[12px] text-[13px] font-bold text-white"
+              style={{ background: CORES_CAMPANHA[i % CORES_CAMPANHA.length] }}
+            >
+              {iniciais(p.nome)}
+            </span>
+            <span className="flex min-w-[160px] flex-1 flex-col gap-[3px]">
+              <span className="text-[14px] font-bold">{p.nome}</span>
+              <span className="text-[12px] font-normal text-texto-3">{aberto ? "Cliente aberto agora" : "Clique para abrir este cliente"}</span>
+            </span>
+            <span className="flex flex-wrap gap-1.5">
+              {MODULOS.map((m) => (
+                <span
+                  key={m}
+                  className={`rounded-lg px-[9px] py-1 text-[11px] font-bold ${
+                    mods[m] ? "bg-azul-claro-2 text-[#1A57A6]" : "bg-[#ECEEF1] text-texto-3"
+                  }`}
+                >
+                  {MODULO_LABEL[m]}
+                  {mods[m] ? "" : " · bloqueado"}
+                </span>
+              ))}
+            </span>
+          </>
+        );
+        const classe = "flex flex-wrap items-center gap-3 rounded-[16px] p-3.5 text-left text-marinho";
+        return aberto ? (
+          <div key={p.id} aria-current="true" className={`${classe} border-[1.5px] border-azul bg-azul-claro`}>
+            {miolo}
+          </div>
+        ) : (
+          <button key={p.id} type="button" onClick={() => abrir(p)} className={`card-clicavel ${classe}`}>
+            {miolo}
+          </button>
+        );
+      })}
+
+      <p className="m-0 mt-1.5 rounded-[12px] bg-superficie-2 px-3.5 py-3 text-[12px] leading-normal text-texto-2">
+        Módulos bloqueados ficam no menu do cliente com cadeado. Membros e admins de cada cliente só enxergam a própria conta.
+      </p>
+    </section>
   );
 }

@@ -43,6 +43,29 @@
   </FilesMatch>
 </IfModule>
 
+# ── Segurança ──────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+  # O portal não pode ser aberto dentro de outro site: é como se monta uma
+  # página falsa por cima para roubar cliques de quem está logado.
+  Header always set X-Frame-Options "DENY"
+  Header always set Content-Security-Policy "frame-ancestors 'none'"
+  # O navegador não adivinha o tipo de um arquivo: vale o que o servidor diz.
+  Header always set X-Content-Type-Options "nosniff"
+  # Ao sair do portal por um link, o endereço interno não viaja junto.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # O portal não usa câmera, microfone nem localização.
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # Sempre por HTTPS, por um ano.
+  Header always set Strict-Transport-Security "max-age=31536000"
+
+  # O script das landing pages roda dentro dos sites dos clientes e precisa
+  # continuar carregável de lá.
+  <FilesMatch "^overso-lead-wp\.js$">
+    Header always unset X-Frame-Options
+    Header always unset Content-Security-Policy
+  </FilesMatch>
+</IfModule>
+
 # ── Compressão ─────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json image/svg+xml
