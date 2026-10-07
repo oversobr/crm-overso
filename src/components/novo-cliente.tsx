@@ -4,8 +4,8 @@ import { ArrowLeft, ArrowRight, Check, Info, Lock, Plus, Trash2, Upload } from "
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { BotaoCopiar, ScriptDaLanding } from "@/components/cliente-ficha-modais";
-import { ModalDegrade, Stepper } from "@/components/ds/modal";
+import { BotaoCopiar, DicasDeInstalacao, ScriptDaLanding } from "@/components/cliente-ficha-modais";
+import { ModalColuna, ModalColunas, ModalDegrade, Stepper } from "@/components/ds/modal";
 import { usePainel } from "@/components/painel";
 import { enviarLogoCliente, TIPOS_DE_LOGO } from "@/lib/logo-cliente";
 import { criarCliente, salvarPerfilCliente, type NovoCliente as ClienteCriado } from "@/lib/queries";
@@ -16,8 +16,8 @@ import { urlSegura } from "@/lib/url";
 import { iniciais } from "@/lib/usuario";
 
 /**
- * Cadastro de cliente em três passos: dados, módulos e pronto (com o script
- * da landing page). Só o nome é obrigatório. O cliente nasce no fim do passo
+ * Cadastro de cliente em três passos, no popup horizontal: dados (em três
+ * colunas), módulos e pronto (com o script da landing page). Só o nome é obrigatório. O cliente nasce no fim do passo
  * 2; contato, links, observações e logo são gravados logo em seguida, e uma
  * falha neles não desfaz o cadastro: dá para completar na ficha.
  */
@@ -128,16 +128,16 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
 
   const rodape: ReactNode[] = [
     <>
-      <button type="button" onClick={onFechar} className="btn btn-secundario min-h-[46px] px-[18px] font-bold">
+      <button type="button" onClick={onFechar} className="btn btn-secundario px-[18px] font-bold">
         Cancelar
       </button>
-      <button type="submit" form="novo-cliente-dados" disabled={!nomeLimpo} className="btn btn-primario min-h-[46px] px-[22px] font-bold">
+      <button type="submit" form="novo-cliente-dados" disabled={!nomeLimpo} className="btn btn-primario px-[22px] font-bold">
         Continuar
         <ArrowRight size={16} strokeWidth={2} aria-hidden />
       </button>
     </>,
     <>
-      <button type="button" onClick={() => setPasso(0)} disabled={criar.isPending} className="btn btn-secundario min-h-[46px] px-[18px] font-bold">
+      <button type="button" onClick={() => setPasso(0)} disabled={criar.isPending} className="btn btn-secundario px-[18px] font-bold">
         <ArrowLeft size={16} strokeWidth={2} aria-hidden />
         Voltar
       </button>
@@ -151,7 +151,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
           type="button"
           onClick={() => criar.mutate()}
           disabled={marcados.length === 0 || criar.isPending}
-          className="btn btn-primario min-h-[46px] px-[22px] font-bold"
+          className="btn btn-primario px-[22px] font-bold"
         >
           {criar.isPending ? "Criando…" : "Criar cliente"}
           <ArrowRight size={16} strokeWidth={2} aria-hidden />
@@ -165,7 +165,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
           onFechar();
           if (criado) void router.navigate({ to: "/clientes/$clienteId", params: { clienteId: criado.id } });
         }}
-        className="btn btn-secundario min-h-[46px] px-[18px] font-bold"
+        className="btn btn-secundario px-[18px] font-bold"
       >
         Ver ficha do cliente
       </button>
@@ -177,7 +177,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
           trocarCliente(criado.id);
           void router.navigate({ to: criado.modulos.crm ? "/" : criado.modulos.conteudo ? "/postagens" : "/eventos" });
         }}
-        className="btn btn-primario min-h-[46px] px-[22px] font-bold"
+        className="btn btn-primario px-[22px] font-bold"
       >
         Abrir cliente
         <ArrowRight size={16} strokeWidth={2} aria-hidden />
@@ -189,60 +189,64 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
     <ModalDegrade
       aberto
       onFechar={onFechar}
+      livre
       icone={passo === 0 ? <IconeNovoCliente /> : avatar}
       titulo={passo === 0 ? "Novo cliente" : nomeLimpo}
       selo={`Passo ${passo + 1} de 3`}
       contexto={CONTEXTO[passo]}
       faixa={<Stepper etapas={ETAPAS} atual={passo} />}
       rodape={rodape[passo]}
-      largura={900}
     >
       {passo === 0 && (
         <form
           id="novo-cliente-dados"
-          className="flex flex-col gap-[22px]"
+          className="contents"
           onSubmit={(e) => {
             e.preventDefault();
             if (nomeLimpo) setPasso(1);
           }}
         >
-          <div className="flex flex-wrap items-stretch gap-5">
-            <div className="flex w-[150px] flex-none flex-col items-center gap-2.5">
-              <input
-                ref={entradaLogo}
-                type="file"
-                accept={TIPOS_DE_LOGO}
-                className="hidden"
-                onChange={(e) => {
-                  const a = e.target.files?.[0];
-                  e.target.value = "";
-                  if (a) setLogo(a);
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => entradaLogo.current?.click()}
-                aria-label="Enviar logo do cliente"
-                className={`flex h-[120px] w-[120px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[24px] p-0 transition-colors ${
-                  previaDoLogo
-                    ? "border border-borda bg-white"
-                    : "border-[1.5px] border-dashed border-azul-borda bg-azul-claro text-[#1A57A6] hover:bg-azul-claro-2"
-                }`}
-              >
-                {previaDoLogo ? (
-                  <img src={previaDoLogo} alt="" className="h-full w-full object-contain p-2" />
-                ) : (
-                  <>
-                    <Upload size={26} strokeWidth={1.8} aria-hidden />
-                    <span className="text-[12px] font-bold">Enviar logo</span>
-                  </>
-                )}
-              </button>
-              <span className="text-center text-[11px] leading-[1.4] text-texto-3 [overflow-wrap:anywhere]">
-                {logo ? `${logo.name} · clique para trocar` : "PNG ou JPG, de preferência quadrada"}
-              </span>
-            </div>
-            <div className="flex min-w-[min(240px,100%)] flex-1 flex-col justify-center gap-3.5">
+          <ModalColunas colunas="340px minmax(0,1fr) minmax(0,1fr)">
+            {/* Coluna 1: logo e nome, o único campo obrigatório */}
+            <ModalColuna fundo>
+              <div className="flex items-center gap-4">
+                <input
+                  ref={entradaLogo}
+                  type="file"
+                  accept={TIPOS_DE_LOGO}
+                  className="hidden"
+                  onChange={(e) => {
+                    const a = e.target.files?.[0];
+                    e.target.value = "";
+                    if (a) setLogo(a);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => entradaLogo.current?.click()}
+                  aria-label="Enviar logo do cliente"
+                  className={`flex h-[104px] w-[104px] flex-none flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[22px] p-0 transition-colors ${
+                    previaDoLogo
+                      ? "border border-borda bg-white"
+                      : "border-[1.5px] border-dashed border-azul-borda bg-azul-claro text-[#1A57A6] hover:bg-azul-claro-2"
+                  }`}
+                >
+                  {previaDoLogo ? (
+                    <img src={previaDoLogo} alt="" className="h-full w-full object-contain p-2" />
+                  ) : (
+                    <>
+                      <Upload size={24} strokeWidth={1.8} aria-hidden />
+                      <span className="text-[12px] font-bold">Enviar logo</span>
+                    </>
+                  )}
+                </button>
+                <span className="flex min-w-0 flex-col gap-1">
+                  <strong className="text-[13px]">Logo</strong>
+                  <span className="text-[11px] leading-[1.45] text-texto-3 [overflow-wrap:anywhere]">
+                    {logo ? `${logo.name} · clique para trocar` : "PNG ou JPG, de preferência quadrada"}
+                  </span>
+                </span>
+              </div>
               <label className="flex flex-col gap-2 text-[13px] font-bold">
                 <span>
                   Nome do cliente <span className="text-erro-texto">*</span>
@@ -256,101 +260,106 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                   className="campo min-h-12 text-[15px] font-semibold"
                 />
               </label>
-              <span className="flex items-center gap-2 rounded-[12px] bg-superficie-2 px-3 py-2.5 text-[12px] leading-[1.45] text-texto-2">
-                <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="flex-none" />
+              <span className="flex items-start gap-2 rounded-[12px] bg-white p-3 text-[12px] leading-normal text-texto-2">
+                <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="mt-px flex-none" />
                 Só o nome é obrigatório. O resto dá para preencher agora ou depois, na ficha do cliente.
               </span>
-            </div>
-          </div>
+            </ModalColuna>
 
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-bold tracking-[0.12em] text-texto-3">OPCIONAL</span>
-            <span className="h-px flex-1 bg-borda" />
-          </div>
-
-          <section className="flex flex-col gap-2.5">
-            <h3 className="m-0 text-[14px] font-bold">Contato do cliente</h3>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
-                Responsável
-                <input value={responsavel} onChange={(e) => setResponsavel(e.target.value)} placeholder="Nome de quem fala com a OVERSO" className="campo" />
-              </label>
-              <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
-                WhatsApp
-                <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(00) 00000-0000" className="campo" />
-              </label>
-              <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
-                E-mail
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contato@cliente.com.br" className="campo" />
-              </label>
-            </div>
-          </section>
-
-          <section className="flex flex-col gap-2.5">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h3 className="m-0 text-[14px] font-bold">Links úteis</h3>
-              <span className="text-[11px] text-texto-3">Site, Instagram, pasta do Drive, landing pages</span>
-            </div>
-            {links.map((l) => {
-              const mudar = (parte: Partial<LinkCliente>) => setLinks((ls) => ls.map((x) => (x.id === l.id ? { ...x, ...parte } : x)));
-              return (
-                <div key={l.id} className="grid grid-cols-[minmax(0,1fr)_44px] gap-2.5 sm:grid-cols-[180px_minmax(0,1fr)_44px]">
-                  <input
-                    value={l.rotulo}
-                    onChange={(e) => mudar({ rotulo: e.target.value })}
-                    placeholder="Nome do link"
-                    aria-label="Nome do link"
-                    className="campo col-span-2 w-full font-semibold sm:col-span-1"
-                  />
-                  {/* type="text": "site.com.br" sem https:// é aceito e completado ao gravar. */}
-                  <input
-                    value={l.url}
-                    onChange={(e) => mudar({ url: e.target.value })}
-                    placeholder="https://"
-                    aria-label={`Endereço do link ${l.rotulo}`}
-                    inputMode="url"
-                    className="campo w-full"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setLinks((ls) => ls.filter((x) => x.id !== l.id))}
-                    aria-label={`Remover link ${l.rotulo}`}
-                    className="btn btn-secundario h-11 w-11 p-0 text-texto-3"
-                  >
-                    <Trash2 size={16} strokeWidth={1.8} aria-hidden />
-                  </button>
+            {/* Coluna 2: contato e observações */}
+            <ModalColuna>
+              <section className="flex flex-col gap-2.5">
+                <div className="flex items-center gap-2">
+                  <h3 className="m-0 text-[14px] font-bold">Contato do cliente</h3>
+                  <span className="rounded-md bg-gelo px-[7px] py-0.5 text-[10px] font-bold tracking-[0.08em] text-texto-3">OPCIONAL</span>
                 </div>
-              );
-            })}
-            <button
-              type="button"
-              onClick={() => setLinks((ls) => [...ls, { id: proximoId.current++, rotulo: "", url: "" }])}
-              className="btn btn-40 self-start border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-[#1A57A6] hover:bg-azul-claro-2"
-            >
-              <Plus size={14} strokeWidth={2.2} aria-hidden />
-              Adicionar link
-            </button>
-          </section>
+                <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
+                  Responsável
+                  <input value={responsavel} onChange={(e) => setResponsavel(e.target.value)} placeholder="Nome de quem fala com a OVERSO" className="campo" />
+                </label>
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
+                    WhatsApp
+                    <input type="tel" value={telefone} onChange={(e) => setTelefone(e.target.value)} placeholder="(00) 00000-0000" className="campo" />
+                  </label>
+                  <label className="flex min-w-0 flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
+                    E-mail
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="contato@cliente.com.br" className="campo" />
+                  </label>
+                </div>
+              </section>
+              <label className="flex flex-col gap-2 text-[14px] font-bold">
+                <span className="flex items-center gap-2">
+                  Observações
+                  <span className="rounded-md bg-gelo px-[7px] py-0.5 text-[10px] font-bold tracking-[0.08em] text-texto-3">OPCIONAL</span>
+                </span>
+                <textarea
+                  rows={5}
+                  value={observacoes}
+                  onChange={(e) => setObservacoes(e.target.value)}
+                  placeholder="O que foi combinado, tom de voz, restrições, datas importantes"
+                  className="campo h-auto resize-none py-3 text-[13px] font-medium leading-normal"
+                />
+              </label>
+            </ModalColuna>
 
-          <label className="flex flex-col gap-2 text-[14px] font-bold">
-            Observações
-            <textarea
-              rows={3}
-              value={observacoes}
-              onChange={(e) => setObservacoes(e.target.value)}
-              placeholder="O que foi combinado, tom de voz, restrições, datas importantes"
-              className="campo h-auto resize-y py-3 text-[13px] font-medium leading-normal"
-            />
-          </label>
+            {/* Coluna 3: links úteis */}
+            <ModalColuna className="!gap-2.5">
+              <div className="flex items-center gap-2">
+                <h3 className="m-0 text-[14px] font-bold">Links úteis</h3>
+                <span className="rounded-md bg-gelo px-[7px] py-0.5 text-[10px] font-bold tracking-[0.08em] text-texto-3">OPCIONAL</span>
+              </div>
+              <span className="-mt-1 text-[11px] text-texto-3">Site, Instagram, pasta do Drive, landing pages</span>
+              {links.map((l) => {
+                const mudar = (parte: Partial<LinkCliente>) => setLinks((ls) => ls.map((x) => (x.id === l.id ? { ...x, ...parte } : x)));
+                return (
+                  <div key={l.id} className="grid flex-none grid-cols-[130px_minmax(0,1fr)_44px] gap-2">
+                    <input
+                      value={l.rotulo}
+                      onChange={(e) => mudar({ rotulo: e.target.value })}
+                      placeholder="Nome"
+                      aria-label="Nome do link"
+                      className="campo w-full px-3 font-semibold"
+                    />
+                    {/* type="text": "site.com.br" sem https:// é aceito e completado ao gravar. */}
+                    <input
+                      value={l.url}
+                      onChange={(e) => mudar({ url: e.target.value })}
+                      placeholder="https://"
+                      aria-label={`Endereço do link ${l.rotulo}`}
+                      inputMode="url"
+                      className="campo w-full px-3"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setLinks((ls) => ls.filter((x) => x.id !== l.id))}
+                      aria-label={`Remover link ${l.rotulo}`}
+                      className="btn btn-secundario h-11 w-11 p-0 text-texto-3"
+                    >
+                      <Trash2 size={16} strokeWidth={1.8} aria-hidden />
+                    </button>
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setLinks((ls) => [...ls, { id: proximoId.current++, rotulo: "", url: "" }])}
+                className="btn btn-40 flex-none self-start border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-[#1A57A6] hover:bg-azul-claro-2"
+              >
+                <Plus size={14} strokeWidth={2.2} aria-hidden />
+                Adicionar link
+              </button>
+            </ModalColuna>
+          </ModalColunas>
         </form>
       )}
 
       {passo === 1 && (
-        <>
+        <div className="flex flex-col gap-[18px] px-5 py-[22px] sm:px-7">
           <p className="m-0 text-[15px] leading-normal">
             O que <strong className="font-extrabold">{nomeLimpo}</strong> vai usar? Dá para mudar depois.
           </p>
-          <div role="group" aria-label="Módulos" className="grid gap-3.5 sm:grid-cols-3">
+          <div role="group" aria-label="Módulos" className="grid gap-3.5 md:grid-cols-3">
             {MODULOS.map((m) => {
               const ligado = escolha[m.id];
               return (
@@ -360,7 +369,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                   role="checkbox"
                   aria-checked={ligado}
                   onClick={() => setEscolha((e) => ({ ...e, [m.id]: !e[m.id] }))}
-                  className={`relative flex flex-col items-start gap-3 rounded-[18px] border-2 p-5 text-left text-marinho transition-colors sm:min-h-[220px] ${
+                  className={`relative flex flex-col items-start gap-3 rounded-[18px] border-2 p-[22px] text-left text-marinho transition-colors md:min-h-[200px] ${
                     ligado ? "border-azul bg-azul-claro" : "border-borda-campo bg-white hover:border-nevoa"
                   }`}
                 >
@@ -385,12 +394,14 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
             <Lock size={16} strokeWidth={2} color="#55657A" aria-hidden className="flex-none" />
             Módulos não marcados continuam no menu do cliente, com cadeado.
           </span>
-        </>
+        </div>
       )}
 
       {passo === 2 && criado && (
-        <>
-          <div className="flex flex-wrap items-center gap-3.5 rounded-[16px] bg-sucesso-fundo px-4 py-3.5 text-sucesso">
+        // Uma coluna só. O script fica com a altura que sobrar e rola por dentro;
+        // em tela baixa ele para em 240px e é o miolo do popup que rola.
+        <div className="flex flex-[1_0_auto] flex-col gap-4 px-5 py-[22px] sm:px-7">
+          <div className="flex flex-none flex-wrap items-center gap-3.5 rounded-[16px] bg-sucesso-fundo px-4 py-3.5 text-sucesso">
             <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-sucesso text-white">
               <Check size={18} strokeWidth={3} aria-hidden />
             </span>
@@ -407,33 +418,36 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
           </div>
 
           {semModulos && (
-            <p className="m-0 rounded-[12px] bg-alerta-fundo px-3 py-2.5 text-[12px] leading-[1.45] text-alerta">
+            <p className="m-0 flex-none rounded-[12px] bg-alerta-fundo px-3 py-2.5 text-[12px] leading-[1.45] text-alerta">
               Os módulos ainda não foram ativados no banco (supabase/20_modulos_cliente.sql), então o cliente foi criado com CRM e
               Conteúdo ligados.
             </p>
           )}
 
           {criado.modulos.crm ? (
-            <section className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
+            <>
+              <div className="flex flex-none flex-col gap-1">
                 <h3 className="m-0 text-[16px] font-extrabold">Ligar a landing page</h3>
-                <span className="text-[13px] text-texto-3">Cole este script na landing page do cliente para os leads caírem no CRM.</span>
+                <span className="text-[13px] text-texto-3">Cole o script abaixo na landing page do cliente para os leads caírem no CRM.</span>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-[14px] border border-borda-campo py-3 pl-4 pr-3.5">
-                <span className="flex min-w-0 flex-wrap items-center gap-3">
-                  <span className="text-[11px] font-bold tracking-[0.1em] text-texto-3">CHAVE DE CAPTURA</span>
+              <div className="grid flex-none gap-3 md:grid-cols-3">
+                <div className="flex min-w-0 flex-col gap-2 rounded-[14px] border border-borda-campo bg-white pb-3.5 pl-4 pr-3.5 pt-3">
+                  <span className="flex items-center justify-between gap-2.5">
+                    <span className="text-[11px] font-bold tracking-[0.1em] text-texto-3">CHAVE DE CAPTURA</span>
+                    <BotaoCopiar texto={criado.ingest_key} rotulo="Copiar chave" copiado="Copiada" />
+                  </span>
                   <code className="font-mono text-[13px] font-semibold [overflow-wrap:anywhere]">{criado.ingest_key}</code>
-                </span>
-                <BotaoCopiar texto={criado.ingest_key} rotulo="Copiar chave" copiado="Copiada" />
+                </div>
+                <DicasDeInstalacao />
               </div>
-              <ScriptDaLanding chave={criado.ingest_key} nome={criado.nome} />
-            </section>
+              <ScriptDaLanding chave={criado.ingest_key} nome={criado.nome} largo />
+            </>
           ) : (
             <p className="m-0 rounded-[14px] bg-superficie-2 px-4 py-3.5 text-[13px] leading-normal text-texto-2">
               Este cliente não usa o CRM, então não há landing page para ligar. Os módulos dele já estão prontos para usar.
             </p>
           )}
-        </>
+        </div>
       )}
     </ModalDegrade>
   );

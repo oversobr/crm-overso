@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, MessageCircle, X } from "lucide-react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { ModalColuna } from "@/components/ds/modal";
@@ -38,6 +39,7 @@ export function CommentThread({
   onPendentes,
   variante = "cartao",
   cardAtivo = null,
+  antes,
 }: {
   conteudoId: string | undefined;
   observacaoAntiga?: string | null;
@@ -54,6 +56,12 @@ export function CommentThread({
   variante?: "cartao" | "solta" | "coluna";
   /** Card do carrossel em exibição (1, 2, 3…): o comentário novo fica ligado a ele. */
   cardAtivo?: number | null;
+  /**
+   * Só na variante "coluna": o que fica preso no alto da coluna, acima do
+   * título da lista (a caixa de aprovação do post). Com isto, o título
+   * também fica preso e só os comentários rolam.
+   */
+  antes?: ReactNode;
 }) {
   const qc = useQueryClient();
   const usuario = useUsuario();
@@ -97,7 +105,7 @@ export function CommentThread({
 
   const cabecalho = (
     <div className="flex items-center justify-between">
-      {variante === "solta" ? (
+      {variante === "solta" || antes ? (
         <h3 className="m-0 text-[14px] font-bold">Comentários</h3>
       ) : (
         <span className="flex items-center gap-2 text-[13px] font-bold">
@@ -201,8 +209,23 @@ export function CommentThread({
 
   if (variante === "coluna") {
     return (
-      <ModalColuna aria-label="Comentários" fundo className="!gap-2.5" rodape={campo}>
-        {cabecalho}
+      <ModalColuna
+        aria-label={antes ? "Aprovação e comentários" : "Comentários"}
+        fundo
+        className="!gap-2.5"
+        rodape={campo}
+        {...(antes
+          ? {
+              topo: (
+                <>
+                  {antes}
+                  {cabecalho}
+                </>
+              ),
+            }
+          : {})}
+      >
+        {!antes && cabecalho}
         {corpo}
       </ModalColuna>
     );

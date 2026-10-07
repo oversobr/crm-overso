@@ -165,7 +165,20 @@ export function BotaoCopiar({ texto, rotulo, copiado: rotuloCopiado }: { texto: 
  * O script pronto do cliente. Vem de public/ (uma cópia só, sem risco de
  * divergir do que está no disco) e só a configuração é trocada pela dele.
  */
-export function ScriptDaLanding({ chave, nome }: { chave: string; nome: string }) {
+export function ScriptDaLanding({
+  chave,
+  nome,
+  largo = false,
+}: {
+  chave: string;
+  nome: string;
+  /**
+   * Só o bloco do script, ocupando a altura que sobrar (passo 3 do cadastro,
+   * que mostra as dicas ao lado da chave). Sem isto, o bloco tem altura fixa
+   * e as dicas vêm embaixo.
+   */
+  largo?: boolean;
+}) {
   const { data: bruto, isError } = useQuery({
     queryKey: ["script-wp"],
     queryFn: async () => {
@@ -185,27 +198,45 @@ export function ScriptDaLanding({ chave, nome }: { chave: string; nome: string }
   if (!script) return <p className="m-0 text-[13px] text-texto-3">Montando o script…</p>;
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-col overflow-hidden rounded-[14px] border border-marinho">
+    <div className={`flex flex-col gap-3 ${largo ? "min-h-[240px] flex-[1_1_0px]" : ""}`}>
+      <div className={`flex flex-col overflow-hidden rounded-[14px] border border-marinho ${largo ? "min-h-[240px] flex-[1_1_0px]" : ""}`}>
         <div className="flex flex-wrap items-center justify-between gap-3 bg-marinho py-2.5 pl-4 pr-3 text-azul-claro-2">
           <span className="text-[12px]">
             Script de <strong className="text-white">{nome}</strong> · copie tudo ({script.split("\n").length} linhas)
           </span>
           <CopiarScript texto={script} />
         </div>
-        <pre className="m-0 h-[170px] overflow-auto bg-[#14202F] px-4 py-3.5 font-mono text-[12px] leading-[1.65] text-[#C9D6E6]">{script}</pre>
+        <pre
+          className={`rolagem-fina m-0 overflow-auto bg-[#14202F] px-4 py-3.5 font-mono text-[12px] leading-[1.65] text-[#C9D6E6] ${
+            largo ? "min-h-0 flex-[1_1_0px]" : "h-[170px]"
+          }`}
+        >
+          {script}
+        </pre>
       </div>
-      <div className="grid gap-2.5 sm:grid-cols-2">
-        <div className="flex flex-col gap-1 rounded-[14px] bg-superficie-2 px-3.5 py-3 text-[12px] leading-normal text-texto-2">
-          <strong className="text-[13px] text-marinho">WPCode</strong>
-          JavaScript Snippet, local Site Wide Footer. Cole sem as tags &lt;script&gt;.
+      {!largo && (
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          <DicasDeInstalacao />
         </div>
-        <div className="flex flex-col gap-1 rounded-[14px] bg-superficie-2 px-3.5 py-3 text-[12px] leading-normal text-texto-2">
-          <strong className="text-[13px] text-marinho">Elementor</strong>
-          Custom Code ou widget HTML, envolva com &lt;script&gt;. Nos campos, use os IDs nome, whatsapp e email em Avançado → ID.
-        </div>
-      </div>
+      )}
     </div>
+  );
+}
+
+/** Onde colar o script: uma caixa para o WPCode e outra para o Elementor. */
+export function DicasDeInstalacao() {
+  const caixa = "flex flex-col gap-1.5 rounded-[14px] bg-superficie-2 px-4 py-3.5 text-[12px] leading-normal text-texto-2";
+  return (
+    <>
+      <div className={caixa}>
+        <strong className="text-[13px] text-marinho">WPCode</strong>
+        JavaScript Snippet, local Site Wide Footer. Cole sem as tags &lt;script&gt;.
+      </div>
+      <div className={caixa}>
+        <strong className="text-[13px] text-marinho">Elementor</strong>
+        Custom Code ou widget HTML, envolva com &lt;script&gt;. Nos campos, use os IDs nome, whatsapp e email em Avançado → ID.
+      </div>
+    </>
   );
 }
 

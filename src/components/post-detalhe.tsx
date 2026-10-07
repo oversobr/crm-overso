@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import { CommentThread } from "@/components/comment-thread";
-import { ModalDegrade, StepperBotoes } from "@/components/ds/modal";
+import { ModalColuna, ModalColunas, ModalDegrade, ModalFaixa, StepperBotoes } from "@/components/ds/modal";
 import { useUrlsDasArtes } from "@/components/post-pecas";
 import { deYmd, fmt, hhmm, ymd } from "@/lib/datas";
 import { atualizarConteudo, duplicarConteudo, eventosQuery, excluirConteudo } from "@/lib/queries";
@@ -191,7 +191,6 @@ export function PostDetalhe({
       aberto
       onFechar={onFechar}
       livre
-      largura={1080}
       icone={<IconeImagem size={26} strokeWidth={1.8} aria-hidden />}
       titulo={c.titulo}
       contexto={
@@ -215,6 +214,21 @@ export function PostDetalhe({
           <Pencil size={16} strokeWidth={2} aria-hidden />
           Editar
         </button>
+      }
+      faixa={
+        <ModalFaixa rotulo="Etapa do post">
+          <div className="overflow-x-auto">
+            <div className="min-w-[520px]">
+              <StepperBotoes
+                rotulo="Etapas do post"
+                etapas={ETAPAS}
+                atual={status}
+                onChange={(s) => s !== status && mudarEtapa.mutate(s)}
+                disabled={ocupado}
+              />
+            </div>
+          </div>
+        </ModalFaixa>
       }
       rodape={
         <>
@@ -255,14 +269,14 @@ export function PostDetalhe({
             </div>
           )}
           <div className="flex gap-2.5">
-            <button type="button" onClick={onFechar} className="btn btn-secundario min-h-[46px] font-bold">
+            <button type="button" onClick={onFechar} className="btn btn-secundario font-bold">
               Fechar
             </button>
             <button
               type="button"
               onClick={() => mudarEtapa.mutate("publicado")}
               disabled={ocupado || status === "publicado"}
-              className="btn btn-primario min-h-[46px] px-5"
+              className="btn btn-primario px-5"
             >
               <Check size={16} strokeWidth={2.2} aria-hidden />
               {status === "publicado" ? "Publicado" : "Marcar como publicado"}
@@ -271,195 +285,170 @@ export function PostDetalhe({
         </>
       }
     >
-      <div className="flex flex-col gap-2.5 border-b border-borda px-5 py-[18px] sm:px-7">
-        <span className="text-[13px] font-bold">Etapa do post</span>
-        <div className="overflow-x-auto">
-          <div className="min-w-[560px]">
-            <StepperBotoes
-              rotulo="Etapas do post"
-              etapas={ETAPAS}
-              atual={status}
-              onChange={(s) => s !== status && mudarEtapa.mutate(s)}
-              disabled={ocupado}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_400px]">
-        <div className="flex min-w-0 flex-col gap-5 px-5 py-[22px] sm:px-7">
-          <div className="grid items-start gap-5 md:grid-cols-[280px_minmax(0,1fr)]">
-            <div className="flex flex-col gap-2.5">
-              <div className="relative flex h-[350px] flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] bg-gelo text-texto-3">
-                {atual ? (
-                  urls[atual] ? (
-                    <a href={urls[atual]} target="_blank" rel="noreferrer" title="Abrir em tamanho real" className="h-full w-full">
-                      <img src={urls[atual]} alt={`Card ${indice + 1} de ${midias.length}`} className="h-full w-full object-cover" />
-                    </a>
-                  ) : (
-                    <LoaderCircle size={24} className="animate-spin" aria-label="Carregando arte" />
-                  )
-                ) : (
-                  <>
-                    <IconeImagem size={40} strokeWidth={1.6} aria-hidden />
-                    <span className="text-[12px] font-bold">Nenhuma arte anexada</span>
-                  </>
-                )}
-                {varias && (
-                  <>
-                    <span className="absolute right-3 top-3 rounded-full bg-[rgba(28,46,69,0.6)] px-[9px] py-1 text-[11px] font-bold text-white">
-                      {indice + 1}/{midias.length}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setCard((indice + midias.length - 1) % midias.length)}
-                      aria-label="Card anterior"
-                      className="absolute left-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
-                    >
-                      <ChevronLeft size={16} strokeWidth={2.2} aria-hidden />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setCard((indice + 1) % midias.length)}
-                      aria-label="Próximo card"
-                      className="absolute right-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
-                    >
-                      <ChevronRight size={16} strokeWidth={2.2} aria-hidden />
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {varias && (
-                <div className="grid grid-cols-4 gap-1.5">
-                  {midias.map((m, i) => (
-                    <button
-                      key={m}
-                      type="button"
-                      onClick={() => setCard(i)}
-                      aria-label={`Ver card ${i + 1}`}
-                      aria-pressed={i === indice}
-                      className={`box-border h-14 overflow-hidden rounded-[10px] border-[2.5px] bg-gelo p-0 text-[13px] font-extrabold text-texto-3 ${
-                        i === indice ? "border-azul" : "border-white"
-                      }`}
-                    >
-                      {urls[m] ? <img src={urls[m]} alt="" className="h-full w-full object-cover" /> : i + 1}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <button
-                type="button"
-                onClick={() => void baixarArtes()}
-                disabled={midias.length === 0 || baixando}
-                className="btn btn-secundario btn-40 font-bold"
-              >
-                <Download size={14} strokeWidth={2} aria-hidden />
-                {baixando ? "Baixando…" : midias.length > 1 ? "Baixar artes" : "Baixar arte"}
-              </button>
-              {link && (
-                <a href={link} target="_blank" rel="noreferrer" className="link truncate text-center text-[12px]">
-                  Abrir link do vídeo ou da pasta
+      <ModalColunas colunas="330px minmax(0,1fr) 360px" className="[&>section]:border-r-0 [&>section:last-child]:lg:border-l">
+        {/* Coluna 1: o carrossel */}
+        <ModalColuna aria-label="Artes" className="!gap-2.5">
+          <div className="relative flex h-[320px] flex-none flex-col items-center justify-center gap-2.5 overflow-hidden rounded-[18px] bg-gelo text-texto-3">
+            {atual ? (
+              urls[atual] ? (
+                <a href={urls[atual]} target="_blank" rel="noreferrer" title="Abrir em tamanho real" className="h-full w-full">
+                  <img src={urls[atual]} alt={`Card ${indice + 1} de ${midias.length}`} className="h-full w-full object-cover" />
                 </a>
-              )}
-            </div>
-
-            <div className="flex min-w-0 flex-col gap-4">
-              <section className="flex flex-col gap-2">
-                <div className="flex items-baseline justify-between">
-                  <h3 className="m-0 text-[14px] font-bold">Legenda</h3>
-                  {c.legenda && (
-                    <button
-                      type="button"
-                      onClick={() => void copiarLegenda()}
-                      className={`min-h-8 border-0 bg-transparent px-2 text-[12px] font-bold ${copiada ? "text-sucesso" : "link"}`}
-                    >
-                      {copiada ? "Copiada" : "Copiar legenda"}
-                    </button>
-                  )}
-                </div>
-                <p
-                  className={`m-0 whitespace-pre-line rounded-[14px] bg-superficie-2 px-4 py-3.5 text-[13px] leading-[1.6] [overflow-wrap:anywhere] ${
-                    c.legenda ? "" : "text-texto-3"
-                  }`}
-                >
-                  {c.legenda || "Este post ainda não tem legenda."}
-                </p>
-                <span className="text-[11px] text-texto-3">
-                  {(c.legenda ?? "").length.toLocaleString("pt-BR")} / {LIMITE_LEGENDA.toLocaleString("pt-BR")} caracteres
+              ) : (
+                <LoaderCircle size={24} className="animate-spin" aria-label="Carregando arte" />
+              )
+            ) : (
+              <>
+                <IconeImagem size={38} strokeWidth={1.6} aria-hidden />
+                <span className="text-[12px] font-bold">Nenhuma arte anexada</span>
+              </>
+            )}
+            {varias && (
+              <>
+                <span className="absolute right-3 top-3 rounded-full bg-[rgba(28,46,69,0.6)] px-[9px] py-1 text-[11px] font-bold text-white">
+                  {indice + 1}/{midias.length}
                 </span>
-              </section>
-
-              <section className="flex flex-col gap-2">
-                <h3 className="m-0 text-[14px] font-bold">Redes</h3>
-                <div className="flex flex-wrap gap-2">
-                  {c.redes.length === 0 && <span className="text-[13px] text-texto-3">Nenhuma rede escolhida.</span>}
-                  {c.redes.map((r) => (
-                    <span
-                      key={r}
-                      className="flex items-center gap-1.5 rounded-[10px] bg-azul-claro-2 px-3 py-1.5 text-[12px] font-bold text-[#1A57A6]"
-                    >
-                      <Check size={12} strokeWidth={3} aria-hidden />
-                      {REDE_LABEL[r]}
-                    </span>
-                  ))}
-                </div>
-              </section>
-
-              <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-borda bg-borda">
-                {detalhes.map(([k, v]) => (
-                  <div key={k} className="flex min-w-0 flex-col gap-1 bg-white px-3 py-2.5">
-                    <span className="text-[10px] font-bold tracking-[0.06em] text-texto-3">{k}</span>
-                    <span className="text-[13px] font-bold [overflow-wrap:anywhere]">{v}</span>
-                  </div>
-                ))}
-              </section>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5 rounded-[14px] border border-[#CFE0F5] bg-azul-claro px-3.5 py-3 text-[12px] leading-normal">
-            <Info size={18} strokeWidth={2} color="#1A66C2" aria-hidden className="flex-none" />
-            A publicação é feita à mão em cada rede. Depois de postar, marque como Publicado aqui.
-          </div>
-        </div>
-
-        <aside
-          aria-label="Aprovação e comentários"
-          className="flex min-h-[420px] min-w-0 flex-col gap-3.5 border-t border-borda bg-superficie-2 px-5 py-[22px] sm:px-6 lg:border-l lg:border-t-0"
-        >
-          <section className={`flex flex-col gap-3 rounded-[16px] border-[1.5px] p-4 ${aprovacao.classe}`}>
-            <span className="flex items-center gap-2 text-[13px] font-extrabold" style={{ color: aprovacao.cor }}>
-              <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: aprovacao.cor }} />
-              {aprovacao.titulo}
-            </span>
-            <span className="text-[12px] leading-normal text-texto-2">{aprovacao.texto}</span>
-            {status === "aprovacao" && (
-              <div className="grid grid-cols-2 gap-2">
-                <button type="button" onClick={() => mudarEtapa.mutate("producao")} disabled={ocupado} className="btn btn-secundario font-bold">
-                  Pedir ajuste
+                <button
+                  type="button"
+                  onClick={() => setCard((indice + midias.length - 1) % midias.length)}
+                  aria-label="Card anterior"
+                  className="absolute left-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                >
+                  <ChevronLeft size={16} strokeWidth={2.2} aria-hidden />
                 </button>
                 <button
                   type="button"
-                  onClick={() => mudarEtapa.mutate("agendado")}
-                  disabled={ocupado}
-                  className="btn bg-sucesso text-white hover:bg-[#17552E] disabled:opacity-60"
+                  onClick={() => setCard((indice + 1) % midias.length)}
+                  aria-label="Próximo card"
+                  className="absolute right-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
                 >
-                  Aprovar
+                  <ChevronRight size={16} strokeWidth={2.2} aria-hidden />
                 </button>
-              </div>
+              </>
             )}
+          </div>
+
+          {varias && (
+            <div className="grid flex-none grid-cols-4 gap-1.5">
+              {midias.map((m, i) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setCard(i)}
+                  aria-label={`Ver card ${i + 1}`}
+                  aria-pressed={i === indice}
+                  className={`box-border h-[52px] overflow-hidden rounded-[10px] border-[2.5px] bg-gelo p-0 text-[13px] font-extrabold text-texto-3 ${
+                    i === indice ? "border-azul" : "border-white"
+                  }`}
+                >
+                  {urls[m] ? <img src={urls[m]} alt="" className="h-full w-full object-cover" /> : i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={() => void baixarArtes()}
+            disabled={midias.length === 0 || baixando}
+            className="btn btn-secundario flex-none text-[12px] font-bold"
+          >
+            <Download size={14} strokeWidth={2} aria-hidden />
+            {baixando ? "Baixando…" : midias.length > 1 ? "Baixar artes" : "Baixar arte"}
+          </button>
+          {link && (
+            <a href={link} target="_blank" rel="noreferrer" className="link truncate text-center text-[12px]">
+              Abrir link do vídeo ou da pasta
+            </a>
+          )}
+        </ModalColuna>
+
+        {/* Coluna 2: legenda e detalhes */}
+        <ModalColuna className="!gap-4 lg:!pl-1.5">
+          <section className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <h3 className="m-0 text-[14px] font-bold">Legenda</h3>
+              {c.legenda && (
+                <button
+                  type="button"
+                  onClick={() => void copiarLegenda()}
+                  className={`min-h-8 border-0 bg-transparent px-2 text-[12px] font-bold ${copiada ? "text-sucesso" : "link"}`}
+                >
+                  {copiada ? "Copiada" : "Copiar legenda"}
+                </button>
+              )}
+            </div>
+            <p
+              className={`m-0 whitespace-pre-line rounded-[14px] bg-superficie-2 px-4 py-3.5 text-[13px] leading-[1.6] [overflow-wrap:anywhere] ${
+                c.legenda ? "" : "text-texto-3"
+              }`}
+            >
+              {c.legenda || "Este post ainda não tem legenda."}
+            </p>
+            <span className="text-[11px] text-texto-3">
+              {(c.legenda ?? "").length.toLocaleString("pt-BR")} / {LIMITE_LEGENDA.toLocaleString("pt-BR")} caracteres
+            </span>
           </section>
 
-          <CommentThread
-            conteudoId={c.id}
-            observacaoAntiga={c.observacoes}
-            variante="solta"
-            // Comentário por card só faz sentido com mais de uma arte.
-            cardAtivo={varias ? indice + 1 : null}
-          />
-        </aside>
-      </div>
+          <section className="flex flex-wrap items-center gap-2.5">
+            <h3 className="m-0 text-[14px] font-bold">Redes</h3>
+            {c.redes.length === 0 && <span className="text-[13px] text-texto-3">Nenhuma rede escolhida.</span>}
+            {c.redes.map((r) => (
+              <span key={r} className="flex items-center gap-1.5 rounded-[10px] bg-azul-claro-2 px-3 py-1.5 text-[12px] font-bold text-[#1A57A6]">
+                <Check size={12} strokeWidth={3} aria-hidden />
+                {REDE_LABEL[r]}
+              </span>
+            ))}
+          </section>
+
+          <section className="grid flex-none grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-borda bg-borda sm:grid-cols-3">
+            {detalhes.map(([k, v]) => (
+              <div key={k} className="flex min-w-0 flex-col gap-1 bg-white px-3 py-2.5">
+                <span className="text-[10px] font-bold tracking-[0.06em] text-texto-3">{k}</span>
+                <span className="text-[13px] font-bold [overflow-wrap:anywhere]">{v}</span>
+              </div>
+            ))}
+          </section>
+
+          <div className="flex flex-none items-center gap-2.5 rounded-[14px] border border-[#CFE0F5] bg-azul-claro px-3.5 py-3 text-[12px] leading-normal">
+            <Info size={18} strokeWidth={2} color="#1A66C2" aria-hidden className="flex-none" />
+            A publicação é feita à mão em cada rede. Depois de postar, marque como Publicado aqui.
+          </div>
+        </ModalColuna>
+
+        {/* Coluna 3: aprovação presa em cima, comentários rolando embaixo */}
+        <CommentThread
+          conteudoId={c.id}
+          observacaoAntiga={c.observacoes}
+          variante="coluna"
+          // Comentário por card só faz sentido com mais de uma arte.
+          cardAtivo={varias ? indice + 1 : null}
+          antes={
+            <section className={`flex flex-col gap-2.5 rounded-[16px] border-[1.5px] p-3.5 ${aprovacao.classe}`}>
+              <span className="flex items-center gap-2 text-[13px] font-extrabold" style={{ color: aprovacao.cor }}>
+                <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: aprovacao.cor }} />
+                {aprovacao.titulo}
+              </span>
+              <span className="text-[12px] leading-normal text-texto-2">{aprovacao.texto}</span>
+              {status === "aprovacao" && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button type="button" onClick={() => mudarEtapa.mutate("producao")} disabled={ocupado} className="btn btn-secundario font-bold">
+                    Pedir ajuste
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => mudarEtapa.mutate("agendado")}
+                    disabled={ocupado}
+                    className="btn bg-sucesso text-white hover:bg-[#17552E] disabled:opacity-60"
+                  >
+                    Aprovar
+                  </button>
+                </div>
+              )}
+            </section>
+          }
+        />
+      </ModalColunas>
     </ModalDegrade>
   );
 }

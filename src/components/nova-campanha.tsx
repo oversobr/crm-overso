@@ -3,7 +3,7 @@ import { ArrowRight, Check, Info, Megaphone } from "lucide-react";
 import { useState } from "react";
 
 import { periodoDaCampanha, prazoDaCampanha } from "@/components/ds/campaign-selector";
-import { ModalDegrade } from "@/components/ds/modal";
+import { ModalColuna, ModalColunas, ModalDegrade } from "@/components/ds/modal";
 import { CampanhaBadge } from "@/components/ds/status-badge";
 import { deYmd, somarDias, ymd } from "@/lib/datas";
 import { paginaDoLead } from "@/lib/leads";
@@ -161,21 +161,20 @@ export function NovaCampanha({
       aberto
       onFechar={onFechar}
       livre
-      largura={1040}
       icone={<Megaphone size={26} strokeWidth={1.8} aria-hidden />}
       titulo="Nova campanha"
       selo={projeto.nome}
       contexto="Um período de captação para separar os leads"
       rodape={
         <>
-          <button type="button" onClick={onFechar} className="btn btn-secundario min-h-[46px] font-bold">
+          <button type="button" onClick={onFechar} className="btn btn-secundario font-bold">
             Cancelar
           </button>
           <button
             type="button"
             onClick={() => criar.mutate()}
             disabled={!valido || criar.isPending}
-            className="btn btn-primario min-h-[46px] px-[22px]"
+            className="btn btn-primario px-[22px]"
           >
             {criar.isPending ? "Criando…" : "Criar campanha"}
             <ArrowRight size={16} strokeWidth={2} aria-hidden />
@@ -183,8 +182,9 @@ export function NovaCampanha({
         </>
       }
     >
-      <div className="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="flex min-w-0 flex-col gap-5 px-5 py-[22px] sm:px-7">
+      <ModalColunas colunas="minmax(0,1fr) minmax(0,1fr) 340px">
+        {/* Coluna 1: nome, período e landing pages */}
+        <ModalColuna>
           <label className="flex flex-col gap-2 text-[13px] font-bold">
             <span>
               Nome da campanha <span className="text-erro-texto">*</span>
@@ -195,7 +195,7 @@ export function NovaCampanha({
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               placeholder="Ex.: Harmonização Outubro"
-              className="campo min-h-12 text-[15px] font-semibold"
+              className="campo min-h-[46px] text-[15px] font-semibold"
             />
           </label>
 
@@ -210,7 +210,7 @@ export function NovaCampanha({
                   type="date"
                   value={inicio}
                   onChange={(e) => setInicio(e.target.value)}
-                  className="campo min-h-[46px] px-3 font-semibold"
+                  className="campo px-3 font-semibold"
                 />
               </label>
               <label className="flex flex-col gap-1.5 text-[12px] font-semibold text-texto-2">
@@ -221,7 +221,7 @@ export function NovaCampanha({
                   min={inicio || undefined}
                   onChange={(e) => setFim(e.target.value)}
                   aria-invalid={Boolean(inicio && fim && fim < inicio)}
-                  className="campo min-h-[46px] px-3 font-semibold"
+                  className="campo px-3 font-semibold"
                 />
               </label>
             </div>
@@ -253,7 +253,7 @@ export function NovaCampanha({
           <section className="flex flex-col gap-2.5">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-[13px] font-bold">Landing pages da campanha</span>
-              <span className="text-[11px] text-texto-3">{paginas.length ? "Escolha uma ou mais" : ""}</span>
+              <span className="text-[11px] text-texto-3">{paginas.length ? "Uma ou mais" : ""}</span>
             </div>
             {paginas.length === 0 ? (
               <p className="m-0 rounded-[12px] bg-superficie-2 px-3.5 py-3 text-[12px] leading-normal text-texto-3">
@@ -290,10 +290,13 @@ export function NovaCampanha({
               </div>
             )}
           </section>
+        </ModalColuna>
 
+        {/* Coluna 2: regra, meta, investimento e cor */}
+        <ModalColuna>
           <section className="flex flex-col gap-2.5">
             <span className="text-[13px] font-bold">Quais leads entram</span>
-            <div role="radiogroup" aria-label="Regra da campanha" className="grid gap-2.5 sm:grid-cols-2">
+            <div role="radiogroup" aria-label="Regra da campanha" className="flex flex-col gap-2">
               {REGRAS.map((r) => {
                 const marcada = regra === r.id;
                 return (
@@ -303,7 +306,7 @@ export function NovaCampanha({
                     role="radio"
                     aria-checked={marcada}
                     onClick={() => setRegra(r.id)}
-                    className={`flex items-start gap-3 rounded-[14px] border-2 p-3.5 text-left text-marinho transition-colors ${
+                    className={`flex items-start gap-3 rounded-[14px] border-2 px-3.5 py-3 text-left text-marinho transition-colors ${
                       marcada ? "border-azul bg-azul-claro" : "border-borda bg-white hover:border-borda-campo-hover"
                     }`}
                   >
@@ -314,7 +317,7 @@ export function NovaCampanha({
                     >
                       <span className={`h-2.5 w-2.5 rounded-full ${marcada ? "bg-azul" : "bg-transparent"}`} />
                     </span>
-                    <span className="flex flex-col gap-1">
+                    <span className="flex flex-col gap-[3px]">
                       <strong className="text-[13px]">{r.titulo}</strong>
                       <span className="text-[12px] font-normal leading-[1.45] text-texto-3">{r.texto}</span>
                     </span>
@@ -323,7 +326,7 @@ export function NovaCampanha({
               })}
             </div>
             {regra === "utm" && (
-              <label className="campo flex min-h-[46px] items-center gap-2.5 text-[12px] font-bold text-texto-3">
+              <label className="campo flex items-center gap-2.5 text-[12px] font-bold text-texto-3">
                 utm_campaign =
                 <input
                   type="text"
@@ -337,10 +340,12 @@ export function NovaCampanha({
             )}
           </section>
 
+          <div className="flex flex-col gap-2">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="flex flex-col gap-1.5 text-[13px] font-bold">
-              Meta de leads
-              <span className="text-[11px] font-medium text-texto-3">Opcional</span>
+              <span>
+                Meta de leads <span className="text-[11px] font-medium text-texto-3">opcional</span>
+              </span>
               <input
                 type="number"
                 min={0}
@@ -348,26 +353,29 @@ export function NovaCampanha({
                 value={meta}
                 onChange={(e) => setMeta(e.target.value)}
                 placeholder="Ex.: 400"
-                className="campo min-h-[46px] px-3 font-semibold"
+                className="campo px-3 font-semibold"
               />
             </label>
             <label className="flex flex-col gap-1.5 text-[13px] font-bold">
-              Investimento previsto
-              <span className="text-[11px] font-medium text-texto-3">Opcional, para calcular o custo por lead</span>
+              <span>
+                Investimento <span className="text-[11px] font-medium text-texto-3">opcional</span>
+              </span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={investimento}
                 onChange={(e) => setInvestimento(e.target.value)}
                 placeholder="R$ 0,00"
-                className="campo min-h-[46px] px-3 font-semibold"
+                className="campo px-3 font-semibold"
               />
             </label>
+          </div>
+          <span className="text-[11px] text-texto-3">Com o investimento, o portal calcula o custo por lead.</span>
           </div>
 
           <section className="flex flex-col gap-2.5">
             <span className="text-[13px] font-bold">Cor da campanha</span>
-            <div role="radiogroup" aria-label="Cor" className="flex flex-wrap gap-2.5">
+            <div role="radiogroup" aria-label="Cor" className="flex flex-wrap gap-2.5 pl-0.5">
               {CORES.map((c) => (
                 <button
                   key={c.hex}
@@ -385,12 +393,10 @@ export function NovaCampanha({
               ))}
             </div>
           </section>
-        </div>
+        </ModalColuna>
 
-        <aside
-          aria-label="Resumo da campanha"
-          className="flex min-w-0 flex-col gap-3.5 border-t border-borda bg-superficie-2 px-5 py-[22px] sm:px-6 lg:border-l lg:border-t-0"
-        >
+        {/* Coluna 3: a prévia */}
+        <ModalColuna aria-label="Resumo da campanha" fundo className="!gap-3.5">
           <span className="text-[11px] font-bold tracking-[0.1em] text-texto-3">COMO VAI APARECER</span>
           <div className="flex flex-col gap-3.5 rounded-[18px] border border-borda bg-white p-[18px]">
             <span className="flex items-center gap-3">
@@ -432,8 +438,8 @@ export function NovaCampanha({
             <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="mt-0.5 flex-none" />A campanha aparece no
             seletor de campanha das telas de Leads e Dashboard.
           </span>
-        </aside>
-      </div>
+        </ModalColuna>
+      </ModalColunas>
     </ModalDegrade>
   );
 }

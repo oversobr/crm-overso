@@ -171,12 +171,15 @@ export function ModalColunas({ colunas, children, className = "" }: { colunas: s
  */
 export function ModalColuna({
   children,
+  topo,
   rodape,
   fundo = false,
   className = "",
   ...resto
 }: {
   children: ReactNode;
+  /** Fica preso em cima, fora da rolagem: a caixa de aprovação e o título da lista. */
+  topo?: ReactNode;
   rodape?: ReactNode;
   /** Fundo cinza claro, para a coluna que é apoio e não o assunto principal. */
   fundo?: boolean;
@@ -188,7 +191,12 @@ export function ModalColuna({
       className={`flex min-h-0 min-w-0 flex-col border-borda max-lg:border-b max-lg:last:border-b-0 lg:border-r lg:last:border-r-0 ${fundo ? "bg-superficie-2" : ""}`}
       {...resto}
     >
-      <div className={`rolagem-fina flex min-h-0 flex-1 flex-col gap-[18px] px-5 py-5 sm:px-6 lg:overflow-y-auto [section:first-child>&]:sm:pl-7 ${className}`}>{children}</div>
+      {topo && <div className="flex flex-none flex-col gap-3 px-5 pt-5 sm:px-6">{topo}</div>}
+      <div
+        className={`rolagem-fina flex min-h-0 flex-1 flex-col gap-[18px] px-5 pb-5 sm:px-6 lg:overflow-y-auto [section:first-child>&]:sm:pl-7 ${topo ? "pt-3" : "pt-5"} ${className}`}
+      >
+        {children}
+      </div>
       {rodape && <div className="flex-none px-5 pb-5 pt-1 sm:px-6">{rodape}</div>}
     </section>
   );
@@ -200,8 +208,8 @@ export function ModalColuna({
  */
 export function ModalFaixa({ rotulo, children }: { rotulo: string; children: ReactNode }) {
   return (
-    <div className="grid items-center gap-x-3 gap-y-2 border-b border-borda px-5 py-3.5 sm:px-7 md:grid-cols-[90px_minmax(0,1fr)]">
-      <span className="text-[13px] font-bold">{rotulo}</span>
+    <div className="grid items-center gap-x-3 gap-y-2 border-b border-borda px-5 py-3.5 sm:px-7 md:grid-cols-[minmax(90px,max-content)_minmax(0,1fr)]">
+      <span className="whitespace-nowrap text-[13px] font-bold">{rotulo}</span>
       <div className="min-w-0">{children}</div>
     </div>
   );
@@ -280,7 +288,7 @@ export function StepperBotoes<T extends string>({
               onClick={() => onChange(e.id)}
               disabled={disabled}
               aria-current={agora ? "step" : undefined}
-              className={`flex min-h-[46px] flex-1 items-center justify-center gap-2 rounded-[12px] border-[1.5px] text-[13px] font-bold transition-colors ${
+              className={`flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[12px] border-[1.5px] text-[13px] font-bold transition-colors ${
                 agora
                   ? ""
                   : feita
