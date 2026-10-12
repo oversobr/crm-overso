@@ -2,7 +2,8 @@ import { useState } from "react";
 
 /** Azul para as etapas medidas pelo script da landing page, marinho para as do CRM. */
 export const COR_ETAPA_LP = "#1A66C2";
-export const COR_ETAPA_CRM = "#1C2E45";
+/** Marinho no claro; no escuro, um azul acinzentado que aparece sobre o card. */
+export const COR_ETAPA_CRM = "var(--grafico-crm)";
 
 export type EtapaDoFunil = {
   rotulo: string;
@@ -110,7 +111,7 @@ export function FunnelChart({ etapas, modo }: { etapas: EtapaDoFunil[]; modo: Mo
               {aberto && (
                 <span
                   role="tooltip"
-                  className="pointer-events-none absolute left-1/2 top-[-58px] z-[5] flex -translate-x-1/2 flex-col gap-[3px] whitespace-nowrap rounded-[12px] bg-marinho px-3.5 py-2.5 text-[12px] text-white shadow-[0_10px_24px_rgba(14,24,38,0.22)]"
+                  className="pointer-events-none absolute left-1/2 top-[-58px] z-[5] flex -translate-x-1/2 flex-col gap-[3px] whitespace-nowrap rounded-[12px] bg-navy px-3.5 py-2.5 text-[12px] text-white shadow-[0_10px_24px_rgba(14,24,38,0.22)]"
                 >
                   <strong className="text-[13px]">
                     {e.rotulo}: {inteiro(e.n)} pessoas

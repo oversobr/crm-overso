@@ -23,7 +23,7 @@ export function Card({
 }) {
   return (
     <section
-      className={`flex min-w-0 flex-col gap-3.5 rounded-[20px] border border-borda bg-white p-[22px] ${className}`}
+      className={`flex min-w-0 flex-col gap-3.5 rounded-[20px] border border-borda bg-superficie p-[22px] ${className}`}
       style={style}
       {...resto}
     >
@@ -53,7 +53,7 @@ export function HighlightCard({
 }) {
   return (
     <section
-      className={`relative flex min-w-0 flex-col gap-3.5 overflow-hidden rounded-[20px] p-[22px] text-white ${className}`}
+      className={`sobre-degrade relative flex min-w-0 flex-col gap-3.5 overflow-hidden rounded-[20px] p-[22px] text-white ${className}`}
       style={{ background: "var(--degrade-claro)", ...style }}
     >
       <MarcaOverso largura={190} altura={172} className="pointer-events-none absolute -right-[30px] -top-2.5 opacity-10" />
@@ -101,7 +101,7 @@ export function KpiCard({
   className?: string;
 }) {
   return (
-    <div className={`flex min-w-0 flex-col gap-2.5 rounded-[20px] border border-borda bg-white p-5 ${className}`}>
+    <div className={`flex min-w-0 flex-col gap-2.5 rounded-[20px] border border-borda bg-superficie p-5 ${className}`}>
       <span className="text-[13px] font-semibold text-texto-3">{rotulo}</span>
       <div className="flex items-baseline gap-2.5">
         <span className="text-[30px] font-extrabold leading-none tracking-[-0.02em]">{valor}</span>

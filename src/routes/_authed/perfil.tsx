@@ -173,7 +173,7 @@ function Capa({
 
   return (
     <section
-      className="relative flex flex-wrap items-center gap-[22px] overflow-hidden rounded-[20px] p-7 text-white"
+      className="sobre-degrade relative flex flex-wrap items-center gap-[22px] overflow-hidden rounded-[20px] p-7 text-white"
       style={{ background: "var(--degrade-profundo)" }}
     >
       <MarcaOverso largura={260} altura={235} className="pointer-events-none absolute -top-[30px] right-[30px] opacity-[0.08]" />
@@ -207,7 +207,7 @@ function Capa({
       <div className="relative flex min-w-[220px] flex-1 flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="text-[24px] font-extrabold leading-tight">{nome}</span>
-          <span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-[#1A57A6]">{NIVEL[nivel].rotulo}</span>
+          <span className="rounded-full bg-superficie px-2.5 py-1 text-[12px] font-bold text-link-chip">{NIVEL[nivel].rotulo}</span>
         </div>
         <span className="text-[14px] text-azul-claro-2">{NIVEL[nivel].descricao(projeto?.nome ?? "seu cliente")}</span>
       </div>
@@ -426,7 +426,7 @@ function Clientes() {
   }
 
   return (
-    <section className="flex min-w-0 flex-[1_1_466px] flex-col gap-3 rounded-[20px] border border-borda bg-white p-[22px]">
+    <section className="flex min-w-0 flex-[1_1_466px] flex-col gap-3 rounded-[20px] border border-borda bg-superficie p-[22px]">
       <div className="flex items-center justify-between gap-3">
         <h2 className="m-0 text-[16px] font-bold">Clientes que você acessa</h2>
         {superAdmin && (
@@ -461,7 +461,7 @@ function Clientes() {
                 <span
                   key={m}
                   className={`rounded-lg px-[9px] py-1 text-[11px] font-bold ${
-                    mods[m] ? "bg-azul-claro-2 text-[#1A57A6]" : "bg-[#ECEEF1] text-texto-3"
+                    mods[m] ? "bg-azul-claro-2 text-link-chip" : "bg-[var(--st-cinza-bg)] text-texto-3"
                   }`}
                 >
                   {MODULO_LABEL[m]}

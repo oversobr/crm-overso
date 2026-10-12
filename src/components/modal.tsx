@@ -47,14 +47,14 @@ export function Modal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
-        className="modal-backdrop absolute inset-0 bg-[rgba(28,46,69,0.55)]"
+        className="modal-backdrop absolute inset-0 bg-[var(--overlay)]"
         onClick={onFechar}
       />
       {/* Painel em coluna: o cabeçalho fica FORA da área que rola, então
           título e X não saem do topo — e nada passa por cima deles. max-h:
           janelas altas (lead, conteúdo) cabem na tela e rolam por dentro. */}
       <div
-        className={`modal-panel relative flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden ${maxW} rounded-[24px] bg-white shadow-[var(--sombra-modal)]`}
+        className={`modal-panel relative flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden ${maxW} rounded-[24px] bg-superficie shadow-[var(--sombra-modal)]`}
       >
         {titulo && (
           <header className="flex shrink-0 items-center justify-between gap-4 px-5 pb-3 pt-5 sm:px-6 sm:pt-6">

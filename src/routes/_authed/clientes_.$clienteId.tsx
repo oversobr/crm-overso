@@ -53,7 +53,7 @@ const MODULOS: { id: Modulo; dica: string }[] = [
   { id: "eventos", dica: "Demandas, materiais e divulgação" },
 ];
 
-const CARTAO = "flex flex-col rounded-[20px] border border-borda bg-white p-[22px]";
+const CARTAO = "flex flex-col rounded-[20px] border border-borda bg-superficie p-[22px]";
 
 type Popup = "dados" | "script" | "pessoa" | "campanhas" | "remover" | null;
 
@@ -202,7 +202,7 @@ function FichaDoCliente() {
 
       {/* Capa */}
       <section
-        className="relative flex flex-wrap items-center gap-[22px] overflow-hidden rounded-[20px] p-7 text-white"
+        className="sobre-degrade relative flex flex-wrap items-center gap-[22px] overflow-hidden rounded-[20px] p-7 text-white"
         style={{ background: "var(--degrade-profundo)" }}
       >
         <MarcaOverso largura={260} altura={235} className="pointer-events-none absolute right-[30px] top-[-30px] text-white opacity-[0.08]" />
@@ -211,7 +211,7 @@ function FichaDoCliente() {
           <div className="flex flex-wrap items-center gap-2.5">
             <h2 className="m-0 text-[28px] font-extrabold leading-tight [overflow-wrap:anywhere]">{base.nome}</h2>
             {noPainel && (
-              <span className="rounded-full bg-white px-2.5 py-1 text-[12px] font-bold text-[#1A57A6]">No painel agora</span>
+              <span className="rounded-full bg-superficie px-2.5 py-1 text-[12px] font-bold text-link-chip">No painel agora</span>
             )}
           </div>
           <span className="text-[14px] text-azul-claro-2">
@@ -249,7 +249,7 @@ function FichaDoCliente() {
               trocarCliente(clienteId);
               void router.navigate({ to: mods.crm ? "/" : mods.conteudo ? "/postagens" : "/eventos" });
             }}
-            className="btn bg-white px-[18px] font-bold text-marinho hover:bg-azul-claro focus-visible:outline-white"
+            className="btn bg-superficie px-[18px] font-bold text-marinho hover:bg-azul-claro focus-visible:outline-white"
           >
             Abrir no painel
             <ArrowRight size={16} strokeWidth={2} aria-hidden />
@@ -260,7 +260,7 @@ function FichaDoCliente() {
       {/* Números */}
       <div className="grid gap-3.5 [grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))]">
         {numeros.map((n) => (
-          <div key={n.rotulo} className="flex flex-col gap-2 rounded-[18px] border border-borda bg-white px-5 py-[18px]">
+          <div key={n.rotulo} className="flex flex-col gap-2 rounded-[18px] border border-borda bg-superficie px-5 py-[18px]">
             <span className="text-[12px] font-semibold text-texto-3">{n.rotulo}</span>
             <span className="text-[26px] font-extrabold leading-tight tracking-[-0.02em]">{n.valor}</span>
             <span className="text-[12px] text-texto-3">{n.nota}</span>
@@ -397,7 +397,7 @@ function FichaDoCliente() {
                     disabled={ultimo || alternar.isPending}
                     onClick={() => alternar.mutate(m.id)}
                     className={`flex min-h-[60px] items-center justify-between gap-3.5 rounded-[14px] border-[1.5px] px-3.5 py-2.5 text-left text-marinho transition-colors disabled:cursor-default ${
-                      ligado ? "border-azul bg-azul-claro" : "border-borda bg-white hover:border-nevoa"
+                      ligado ? "border-azul bg-azul-claro" : "border-borda bg-superficie hover:border-nevoa"
                     }`}
                   >
                     <span className="flex flex-col gap-0.5">
@@ -410,7 +410,7 @@ function FichaDoCliente() {
                         ligado ? "justify-end bg-azul" : "justify-start bg-nevoa-2"
                       }`}
                     >
-                      <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+                      <span className="h-5 w-5 rounded-full bg-superficie shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
                     </span>
                   </button>
                 );
@@ -452,7 +452,7 @@ function FichaDoCliente() {
           </section>
 
           {superAdmin && (
-            <section className="flex flex-col gap-2.5 rounded-[20px] border-[1.5px] border-[#F2C7C2] bg-white p-[22px]">
+            <section className="flex flex-col gap-2.5 rounded-[20px] border-[1.5px] border-[var(--st-vermelho-border-forte)] bg-superficie p-[22px]">
               <h2 className="m-0 text-[16px] font-bold text-erro-texto">Remover cliente</h2>
               <span className="text-[12px] leading-normal text-texto-2">
                 Apaga leads, posts e acessos deste cliente. A landing page para de enviar leads. Não dá para desfazer.
@@ -460,7 +460,7 @@ function FichaDoCliente() {
               <button
                 type="button"
                 onClick={() => setPopup("remover")}
-                className="btn self-start border-[1.5px] border-erro bg-white px-4 font-bold text-erro-texto hover:bg-erro-fundo"
+                className="btn self-start border-[1.5px] border-erro bg-superficie px-4 font-bold text-erro-texto hover:bg-erro-fundo"
               >
                 <Trash2 size={16} strokeWidth={1.8} aria-hidden />
                 Remover {base.nome}
@@ -514,7 +514,7 @@ function Logo({ perfil, nome, onSalvo }: { perfil: PerfilCliente | undefined; no
   });
 
   return (
-    <span className="relative flex h-24 w-24 flex-none items-center justify-center rounded-[24px] bg-white text-[30px] font-extrabold text-azul">
+    <span className="relative flex h-24 w-24 flex-none items-center justify-center rounded-[24px] bg-superficie text-[30px] font-extrabold text-link">
       {perfil?.logo_url ? (
         <img src={perfil.logo_url} alt="" className="h-full w-full rounded-[24px] object-contain p-2" />
       ) : (
@@ -538,7 +538,7 @@ function Logo({ perfil, nome, onSalvo }: { perfil: PerfilCliente | undefined; no
         title={trocar.isPending ? "Enviando…" : "Trocar logo"}
         disabled={!perfil || trocar.isPending}
         onClick={() => entrada.current?.click()}
-        className="absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-[#1757A6] bg-white p-0 text-marinho transition-colors hover:bg-azul-claro focus-visible:outline-white disabled:opacity-70"
+        className="absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-[#1757A6] bg-superficie p-0 text-marinho transition-colors hover:bg-azul-claro focus-visible:outline-white disabled:opacity-70"
       >
         <Pencil size={14} strokeWidth={2} aria-hidden />
       </button>
@@ -599,7 +599,7 @@ function Links({ perfil, onSalvo }: { perfil: PerfilCliente; onSalvo: () => Prom
           <button
             type="button"
             onClick={() => setAdicionando(true)}
-            className="btn btn-36 border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-[#1A57A6] hover:bg-azul-claro-2"
+            className="btn btn-36 border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-link-chip hover:bg-azul-claro-2"
           >
             <Plus size={14} strokeWidth={2.2} aria-hidden />
             Adicionar link
@@ -658,14 +658,14 @@ function Links({ perfil, onSalvo }: { perfil: PerfilCliente; onSalvo: () => Prom
                 rel="noreferrer"
                 className="flex min-w-0 flex-1 items-center gap-3 rounded-[14px] py-2.5 pl-3.5 text-marinho no-underline"
               >
-                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-azul-claro-2 text-azul">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-azul-claro-2 text-link">
                   <Link2 size={16} strokeWidth={2} aria-hidden />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-[13px] font-bold">{l.rotulo || "Link"}</span>
                   <span className="truncate text-[12px] text-texto-3">{l.url.replace(/^https?:[/][/]/, "")}</span>
                 </span>
-                <ArrowUpRight size={16} strokeWidth={2} color="#55657A" aria-hidden className="flex-none" />
+                <ArrowUpRight size={16} strokeWidth={2} color="var(--text-3)" aria-hidden className="flex-none" />
               </a>
               <button
                 type="button"
@@ -698,7 +698,7 @@ function LinhaDePagina({ pagina }: { pagina: LandingPage }) {
   const dias = Math.floor((Date.now() - new Date(pagina.ultimoLead).getTime()) / 864e5);
   const recebendo = dias < 2;
   return (
-    <div className="grid min-h-14 grid-cols-1 items-center gap-x-3.5 gap-y-1.5 border-b border-gelo px-1 py-2 text-[13px] sm:grid-cols-[minmax(0,1.6fr)_1fr_1fr]">
+    <div className="grid min-h-14 grid-cols-1 items-center gap-x-3.5 gap-y-1.5 border-b border-divisor px-1 py-2 text-[13px] sm:grid-cols-[minmax(0,1.6fr)_1fr_1fr]">
       <span className="flex min-w-0 flex-col gap-0.5">
         <strong className="truncate font-bold">{nomeDaPagina(pagina.endereco)}</strong>
         <span className="truncate text-[12px] text-texto-3">{pagina.endereco}</span>
@@ -723,9 +723,9 @@ function LinhaDePagina({ pagina }: { pagina: LandingPage }) {
 /* ── Quem acessa ────────────────────────────────────────────────────── */
 
 const TOM_PESSOA = {
-  super: { avatar: "bg-marinho text-white", selo: "bg-marinho text-white" },
-  admin: { avatar: "bg-azul text-white", selo: "bg-azul-claro-2 text-[#1A57A6]" },
-  membro: { avatar: "bg-azul-claro-2 text-[#1A57A6]", selo: "bg-[#ECEEF1] text-[#4A5868]" },
+  super: { avatar: "bg-navy text-white", selo: "bg-navy text-white" },
+  admin: { avatar: "bg-azul text-white", selo: "bg-azul-claro-2 text-link-chip" },
+  membro: { avatar: "bg-azul-claro-2 text-link-chip", selo: "bg-[var(--st-cinza-bg)] text-texto-4b" },
 } as const;
 
 function Pessoa({

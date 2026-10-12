@@ -1,6 +1,7 @@
 import { acessosPorCliente } from "./guardado";
 import { receberDaConta } from "./notificacoes";
 import { getSupabaseBrowserClient } from "./supabase/client";
+import { acompanharSistema, receberTemaDaConta } from "./tema";
 
 /**
  * O que é de cada conta e antes vivia só no navegador: notificações lidas,
@@ -15,6 +16,8 @@ import { getSupabaseBrowserClient } from "./supabase/client";
 /** Traz do banco o que a conta já tem e junta com o que está neste navegador. */
 export async function sincronizarConta() {
   const sb = getSupabaseBrowserClient();
+  acompanharSistema();
+  void receberTemaDaConta().catch(() => {});
   const [lidas, preferencias, acessos] = await Promise.all([
     sb.from("notificacoes_lidas").select("chave").order("lida_em", { ascending: false }).limit(400),
     sb.from("preferencias_usuario").select("avisos_desligados").maybeSingle(),

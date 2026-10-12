@@ -133,7 +133,7 @@ export function LeadDetalhe({
                   aria-checked={marcado}
                   onClick={() => setStatus(s)}
                   className={`flex min-h-11 items-center justify-center gap-2 rounded-[12px] border-[1.5px] px-2 text-[13px] font-bold transition-colors ${
-                    marcado ? "" : "border-borda-campo bg-white text-texto-2 hover:border-borda-campo-hover"
+                    marcado ? "" : "border-borda-campo bg-superficie text-texto-2 hover:border-borda-campo-hover"
                   }`}
                   style={marcado ? { background: cor.fundo, color: cor.texto, borderColor: cor.ponto } : undefined}
                 >
@@ -151,7 +151,7 @@ export function LeadDetalhe({
             href={linkWhatsApp(lead.whatsapp)}
             target="_blank"
             rel="noreferrer"
-            className="btn bg-white text-sucesso hover:bg-sucesso-fundo focus-visible:outline-white"
+            className="btn bg-superficie text-sucesso hover:bg-sucesso-fundo focus-visible:outline-white"
           >
             <MessageCircle size={18} strokeWidth={1.8} aria-hidden />
             Abrir WhatsApp
@@ -227,7 +227,7 @@ export function LeadDetalhe({
               ))}
               {utms.length === 0 && anuncios.length === 0 && <Origem rotulo="SOURCE">direto</Origem>}
               {/* Número ímpar de caixas: a última célula fica branca, não cinza. */}
-              {celulasDeOrigem % 2 === 1 && <span className="bg-white" />}
+              {celulasDeOrigem % 2 === 1 && <span className="bg-superficie" />}
             </div>
           </Secao>
 
@@ -245,7 +245,7 @@ export function LeadDetalhe({
                 {respostas.map(([pergunta, valor]) => (
                   <div
                     key={pergunta}
-                    className="grid gap-x-3 gap-y-1 border-b border-gelo px-3.5 py-3 text-[13px] last:border-b-0 sm:grid-cols-[170px_minmax(0,1fr)]"
+                    className="grid gap-x-3 gap-y-1 border-b border-divisor px-3.5 py-3 text-[13px] last:border-b-0 sm:grid-cols-[170px_minmax(0,1fr)]"
                   >
                     <span className="font-semibold text-texto-3 [overflow-wrap:anywhere]">{pergunta}</span>
                     <span className="font-bold [overflow-wrap:anywhere]">{valorDaResposta(valor)}</span>
@@ -293,9 +293,9 @@ function Caixa({ rotulo, children }: { rotulo: string; children: ReactNode }) {
 
 function Origem({ rotulo, azul = false, children }: { rotulo: string; azul?: boolean; children: ReactNode }) {
   return (
-    <div className="flex min-w-0 flex-col gap-1 bg-white px-3.5 py-3">
+    <div className="flex min-w-0 flex-col gap-1 bg-superficie px-3.5 py-3">
       <span className="text-[11px] font-bold tracking-[0.06em] text-texto-3">{rotulo}</span>
-      <span className={`text-[13px] font-bold [overflow-wrap:anywhere] ${azul ? "text-[#1A57A6]" : ""}`}>{children}</span>
+      <span className={`text-[13px] font-bold [overflow-wrap:anywhere] ${azul ? "text-link-chip" : ""}`}>{children}</span>
     </div>
   );
 }
@@ -323,10 +323,10 @@ function Jornada({ lead }: { lead: Lead }) {
           <div
             key={p.rotulo}
             className={`flex flex-col gap-1.5 rounded-[14px] border px-3.5 py-3 ${
-              p.quando ? "border-[#CFE0F5] bg-azul-claro" : "border-dashed border-nevoa-2 bg-superficie-2"
+              p.quando ? "border-[var(--border-info)] bg-azul-claro" : "border-dashed border-nevoa-2 bg-superficie-2"
             }`}
           >
-            <span className={`flex items-center gap-2 text-[12px] font-bold ${p.quando ? "text-[#1A57A6]" : "text-texto-4"}`}>
+            <span className={`flex items-center gap-2 text-[12px] font-bold ${p.quando ? "text-link-chip" : "text-texto-4"}`}>
               <span
                 className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white ${
                   p.quando ? "bg-azul" : "bg-nevoa"
@@ -411,7 +411,7 @@ function Anotacoes({ leadId }: { leadId: string }) {
     >
       <div className="flex items-center justify-between">
         <h3 className="m-0 text-[14px] font-bold">Anotações da equipe</h3>
-        <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-[#1A57A6]">{notas.length}</span>
+        <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-link-chip">{notas.length}</span>
       </div>
 
       {!isLoading && notas.length === 0 && (
@@ -426,10 +426,10 @@ function Anotacoes({ leadId }: { leadId: string }) {
         const autor = minha ? usuario.nome || "Você" : n.autor_nome || "Equipe";
         return (
           <div key={n.id} className="flex gap-2.5">
-            <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-marinho text-[10px] font-bold text-white">
+            <span className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full bg-navy text-[10px] font-bold text-white">
               {minha ? usuario.iniciais : n.autor_nome ? iniciais(n.autor_nome) : "EQ"}
             </span>
-            <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-[4px_12px_12px_12px] bg-white px-[11px] py-[9px]">
+            <div className="flex min-w-0 flex-1 flex-col gap-1 rounded-[4px_12px_12px_12px] bg-superficie px-[11px] py-[9px]">
               <span className="flex flex-wrap items-baseline gap-x-1.5">
                 <span className="text-[12px] font-bold">{autor}</span>
                 <span className="text-[10px] text-texto-3">{chegouEm(n.criado_em)}</span>

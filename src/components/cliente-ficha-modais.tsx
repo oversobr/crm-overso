@@ -152,7 +152,7 @@ export function BotaoCopiar({ texto, rotulo, copiado: rotuloCopiado }: { texto: 
         setTimeout(() => setCopiado(false), 1800);
       }}
       className={`btn btn-40 whitespace-nowrap border px-3 text-[12px] font-bold ${
-        copiado ? "border-sucesso bg-sucesso-fundo text-sucesso" : "border-borda-campo bg-white text-marinho hover:bg-superficie-2"
+        copiado ? "border-sucesso bg-sucesso-fundo text-sucesso" : "border-borda-campo bg-superficie text-marinho hover:bg-superficie-2"
       }`}
     >
       {copiado ? <Check size={14} strokeWidth={2.4} aria-hidden /> : <Copy size={14} strokeWidth={1.8} aria-hidden />}
@@ -199,8 +199,8 @@ export function ScriptDaLanding({
 
   return (
     <div className={`flex flex-col gap-3 ${largo ? "min-h-[240px] flex-[1_1_0px]" : ""}`}>
-      <div className={`flex flex-col overflow-hidden rounded-[14px] border border-marinho ${largo ? "min-h-[240px] flex-[1_1_0px]" : ""}`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-marinho py-2.5 pl-4 pr-3 text-azul-claro-2">
+      <div className={`flex flex-col overflow-hidden rounded-[14px] border border-navy ${largo ? "min-h-[240px] flex-[1_1_0px]" : ""}`}>
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-navy py-2.5 pl-4 pr-3 text-[#E3EEFA]">
           <span className="text-[12px]">
             Script de <strong className="text-white">{nome}</strong> · copie tudo ({script.split("\n").length} linhas)
           </span>
@@ -250,7 +250,7 @@ function CopiarScript({ texto }: { texto: string }) {
         setCopiado(true);
         setTimeout(() => setCopiado(false), 1800);
       }}
-      className={`btn btn-36 border-0 px-3 text-[12px] font-bold text-white ${copiado ? "bg-sucesso" : "bg-azul hover:bg-azul-hover"}`}
+      className={`btn btn-36 border-0 px-3 text-[12px] font-bold text-white ${copiado ? "bg-verde" : "bg-azul hover:bg-azul-hover"}`}
     >
       {copiado ? <Check size={14} strokeWidth={2.4} aria-hidden /> : <Copy size={14} strokeWidth={2} aria-hidden />}
       {copiado ? "Copiado" : "Copiar script"}
@@ -365,7 +365,7 @@ export function AdicionarPessoaModal({
                 aria-checked={papel === n.id}
                 onClick={() => setPapel(n.id)}
                 className={`flex min-h-[60px] flex-col justify-center gap-0.5 rounded-[14px] border-[1.5px] px-3.5 py-2.5 text-left text-marinho transition-colors ${
-                  papel === n.id ? "border-azul bg-azul-claro" : "border-borda bg-white hover:border-nevoa"
+                  papel === n.id ? "border-azul bg-azul-claro" : "border-borda bg-superficie hover:border-nevoa"
                 }`}
               >
                 <span className="text-[14px] font-bold">{n.rotulo}</span>

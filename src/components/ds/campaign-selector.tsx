@@ -87,7 +87,7 @@ export function CampaignSelector({
   return (
     <section
       aria-label="Campanha"
-      className="relative z-[6] flex flex-wrap items-center gap-4 rounded-[20px] border border-borda bg-white px-3.5 py-3"
+      className="relative z-[6] flex flex-wrap items-center gap-4 rounded-[20px] border border-borda bg-superficie px-3.5 py-3"
     >
       <div ref={caixa} className="relative max-w-full">
         <button
@@ -116,7 +116,7 @@ export function CampaignSelector({
           <div
             role="listbox"
             aria-label="Campanhas"
-            className="menu-in absolute left-0 top-[62px] z-40 flex w-[400px] max-w-[calc(100vw-48px)] flex-col overflow-hidden rounded-[18px] border border-borda bg-white shadow-[var(--sombra-popup)]"
+            className="menu-in absolute left-0 top-[62px] z-40 flex w-[400px] max-w-[calc(100vw-48px)] flex-col overflow-hidden rounded-[18px] border border-borda bg-superficie shadow-[var(--sombra-popup)]"
           >
             <span className="px-4 pb-2 pt-3.5 text-[11px] font-bold tracking-[0.1em] text-texto-3">ESCOLHA A CAMPANHA</span>
             <div className="rolagem-fina flex max-h-[min(340px,55vh)] flex-col gap-1 overflow-y-auto px-2 pb-2">
@@ -140,7 +140,7 @@ export function CampaignSelector({
                       <span className="text-[11px] text-texto-3">{o.periodo}</span>
                     </span>
                     {o.status && <CampanhaBadge status={o.status} />}
-                    {sel && <Check size={16} strokeWidth={3} color="#1A66C2" aria-hidden className="shrink-0" />}
+                    {sel && <Check size={16} strokeWidth={3} color="var(--link)" aria-hidden className="shrink-0" />}
                   </button>
                 );
               })}
@@ -151,7 +151,7 @@ export function CampaignSelector({
                 setAberto(false);
                 setCriando(true);
               }}
-              className="link flex min-h-12 items-center gap-2 border-0 border-t border-solid border-gelo bg-transparent px-4 text-left text-[13px] font-bold hover:no-underline"
+              className="link flex min-h-12 items-center gap-2 border-0 border-t border-solid border-divisor bg-transparent px-4 text-left text-[13px] font-bold hover:no-underline"
             >
               <Plus size={16} strokeWidth={2.2} aria-hidden />
               Nova campanha

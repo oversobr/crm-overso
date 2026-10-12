@@ -165,7 +165,7 @@ function Login() {
           {/* Abaixo de 1024px o painel azul some; a marca aparece aqui. */}
           <div className="flex items-center gap-3 lg:hidden">
             <LogoOverso className="h-5 w-auto" />
-            <span className="rounded-md bg-borda-campo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">PORTAL</span>
+            <span className="rounded-md bg-grupo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">PORTAL</span>
           </div>
 
           {passo === "entrar" && (
@@ -203,8 +203,8 @@ function Login() {
 
               <Enviar carregando={carregando} rotulo="Entrar" ocupado="Entrando…" />
 
-              <div className="flex gap-3 rounded-[16px] border border-borda bg-white p-4">
-                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-azul-claro-2 text-azul">
+              <div className="flex gap-3 rounded-[16px] border border-borda bg-superficie p-4">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] bg-azul-claro-2 text-link">
                   <Info size={18} strokeWidth={1.8} aria-hidden />
                 </span>
                 <span className="flex flex-col gap-1 text-[13px] leading-normal text-texto-2">
@@ -259,7 +259,7 @@ function PainelDaMarca() {
   return (
     <section
       aria-label="Portal OVERSO"
-      className="relative box-border hidden flex-[1_1_520px] flex-col justify-between gap-10 overflow-hidden px-14 py-12 text-white lg:flex"
+      className="sobre-degrade relative box-border hidden flex-[1_1_520px] flex-col justify-between gap-10 overflow-hidden px-14 py-12 text-white lg:flex"
       style={{ background: "linear-gradient(140deg, #0F3A70 0%, #1757A6 55%, #1A66C2 100%)" }}
     >
       <MarcaOverso largura={620} altura={560} className="pointer-events-none absolute -bottom-[120px] -right-[140px] opacity-[0.07]" />
@@ -283,7 +283,7 @@ function PainelDaMarca() {
               key={titulo}
               className="flex items-center gap-3.5 rounded-[16px] border border-white/20 bg-white/[0.12] px-4 py-3.5 backdrop-blur-[10px]"
             >
-              <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[12px] bg-white text-[#1A57A6]">
+              <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[12px] bg-superficie text-link-chip">
                 <Icone tamanho={20} />
               </span>
               <span className="flex flex-col gap-0.5">

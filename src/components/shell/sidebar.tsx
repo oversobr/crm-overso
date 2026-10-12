@@ -110,7 +110,7 @@ export function Sidebar({
   return (
     <>
       {/* Véu do celular: escurece o conteúdo e fecha a gaveta ao tocar fora. */}
-      {aberto && <div onClick={onFechar} aria-hidden className="modal-backdrop fixed inset-0 z-40 bg-[rgba(28,46,69,0.55)] lg:hidden" />}
+      {aberto && <div onClick={onFechar} aria-hidden className="modal-backdrop fixed inset-0 z-40 bg-[var(--overlay)] lg:hidden" />}
 
       {/* 296px e não os 260 do `flex-basis` do design: lá o cabeçalho (marca,
           OVERSO, PORTAL, botão) não quebra linha e empurra o menu até essa
@@ -139,7 +139,7 @@ export function Sidebar({
         ) : (
           <div className="flex shrink-0 items-center gap-3 px-1.5">
             <LogoOverso className="h-5 w-auto shrink-0" />
-            <span className="rounded-md bg-borda-campo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">
+            <span className="rounded-md bg-grupo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">
               PORTAL
             </span>
             {/* No celular este canto é o botão de fechar a gaveta. */}
@@ -177,8 +177,8 @@ export function Sidebar({
 
         {/* Aviso do módulo não contratado: lembra que ele existe. */}
         {!compacto && bloqueado && (
-          <div className="mt-auto flex shrink-0 flex-col items-center gap-2.5 rounded-[18px] bg-marinho px-[18px] py-[22px] text-center text-gelo">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-marinho-hover">
+          <div className="mt-auto flex shrink-0 flex-col items-center gap-2.5 rounded-[18px] bg-navy px-[18px] py-[22px] text-center text-[#EDF1F4]">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-navy-2">
               <Lock size={18} strokeWidth={1.8} color="#FFFFFF" aria-hidden />
             </span>
             <span className="text-[15px] font-bold">Módulo {MODULO_LABEL[bloqueado]}</span>
@@ -202,7 +202,7 @@ export function Sidebar({
         createPortal(
           <span
             role="tooltip"
-            className="pointer-events-none fixed z-[80] flex -translate-y-1/2 items-center gap-2 whitespace-nowrap rounded-[10px] bg-marinho px-3 py-2 text-[12px] font-bold text-white shadow-[0_8px_20px_rgba(14,24,38,0.2)]"
+            className="pointer-events-none fixed z-[80] flex -translate-y-1/2 items-center gap-2 whitespace-nowrap rounded-[10px] bg-navy px-3 py-2 text-[12px] font-bold text-white shadow-[0_8px_20px_rgba(14,24,38,0.2)]"
             style={{ top: dica.top, left: dica.left }}
           >
             {dica.rotulo}
@@ -216,7 +216,7 @@ export function Sidebar({
 
 /** Título de grupo. No menu recolhido não cabe: vira um traço entre os grupos. */
 function Rotulo({ children, compacto, primeiro = false }: { children: string; compacto: boolean; primeiro?: boolean }) {
-  if (compacto) return <span aria-hidden className="mx-2.5 my-2 block h-px bg-borda-campo" />;
+  if (compacto) return <span aria-hidden className="mx-2.5 my-2 block h-px bg-grupo" />;
   return (
     <span className={`px-3 pb-1.5 text-[11px] font-bold tracking-[0.12em] text-texto-3 ${primeiro ? "" : "pt-4"}`}>
       {children}
@@ -279,7 +279,7 @@ function ItemMenu({
 
           {selo &&
             (compacto ? (
-              <span className="absolute right-1.5 top-1 box-border flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-gelo bg-azul px-1 text-[9px] font-bold text-white">
+              <span className="absolute right-1.5 top-1 box-border flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-divisor bg-azul px-1 text-[9px] font-bold text-white">
                 {selo}
               </span>
             ) : (
@@ -288,7 +288,7 @@ function ItemMenu({
 
           {trancado &&
             (compacto ? (
-              <span className="absolute bottom-1.5 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-borda-campo text-texto-3">
+              <span className="absolute bottom-1.5 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-grupo text-texto-3">
                 <Lock size={10} strokeWidth={2.6} aria-hidden />
               </span>
             ) : (
@@ -347,7 +347,7 @@ function ClientSwitcher({ compacto, onTrocar }: { compacto: boolean; onTrocar: (
 
   const classe = compacto
     ? "flex min-h-12 w-full shrink-0 items-center justify-center rounded-[12px] bg-azul"
-    : "flex min-h-[60px] w-full shrink-0 items-center gap-3 rounded-[14px] border border-borda-campo bg-white px-3 py-2.5 text-left text-marinho";
+    : "flex min-h-[60px] w-full shrink-0 items-center gap-3 rounded-[14px] border border-borda-campo bg-superficie px-3 py-2.5 text-left text-marinho";
 
   // Uma conta só: não há o que trocar, então não é botão.
   if (!varios) {
@@ -382,7 +382,7 @@ function ClientSwitcher({ compacto, onTrocar }: { compacto: boolean; onTrocar: (
         lado={compacto ? "direita" : "abaixo"}
         role="listbox"
         aria-label="Clientes"
-        className="flex w-[320px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[18px] border border-borda bg-white text-marinho shadow-[var(--sombra-popup)]"
+        className="flex w-[320px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[18px] border border-borda bg-superficie text-marinho shadow-[var(--sombra-popup)]"
       >
         <span className="px-4 pb-2 pt-3.5 text-[11px] font-bold tracking-[0.1em] text-texto-3">ESCOLHA O CLIENTE</span>
         <div className="rolagem-fina flex max-h-[min(360px,60vh)] flex-col gap-1 overflow-y-auto px-2 pb-2">
@@ -411,7 +411,7 @@ function ClientSwitcher({ compacto, onTrocar }: { compacto: boolean; onTrocar: (
                   <span className="truncate text-[13px] font-bold">{p.nome}</span>
                   <span className="truncate text-[11px] text-texto-3">{modulosDoCliente(p) || "Sem módulos ligados"}</span>
                 </span>
-                {sel && <Check size={16} strokeWidth={3} color="#1A66C2" aria-hidden className="shrink-0" />}
+                {sel && <Check size={16} strokeWidth={3} color="var(--link)" aria-hidden className="shrink-0" />}
               </button>
             );
           })}

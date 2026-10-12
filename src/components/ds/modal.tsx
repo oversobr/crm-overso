@@ -79,22 +79,22 @@ export function ModalDegrade({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5 lg:px-[60px] lg:py-9">
-      <div className="modal-backdrop fixed inset-0 bg-[rgba(28,46,69,0.55)]" onClick={onFechar} aria-hidden="true" />
+      <div className="modal-backdrop fixed inset-0 bg-[var(--overlay)]" onClick={onFechar} aria-hidden="true" />
       <div
         ref={painel}
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
         tabIndex={-1}
-        className="modal-panel relative flex max-h-[calc(100dvh-24px)] w-full flex-col rounded-[24px] bg-white text-marinho shadow-[var(--sombra-modal)] outline-none sm:max-h-[calc(100dvh-40px)] lg:max-h-[calc(100dvh-72px)]"
+        className="modal-panel relative flex max-h-[calc(100dvh-24px)] w-full flex-col rounded-[24px] bg-superficie text-marinho shadow-[var(--sombra-modal)] outline-none sm:max-h-[calc(100dvh-40px)] lg:max-h-[calc(100dvh-72px)]"
         style={{ maxWidth: largura }}
       >
         <div
-          className="flex flex-none flex-wrap items-center justify-between gap-4 rounded-t-[24px] px-5 py-[18px] text-white sm:px-7"
+          className="sobre-degrade flex flex-none flex-wrap items-center justify-between gap-4 rounded-t-[24px] px-5 py-[18px] text-white sm:px-7"
           style={{ background: "var(--degrade-profundo)" }}
         >
           <div className="flex min-w-0 items-center gap-4">
-            <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-white text-[16px] font-extrabold text-[#1A57A6] [&>svg]:h-[22px] [&>svg]:w-[22px]">
+            <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-superficie text-[16px] font-extrabold text-link-chip [&>svg]:h-[22px] [&>svg]:w-[22px]">
               {icone}
             </span>
             <div className="flex min-w-0 flex-col gap-1">
@@ -229,7 +229,7 @@ export function Stepper({ etapas, atual }: { etapas: string[]; atual: number }) 
         return (
           <li key={nome} className="contents">
             {i > 0 && (
-              <span aria-hidden="true" className={`h-0.5 flex-1 rounded-full ${i <= atual ? "bg-azul" : "bg-borda-campo"}`} />
+              <span aria-hidden="true" className={`h-0.5 flex-1 rounded-full ${i <= atual ? "bg-azul" : "bg-grupo"}`} />
             )}
             <span
               aria-current={agora ? "step" : undefined}
@@ -239,7 +239,7 @@ export function Stepper({ etapas, atual }: { etapas: string[]; atual: number }) 
             >
               <span
                 className={`flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full text-[13px] font-extrabold ${
-                  agora ? "bg-azul text-white" : feita ? "bg-azul-claro-2 text-azul" : "bg-gelo text-texto-3"
+                  agora ? "bg-azul text-white" : feita ? "bg-azul-claro-2 text-link" : "bg-gelo text-texto-3"
                 }`}
               >
                 {feita ? <Check size={14} strokeWidth={3} aria-hidden /> : i + 1}
@@ -293,7 +293,7 @@ export function StepperBotoes<T extends string>({
                   ? ""
                   : feita
                     ? "border-borda bg-superficie-2 text-texto-2 hover:border-borda-campo-hover"
-                    : "border-borda bg-white text-texto-3 hover:border-borda-campo-hover hover:text-marinho"
+                    : "border-borda bg-superficie text-texto-3 hover:border-borda-campo-hover hover:text-marinho"
               }`}
               style={agora ? { background: e.cor.fundo, color: e.cor.texto, borderColor: e.cor.ponto } : undefined}
             >

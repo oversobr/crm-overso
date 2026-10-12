@@ -37,7 +37,7 @@ export function SegmentedBars({ fatias, barras = 40 }: { fatias: Fatia[]; barras
   );
   const cores = fatias.flatMap((f, i) => Array.from({ length: partes[i] ?? 0 }, () => f.cor));
   // Sem dado nenhum, o desenho continua lá, em cinza: mantém a altura do card.
-  const desenho = cores.length ? cores : Array.from({ length: barras }, () => "#EDF1F4");
+  const desenho = cores.length ? cores : Array.from({ length: barras }, () => "var(--bg-app)");
 
   return (
     <div className="flex h-16 gap-[3px]" aria-hidden="true">

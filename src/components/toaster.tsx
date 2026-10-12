@@ -16,7 +16,7 @@ export function Toaster() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="toast-in flex items-center gap-2.5 rounded-[12px] border border-borda bg-white px-4 py-3 text-[13px] font-semibold text-marinho shadow-[var(--sombra-popup)]"
+          className="toast-in flex items-center gap-2.5 rounded-[12px] border border-borda bg-superficie px-4 py-3 text-[13px] font-semibold text-marinho shadow-[var(--sombra-popup)]"
         >
           {ICONE[t.tipo]}
           {t.msg}

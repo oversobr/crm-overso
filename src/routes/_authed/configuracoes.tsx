@@ -12,6 +12,7 @@ import { primeiraTela } from "@/lib/guardado";
 import type { RegraDeAviso } from "@/lib/notificacoes";
 import { definirRegrasDesligadas, REGRAS_DE_AVISO, useRegrasDesligadas } from "@/lib/notificacoes";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { definirTema, useTema, type Tema } from "@/lib/tema";
 import { toast } from "@/lib/toast";
 import { modulosDe } from "@/lib/types";
 import { iniciais } from "@/lib/usuario";
@@ -59,7 +60,7 @@ function Configuracoes() {
       />
 
       <div className="flex flex-wrap items-start gap-4">
-        <nav aria-label="Seções" className="flex max-w-[280px] flex-[1_1_240px] flex-col gap-1 rounded-[20px] border border-borda bg-white p-2.5">
+        <nav aria-label="Seções" className="flex max-w-[280px] flex-[1_1_240px] flex-col gap-1 rounded-[20px] border border-borda bg-superficie p-2.5">
           {secoes.map((s) => {
             const ativa = s.id === atual;
             return (
@@ -108,7 +109,7 @@ function Configuracoes() {
 
 function Secao({ titulo, descricao, acao, children }: { titulo: string; descricao: string; acao?: ReactNode; children: ReactNode }) {
   return (
-    <section className="flex flex-col gap-[18px] rounded-[20px] border border-borda bg-white p-6">
+    <section className="flex flex-col gap-[18px] rounded-[20px] border border-borda bg-superficie p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 className="m-0 text-[18px] font-extrabold">{titulo}</h2>
@@ -124,7 +125,7 @@ function Secao({ titulo, descricao, acao, children }: { titulo: string; descrica
 /** Linha "rótulo à esquerda, controle à direita" da aba Geral. */
 function Linha({ titulo, dica, children, ultima = false }: { titulo: string; dica: string; children: ReactNode; ultima?: boolean }) {
   return (
-    <div className={`grid items-center gap-4 md:grid-cols-[220px_minmax(0,1fr)] ${ultima ? "" : "border-b border-gelo pb-[18px]"}`}>
+    <div className={`grid items-center gap-4 md:grid-cols-[220px_minmax(0,1fr)] ${ultima ? "" : "border-b border-divisor pb-[18px]"}`}>
       <span className="flex flex-col gap-0.5">
         <strong className="text-[14px]">{titulo}</strong>
         <span className="text-[12px] text-texto-3">{dica}</span>
@@ -140,7 +141,7 @@ function Linha({ titulo, dica, children, ultima = false }: { titulo: string; dic
  */
 function BarraDeSalvar({ mudou, onSalvar, onDescartar }: { mudou: boolean; onSalvar: () => void; onDescartar: () => void }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] bg-marinho px-[18px] py-3.5 text-white">
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-[16px] bg-navy px-[18px] py-3.5 text-white">
       <span className="text-[13px] text-[#DCE8F7]">
         {mudou ? "Você tem mudanças por salvar." : "As mudanças valem assim que você salvar."}
       </span>
@@ -170,17 +171,11 @@ function BarraDeSalvar({ mudou, onSalvar, onDescartar }: { mudou: boolean; onSal
 /* ── Geral ──────────────────────────────────────────────────────── */
 
 const TEMAS = [
-  { id: "claro", rotulo: "Claro", fundo: "#EDF1F4", lado: "#DCE2E8", cartao: "#FFFFFF", disponivel: true },
-  { id: "escuro", rotulo: "Escuro", fundo: "#1A1F26", lado: "#222831", cartao: "#2E3641", disponivel: false },
-  {
-    id: "sistema",
-    rotulo: "Igual ao sistema",
-    fundo: "linear-gradient(90deg, #EDF1F4 50%, #1A1F26 50%)",
-    lado: "#B5BEC4",
-    cartao: "#8D99A6",
-    disponivel: false,
-  },
-] as const;
+  // As miniaturas usam as cores de cada tema, fixas: a do escuro é escura mesmo com o portal no claro.
+  { id: "claro", rotulo: "Claro", fundo: "#EDF1F4", lado: "#DCE2E8", cartao: "#FFFFFF" },
+  { id: "escuro", rotulo: "Escuro", fundo: "#0E1620", lado: "#16202C", cartao: "#1C2836" },
+  { id: "sistema", rotulo: "Igual ao sistema", fundo: "linear-gradient(90deg, #EDF1F4 50%, #0E1620 50%)", lado: "#B5BEC4", cartao: "#8D99A6" },
+] as const satisfies readonly { id: Tema; rotulo: string; fundo: string; lado: string; cartao: string }[];
 
 const PRIMEIRAS: { id: PrimeiraTela; rotulo: string }[] = [
   { id: "escolher", rotulo: "Escolher cliente" },
@@ -188,6 +183,7 @@ const PRIMEIRAS: { id: PrimeiraTela; rotulo: string }[] = [
 ];
 
 function Geral({ superAdmin }: { superAdmin: boolean }) {
+  const tema = useTema();
   const salva = primeiraTela.usar();
   const [rascunho, setRascunho] = useState<PrimeiraTela>(salva);
   useEffect(() => setRascunho(salva), [salva]);
@@ -203,11 +199,10 @@ function Geral({ superAdmin }: { superAdmin: boolean }) {
                   key={t.id}
                   type="button"
                   role="radio"
-                  aria-checked={t.id === "claro"}
-                  disabled={!t.disponivel}
-                  title={t.disponivel ? undefined : "Ainda não disponível"}
-                  className={`flex flex-col gap-2 rounded-[14px] border-2 bg-white p-2.5 ${
-                    t.id === "claro" ? "border-azul" : "border-borda opacity-60"
+                  aria-checked={t.id === tema}
+                  onClick={() => definirTema(t.id)}
+                  className={`flex flex-col gap-2 rounded-[14px] border-2 bg-superficie p-2.5 transition-colors ${
+                    t.id === tema ? "border-azul" : "border-borda hover:border-borda-campo-hover"
                   }`}
                 >
                   <span aria-hidden="true" className="box-border flex h-14 gap-1 rounded-[10px] p-1.5" style={{ background: t.fundo }}>
@@ -221,7 +216,9 @@ function Geral({ superAdmin }: { superAdmin: boolean }) {
                 </button>
               ))}
             </div>
-            <span className="text-[11px] text-texto-3">O portal ainda só tem o tema claro. O escuro entra numa próxima versão.</span>
+            <span className="text-[11px] text-texto-3">
+              Vale na hora e acompanha a sua conta nos outros aparelhos. "Igual ao sistema" segue o tema do computador ou do celular.
+            </span>
           </div>
         </Linha>
 
@@ -238,7 +235,7 @@ function Geral({ superAdmin }: { superAdmin: boolean }) {
                     aria-checked={marcada}
                     onClick={() => setRascunho(p.id)}
                     className={`min-h-10 rounded-[9px] border-0 px-4 text-[13px] font-bold text-marinho transition-[background-color,box-shadow] focus-visible:outline-offset-0 ${
-                      marcada ? "bg-white shadow-[0_1px_3px_rgba(28,46,69,0.12)]" : "bg-transparent"
+                      marcada ? "bg-superficie shadow-[0_1px_3px_rgba(28,46,69,0.12)]" : "bg-transparent"
                     }`}
                   >
                     {p.rotulo}
@@ -314,7 +311,7 @@ function Notificacoes() {
           {regras.map((r) => {
             const ligada = !desligadas.includes(r.id);
             return (
-              <div key={r.id} className={`${COLUNAS} min-h-[60px] items-center border-t border-gelo px-4 py-2`}>
+              <div key={r.id} className={`${COLUNAS} min-h-[60px] items-center border-t border-divisor px-4 py-2`}>
                 <span className="flex flex-col gap-0.5">
                   <strong className="text-[13px]">{r.rotulo}</strong>
                   <span className="text-[11px] text-texto-3">{r.dica}</span>
@@ -381,7 +378,7 @@ function Caixa({ marcada, rotulo, onClick }: { marcada: boolean; rotulo: string;
       >
         <span
           className={`box-border flex h-[22px] w-[22px] items-center justify-center rounded-[7px] border-2 text-white transition-colors ${
-            marcada ? "border-azul bg-azul" : onClick ? "border-nevoa bg-white" : "border-borda bg-superficie-2"
+            marcada ? "border-azul bg-azul" : onClick ? "border-nevoa bg-superficie" : "border-borda bg-superficie-2"
           }`}
         >
           {marcada && <Check size={12} strokeWidth={3.5} aria-hidden />}
@@ -451,12 +448,12 @@ function Seguranca() {
           aria-checked={false}
           aria-disabled="true"
           aria-label="Verificação em duas etapas"
-          className="flex flex-col items-start gap-2.5 rounded-[16px] border-[1.5px] border-borda bg-white p-4"
+          className="flex flex-col items-start gap-2.5 rounded-[16px] border-[1.5px] border-borda bg-superficie p-4"
         >
           <span className="flex w-full items-center justify-between gap-3">
             <strong className="text-[14px]">Verificação em duas etapas</strong>
             <span className="box-border flex h-6 w-11 flex-none items-center justify-start rounded-full bg-nevoa-2 p-0.5 opacity-60">
-              <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+              <span className="h-5 w-5 rounded-full bg-superficie shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
             </span>
           </span>
           <span className="text-[12px] leading-normal text-texto-3">
@@ -508,7 +505,7 @@ function Pessoa({ email, escuro = false }: { email: string; escuro?: boolean }) 
     <span className="flex min-w-0 items-center gap-3">
       <span
         className={`flex h-9 w-9 flex-none items-center justify-center rounded-full text-[12px] font-bold ${
-          escuro ? "bg-marinho text-white" : "bg-nevoa text-marinho"
+          escuro ? "bg-navy text-white" : "bg-nevoa text-marinho"
         }`}
       >
         {iniciais(nome.replace(/[._-]+/g, " "))}
@@ -523,7 +520,7 @@ function Pessoa({ email, escuro = false }: { email: string; escuro?: boolean }) 
 
 function Selo({ children, escuro = false }: { children: ReactNode; escuro?: boolean }) {
   return (
-    <span className={`rounded-full px-[9px] py-[3px] text-[11px] font-bold ${escuro ? "bg-marinho text-white" : "bg-[#ECEEF1] text-[#4A5868]"}`}>
+    <span className={`rounded-full px-[9px] py-[3px] text-[11px] font-bold ${escuro ? "bg-navy text-white" : "bg-[var(--st-cinza-bg)] text-texto-4b"}`}>
       {children}
     </span>
   );
@@ -630,7 +627,7 @@ function EquipeOverso({ totalDeClientes }: { totalDeClientes: number }) {
             <span />
           </div>
           {globais.map((g) => (
-            <div key={g.user_id} className={`${GRADE_EQUIPE} min-h-16 border-t border-gelo px-4 py-2 text-[13px]`}>
+            <div key={g.user_id} className={`${GRADE_EQUIPE} min-h-16 border-t border-divisor px-4 py-2 text-[13px]`}>
               <Pessoa email={g.email} escuro />
               <span>
                 <Selo escuro>Super-admin</Selo>
@@ -645,7 +642,7 @@ function EquipeOverso({ totalDeClientes }: { totalDeClientes: number }) {
               </span>
             </div>
           ))}
-          {globais.length === 0 && <div className="border-t border-gelo px-4 py-6 text-center text-[13px] text-texto-3">Carregando a equipe…</div>}
+          {globais.length === 0 && <div className="border-t border-divisor px-4 py-6 text-center text-[13px] text-texto-3">Carregando a equipe…</div>}
         </div>
       </div>
     </Secao>
@@ -730,7 +727,7 @@ function AcessosDoCliente() {
             <span />
           </div>
           {membros.map((m) => (
-            <div key={m.user_id} className={`${GRADE_EQUIPE} min-h-16 border-t border-gelo px-4 py-2 text-[13px]`}>
+            <div key={m.user_id} className={`${GRADE_EQUIPE} min-h-16 border-t border-divisor px-4 py-2 text-[13px]`}>
               <Pessoa email={m.email} />
               <span>
                 <Selo>{m.papel === "admin" ? "Admin do cliente" : "Membro"}</Selo>
@@ -746,7 +743,7 @@ function AcessosDoCliente() {
             </div>
           ))}
           {membros.length === 0 && (
-            <div className="border-t border-gelo px-4 py-6 text-center text-[13px] text-texto-3">
+            <div className="border-t border-divisor px-4 py-6 text-center text-[13px] text-texto-3">
               {isLoading ? "Carregando os acessos…" : "Ninguém com acesso direto a este cliente ainda."}
             </div>
           )}

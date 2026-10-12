@@ -13,10 +13,10 @@ import { useUsuario } from "@/lib/usuario";
 
 /** Fundo e cor do quadradinho do ícone, por tipo. */
 export const COR_NOTIFICACAO: Record<TipoNotificacao, { fundo: string; texto: string }> = {
-  alerta: { fundo: "#FDF0DD", texto: "#8A4B08" },
-  lead: { fundo: "#E3EEFA", texto: "#1A57A6" },
-  comentario: { fundo: "#F3E8FB", texto: "#6B3696" },
-  post: { fundo: "#E3EEFA", texto: "#1A57A6" },
+  alerta: { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)" },
+  lead: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)" },
+  comentario: { fundo: "var(--st-roxo-bg)", texto: "var(--st-roxo-text)" },
+  post: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)" },
 };
 
 /** O ícone de cada tipo, no tamanho pedido (18 no sino, 20 na central). */
@@ -61,7 +61,7 @@ function LinhaNotificacao({ n, lida, onAbrir }: { n: Notificacao; lida: boolean;
         onAbrir();
       }}
       className={`flex items-start gap-3 rounded-[14px] p-2.5 text-marinho no-underline transition-colors hover:bg-superficie-2 focus-visible:outline-offset-0 ${
-        lida ? "bg-white" : "bg-azul-claro"
+        lida ? "bg-superficie" : "bg-azul-claro"
       }`}
     >
       <span
@@ -103,7 +103,7 @@ export function Sino() {
       >
         <Bell size={20} strokeWidth={1.8} aria-hidden />
         {n > 0 && (
-          <span className="absolute -right-[3px] -top-[3px] box-border flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-gelo bg-erro px-1 text-[10px] font-bold text-white">
+          <span className="absolute -right-[3px] -top-[3px] box-border flex h-[18px] min-w-[18px] items-center justify-center rounded-full border-2 border-divisor bg-erro px-1 text-[10px] font-bold text-white">
             {n > 99 ? "99+" : n}
           </span>
         )}
@@ -113,7 +113,7 @@ export function Sino() {
         <div
           role="dialog"
           aria-label="Notificações recentes"
-          className="menu-in absolute right-0 top-14 z-30 flex w-[390px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[20px] border border-borda bg-white shadow-[var(--sombra-popup)]"
+          className="menu-in absolute right-0 top-14 z-30 flex w-[390px] max-w-[calc(100vw-32px)] flex-col overflow-hidden rounded-[20px] border border-borda bg-superficie shadow-[var(--sombra-popup)]"
         >
           <div className="flex items-center justify-between gap-2.5 px-[18px] pb-3 pt-4">
             <span className="flex items-center gap-2 text-[15px] font-extrabold">
@@ -143,7 +143,7 @@ export function Sino() {
             ))}
           </div>
 
-          <div className="border-t border-gelo px-3.5 pb-3.5 pt-3">
+          <div className="border-t border-divisor px-3.5 pb-3.5 pt-3">
             <Link to="/notificacoes" onClick={() => setAberto(false)} className="btn btn-primario min-h-[46px] w-full">
               Ver todas as notificações
               <ArrowRight size={16} strokeWidth={2} aria-hidden />

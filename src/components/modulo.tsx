@@ -77,7 +77,7 @@ export function ModuloDesativado({ modulo, compacto = false }: { modulo: Modulo;
 
   if (compacto) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-dashed border-nevoa bg-white/60 px-[22px] py-4">
+      <div className="flex flex-wrap items-center gap-3 rounded-[20px] border border-dashed border-nevoa bg-superficie/60 px-[22px] py-4">
         <Lock size={18} strokeWidth={1.8} className="shrink-0 text-texto-3" />
         <p className="min-w-0 flex-1 text-[13px] text-texto-2">
           <span className="font-bold text-marinho">{MODULO_LABEL[modulo]} não está ativado</span> para este cliente.
@@ -88,7 +88,7 @@ export function ModuloDesativado({ modulo, compacto = false }: { modulo: Modulo;
   }
 
   return (
-    <div className="flex flex-col items-center rounded-[20px] border border-dashed border-nevoa bg-white/60 px-6 py-14 text-center">
+    <div className="flex flex-col items-center rounded-[20px] border border-dashed border-nevoa bg-superficie/60 px-6 py-14 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-superficie-2 text-texto-3">
         <Lock size={20} strokeWidth={1.8} />
       </div>

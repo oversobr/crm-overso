@@ -277,7 +277,7 @@ function LeadsTela() {
   const comContato = (s?.contato_feito ?? 0) + noGrupo;
   const perdidos = s?.perdido ?? 0;
   const funil = [
-    { rotulo: "Entraram", n: entraram, taxa: "100%", cor: "#1C2E45" },
+    { rotulo: "Entraram", n: entraram, taxa: "100%", cor: "var(--grafico-enviaram)" },
     { rotulo: "Contato feito", n: comContato, taxa: taxa(comContato, entraram), cor: "#1A66C2" },
     { rotulo: "Entrou no grupo", n: noGrupo, taxa: taxa(noGrupo, comContato), cor: "#5B93D6" },
     { rotulo: "Convertido", n: convertido, taxa: taxa(convertido, noGrupo), cor: "#9CC0EA" },
@@ -336,10 +336,10 @@ function LeadsTela() {
             <div key={f.rotulo} className="flex flex-col gap-2.5 rounded-[16px] bg-superficie-2 p-4">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-[12px] font-semibold text-texto-2">{f.rotulo}</span>
-                <span className="rounded-full bg-white px-2 py-[3px] text-[11px] font-bold">{f.taxa}</span>
+                <span className="rounded-full bg-superficie px-2 py-[3px] text-[11px] font-bold">{f.taxa}</span>
               </div>
               <span className="text-[26px] font-extrabold leading-tight tracking-[-0.02em]">{inteiro(f.n)}</span>
-              <div className="h-2 rounded-full bg-borda-campo" aria-hidden="true">
+              <div className="h-2 rounded-full bg-grupo" aria-hidden="true">
                 <div
                   className="h-2 rounded-full transition-[width] duration-300"
                   style={{ width: `${entraram > 0 ? (100 * f.n) / entraram : 0}%`, background: f.cor }}
@@ -350,7 +350,7 @@ function LeadsTela() {
         </div>
       </Card>
 
-      <section className="flex min-w-0 flex-col rounded-[20px] border border-borda bg-white">
+      <section className="flex min-w-0 flex-col rounded-[20px] border border-borda bg-superficie">
         <div className="flex items-center gap-2.5 rounded-t-[20px] border-b border-borda bg-superficie-2 px-[22px] py-3.5 text-[13px] text-texto-2">
           <span className="h-2.5 w-2.5 flex-none rounded-full bg-azul" />
           Leads parciais são pessoas que começaram o formulário e não enviaram. Se voltarem e enviarem, o cadastro é completado.
@@ -417,7 +417,7 @@ function LeadsTela() {
                   soParciais ? "justify-end bg-azul" : "justify-start bg-nevoa-2"
                 }`}
               >
-                <span className="h-[18px] w-[18px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+                <span className="h-[18px] w-[18px] rounded-full bg-superficie shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
               </span>
               Só parciais
             </button>
@@ -447,7 +447,7 @@ function LeadsTela() {
               <button
                 type="button"
                 onClick={() => setConfirmandoMassa(true)}
-                className="btn btn-40 border border-erro/30 bg-white text-erro-texto hover:bg-erro-fundo"
+                className="btn btn-40 border border-erro/30 bg-superficie text-erro-texto hover:bg-erro-fundo"
               >
                 <Trash2 size={14} strokeWidth={1.8} aria-hidden />
                 Excluir selecionados
@@ -573,12 +573,12 @@ function LinhaLead({
     <div
       role="row"
       aria-selected={marcado}
-      className={`linha-tabela ${GRADE} min-h-[68px] border-b border-gelo px-3.5 py-2 text-[13px]`}
+      className={`linha-tabela ${GRADE} min-h-[68px] border-b border-divisor px-3.5 py-2 text-[13px]`}
     >
       <Checkbox aria-label={`Selecionar ${nome}`} checked={marcado} onChange={onMarcar} />
 
       <span role="cell" className="flex min-w-0 items-center gap-2.5">
-        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-azul-claro-2 text-[12px] font-bold text-[#1A57A6]">
+        <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-azul-claro-2 text-[12px] font-bold text-link-chip">
           {iniciais(l.nome)}
         </span>
         <span className="flex min-w-0 flex-col gap-[3px]">
@@ -619,7 +619,7 @@ function LinhaLead({
           target="_blank"
           rel="noreferrer"
           aria-label={`Abrir WhatsApp de ${nome}`}
-          className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-sucesso-fundo text-sucesso transition-colors hover:bg-[#CDEBD7]"
+          className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-sucesso-fundo text-sucesso transition-colors hover:bg-[var(--st-verde-bg-hover)]"
         >
           <MessageCircle size={18} strokeWidth={1.8} aria-hidden />
         </a>

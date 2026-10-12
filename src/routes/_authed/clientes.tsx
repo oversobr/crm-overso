@@ -116,7 +116,7 @@ function Clientes() {
           opcoes={FILTROS}
           valor={filtro}
           onChange={setFiltro}
-          className="!bg-borda-campo [&>button]:px-3.5 [&>button]:text-marinho"
+          className="!bg-grupo [&>button]:px-3.5 [&>button]:text-marinho"
         />
       </div>
 
@@ -166,12 +166,12 @@ function Clientes() {
                     <span className="flex flex-wrap items-center gap-2">
                       <span className="text-[16px] font-bold [overflow-wrap:anywhere]">{c.nome}</span>
                       {aberto && (
-                        <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-[#1A57A6]">No painel agora</span>
+                        <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-link-chip">No painel agora</span>
                       )}
                     </span>
                     <span className="truncate text-[12px] font-normal text-texto-3">{c.slug}</span>
                   </span>
-                  <ChevronRight size={18} strokeWidth={2} color="#55657A" aria-hidden className="flex-none" />
+                  <ChevronRight size={18} strokeWidth={2} color="var(--text-3)" aria-hidden className="flex-none" />
                 </div>
 
                 <div className="flex flex-wrap gap-1.5">
@@ -179,7 +179,7 @@ function Clientes() {
                     <span
                       key={m}
                       className={`flex items-center gap-[5px] rounded-lg border px-2.5 py-[5px] text-[12px] font-bold ${
-                        mods[m] ? "border-sucesso-fundo bg-sucesso-fundo text-sucesso" : "border-dashed border-nevoa-2 bg-white text-texto-3"
+                        mods[m] ? "border-sucesso-fundo bg-sucesso-fundo text-sucesso" : "border-dashed border-nevoa-2 bg-superficie text-texto-3"
                       }`}
                     >
                       {mods[m] ? <Check size={12} strokeWidth={3} aria-hidden /> : <Lock size={12} strokeWidth={2.4} aria-hidden />}
@@ -188,7 +188,7 @@ function Clientes() {
                   ))}
                 </div>
 
-                <div className="flex w-full justify-between gap-2.5 border-t border-gelo pt-3 text-[12px] font-normal text-texto-3">
+                <div className="flex w-full justify-between gap-2.5 border-t border-divisor pt-3 text-[12px] font-normal text-texto-3">
                   <span>
                     {!mods.crm
                       ? "Sem o módulo CRM"

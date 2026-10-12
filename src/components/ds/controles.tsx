@@ -66,7 +66,7 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(o.id)}
             className={`min-h-[38px] flex-1 whitespace-nowrap rounded-[9px] border-0 px-3 text-[13px] font-bold transition-[background-color,color,box-shadow] focus-visible:outline-offset-0 ${
               ativo
-                ? "bg-white text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.12)]"
+                ? "bg-superficie text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.12)]"
                 : "bg-transparent text-texto-3 hover:text-marinho"
             }`}
           >
@@ -104,7 +104,7 @@ export function Switch({
         ligado ? "justify-end bg-azul hover:bg-azul-hover" : "justify-start bg-nevoa-2 hover:bg-nevoa"
       }`}
     >
-      <span className="h-5 w-5 rounded-full bg-white" />
+      <span className="h-5 w-5 rounded-full bg-superficie" />
     </button>
   );
 }
@@ -156,7 +156,7 @@ export function MenuSelect<T extends string | number>({
         <div
           role="listbox"
           aria-label={rotulo}
-          className="menu-in absolute right-0 top-[42px] z-40 flex min-w-[168px] flex-col gap-0.5 rounded-[14px] border border-borda bg-white p-1.5 shadow-[var(--sombra-popup)]"
+          className="menu-in absolute right-0 top-[42px] z-40 flex min-w-[168px] flex-col gap-0.5 rounded-[14px] border border-borda bg-superficie p-1.5 shadow-[var(--sombra-popup)]"
         >
           {opcoes.map((o) => {
             const sel = o.valor === valor;
@@ -175,7 +175,7 @@ export function MenuSelect<T extends string | number>({
                 }`}
               >
                 {o.rotulo}
-                {sel && <Check size={14} strokeWidth={3} color="#1A66C2" aria-hidden />}
+                {sel && <Check size={14} strokeWidth={3} color="var(--link)" aria-hidden />}
               </button>
             );
           })}

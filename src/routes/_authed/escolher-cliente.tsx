@@ -28,9 +28,9 @@ const MODULOS: Modulo[] = ["crm", "conteudo", "eventos"];
 
 /** Cores dos selos de alerta: lead em azul, post em roxo, aviso em laranja. */
 const COR_ALERTA = {
-  lead: { fundo: "#E3EEFA", texto: "#1A57A6" },
-  post: { fundo: "#F3E8FB", texto: "#6B3696" },
-  aviso: { fundo: "#FDF0DD", texto: "#8A4B08" },
+  lead: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)" },
+  post: { fundo: "var(--st-roxo-bg)", texto: "var(--st-roxo-text)" },
+  aviso: { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)" },
 } as const;
 
 function EscolherCliente() {
@@ -77,11 +77,11 @@ function EscolherCliente() {
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-borda-campo px-5 py-5 sm:px-10">
         <div className="flex items-center gap-3">
           <LogoOverso className="h-[22px] w-auto" />
-          <span className="rounded-md bg-borda-campo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">PORTAL</span>
+          <span className="rounded-md bg-grupo px-[7px] py-[3px] text-[10px] font-bold tracking-[0.1em] text-texto-2">PORTAL</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-2.5 rounded-full border border-borda-campo bg-white py-1.5 pl-1.5 pr-3.5">
-            <span className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-full bg-marinho text-[12px] font-bold text-white">
+          <span className="flex items-center gap-2.5 rounded-full border border-borda-campo bg-superficie py-1.5 pl-1.5 pr-3.5">
+            <span className="flex h-[34px] w-[34px] items-center justify-center overflow-hidden rounded-full bg-navy text-[12px] font-bold text-white">
               {usuario.avatarUrl ? <img src={usuario.avatarUrl} alt="" className="h-full w-full object-cover" /> : usuario.iniciais}
             </span>
             <span className="flex flex-col gap-px">
@@ -99,7 +99,7 @@ function EscolherCliente() {
       <main className="mx-auto box-border flex w-full max-w-[1180px] flex-1 flex-col gap-[26px] px-5 pb-14 pt-11 sm:px-8">
         <div className="flex flex-wrap items-end justify-between gap-5">
           <div className="flex flex-col gap-2.5">
-            <span className="flex items-center gap-1.5 self-start rounded-full bg-marinho px-2.5 py-[5px] text-[11px] font-bold tracking-[0.08em] text-white">
+            <span className="flex items-center gap-1.5 self-start rounded-full bg-navy px-2.5 py-[5px] text-[11px] font-bold tracking-[0.08em] text-white">
               <ShieldCheck size={12} strokeWidth={2.4} aria-hidden />
               VISÃO DE SUPER-ADMIN
             </span>
@@ -159,7 +159,7 @@ function EscolherCliente() {
                 className={`relative flex flex-col gap-4 rounded-[20px] border-2 p-5 text-left text-marinho transition-[border-color,box-shadow,background-color] ${
                   marcado
                     ? "border-azul bg-azul-claro shadow-[0_10px_26px_rgba(26,102,194,0.16)]"
-                    : "border-borda bg-white hover:border-azul-borda"
+                    : "border-borda bg-superficie hover:border-azul-borda"
                 }`}
               >
                 {marcado && (
@@ -198,7 +198,7 @@ function EscolherCliente() {
                   )}
                 </span>
 
-                <span className="mt-auto flex flex-wrap gap-2 border-t border-gelo pt-3 text-[11px] font-bold">
+                <span className="mt-auto flex flex-wrap gap-2 border-t border-divisor pt-3 text-[11px] font-bold">
                   {MODULOS.map((m) => (
                     <span key={m} className={`flex items-center gap-1 ${mods[m] ? "text-sucesso" : "text-texto-4"}`}>
                       {mods[m] ? <Check size={11} strokeWidth={3} aria-hidden /> : <X size={11} strokeWidth={3} aria-hidden />}
@@ -214,9 +214,9 @@ function EscolherCliente() {
           {!termo && (
             <Link
               to="/clientes"
-              className="flex min-h-[190px] flex-col items-center justify-center gap-2.5 rounded-[20px] border-2 border-dashed border-azul-borda bg-azul-claro p-5 text-[#1A57A6] no-underline transition-colors hover:border-azul"
+              className="flex min-h-[190px] flex-col items-center justify-center gap-2.5 rounded-[20px] border-2 border-dashed border-azul-borda bg-azul-claro p-5 text-link-chip no-underline transition-colors hover:border-azul"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white">
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-superficie">
                 <Plus size={22} strokeWidth={2.2} aria-hidden />
               </span>
               <span className="text-[15px] font-extrabold">Novo cliente</span>
@@ -229,7 +229,7 @@ function EscolherCliente() {
           <p className="m-0 py-6 text-center text-[14px] text-texto-3">Nenhum cliente com esse nome.</p>
         )}
 
-        <div className="sticky bottom-5 flex flex-wrap items-center justify-between gap-4 rounded-[20px] bg-marinho py-4 pl-[22px] pr-[18px] text-white shadow-[0_16px_40px_rgba(14,24,38,0.25)]">
+        <div className="sticky bottom-5 flex flex-wrap items-center justify-between gap-4 rounded-[20px] bg-navy py-4 pl-[22px] pr-[18px] text-white shadow-[0_16px_40px_rgba(14,24,38,0.25)]">
           <label className="flex min-h-11 cursor-pointer items-center gap-2.5 text-[13px] font-semibold text-[#DCE8F7]">
             <Checkbox checked={sempreOUltimo} onChange={(e) => setSempreOUltimo(e.target.checked)} className="!accent-[#5C9DE6]" />
             Abrir sempre o último cliente que usei

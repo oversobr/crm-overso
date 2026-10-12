@@ -75,7 +75,7 @@ export function PostPreview({
         </span>
       </div>
 
-      <div className="flex flex-col overflow-hidden rounded-[16px] border border-borda bg-white">
+      <div className="flex flex-col overflow-hidden rounded-[16px] border border-borda bg-superficie">
         <div className="flex items-center gap-2.5 px-3 py-2.5">
           <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-azul text-[10px] font-bold text-white">
             {iniciais(cliente)}
@@ -105,7 +105,7 @@ export function PostPreview({
                   type="button"
                   onClick={() => onAtivo((indice + midias.length - 1) % midias.length)}
                   aria-label="Arte anterior"
-                  className="absolute left-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute left-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-[#1C2E45] transition-colors hover:bg-white"
                 >
                   <ChevronLeft size={16} strokeWidth={2.2} aria-hidden />
                 </button>
@@ -113,7 +113,7 @@ export function PostPreview({
                   type="button"
                   onClick={() => onAtivo((indice + 1) % midias.length)}
                   aria-label="Próxima arte"
-                  className="absolute right-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute right-2.5 top-1/2 -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-[#1C2E45] transition-colors hover:bg-white"
                 >
                   <ChevronRight size={16} strokeWidth={2.2} aria-hidden />
                 </button>
@@ -125,7 +125,7 @@ export function PostPreview({
                       onClick={() => onAtivo(i)}
                       aria-label={`Ver arte ${i + 1}`}
                       aria-pressed={i === indice}
-                      className={`h-1.5 w-1.5 rounded-full border-0 p-0 shadow-[0_0_0_1px_rgba(28,46,69,0.25)] ${i === indice ? "bg-azul" : "bg-white"}`}
+                      className={`h-1.5 w-1.5 rounded-full border-0 p-0 shadow-[0_0_0_1px_rgba(28,46,69,0.25)] ${i === indice ? "bg-azul" : "bg-superficie"}`}
                     />
                   ))}
                 </div>
@@ -246,7 +246,7 @@ export function CampoArtes({
           onClick={() => input.current?.click()}
           className={`flex min-h-14 items-center gap-3 rounded-[14px] border-[1.5px] border-dashed px-3 py-2 text-left text-marinho transition-colors ${tracejado}`}
         >
-          <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[10px] bg-white text-azul">
+          <span className="flex h-[38px] w-[38px] flex-none items-center justify-center rounded-[10px] bg-superficie text-link">
             {enviando > 0 ? <LoaderCircle size={18} className="animate-spin" aria-hidden /> : <Upload size={18} strokeWidth={1.8} aria-hidden />}
           </span>
           <span className="flex min-w-0 flex-col gap-0.5">
@@ -277,7 +277,7 @@ export function CampoArtes({
                   onAtivo(0);
                 }}
                 aria-label={`Remover arte ${i + 1}`}
-                className="absolute -right-[7px] -top-[7px] flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-white bg-marinho p-0 text-white transition-colors hover:bg-erro"
+                className="absolute -right-[7px] -top-[7px] flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-superficie bg-navy p-0 text-white transition-colors hover:bg-erro"
               >
                 <X size={10} strokeWidth={3} aria-hidden />
               </button>
@@ -289,7 +289,7 @@ export function CampoArtes({
               onClick={() => input.current?.click()}
               aria-label="Enviar mais artes"
               title={`Arraste ou clique para enviar mais artes. ${oQuePode}.`}
-              className={`box-border flex h-[60px] w-[60px] items-center justify-center rounded-[12px] border-[1.5px] border-dashed p-0 text-azul transition-colors ${tracejado}`}
+              className={`box-border flex h-[60px] w-[60px] items-center justify-center rounded-[12px] border-[1.5px] border-dashed p-0 text-link transition-colors ${tracejado}`}
             >
               {enviando > 0 ? <LoaderCircle size={20} className="animate-spin" aria-hidden /> : <Upload size={20} strokeWidth={1.8} aria-hidden />}
             </button>

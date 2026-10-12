@@ -1,32 +1,37 @@
 import type { Campaign, Status, StatusConteudo } from "./types";
 
 /**
- * Cores de status do handoff (seção 3), como hex: entram em `style`, porque
- * a cor vem do DADO e o Tailwind só gera classe que encontra escrita.
+ * Cores de status do handoff (seção 3): entram em `style`, porque a cor vem
+ * do DADO e o Tailwind só gera classe que encontra escrita.
+ *
+ * Fundo, texto e borda são variáveis do tema (styles.css): mudam no escuro.
+ * Ponto e série são a cor da marca nos gráficos e ficam iguais nos dois
+ * temas, menos o Convertido, que no escuro precisa clarear para aparecer.
  *
  *   fundo/texto  o selo (StatusBadge) e o chip do calendário
+ *   borda        o contorno do selo: no claro é a cor do fundo, no escuro um tom acima
  *   ponto        a bolinha ao lado do rótulo
  *   serie        a cor da fatia nas barras segmentadas
  */
-export type CorStatus = { fundo: string; texto: string; ponto: string; serie: string };
+export type CorStatus = { fundo: string; texto: string; borda: string; ponto: string; serie: string };
 
 export const COR_LEAD: Record<Status, CorStatus> = {
-  novo: { fundo: "#E3EEFA", texto: "#1A57A6", ponto: "#1A66C2", serie: "#1A66C2" },
-  contato_feito: { fundo: "#FDF0DD", texto: "#8A4B08", ponto: "#D98A1C", serie: "#5B93D6" },
-  entrou_no_grupo: { fundo: "#E3F1F3", texto: "#1F5F6B", ponto: "#2A8C9C", serie: "#9CC0EA" },
-  convertido: { fundo: "#E2F3E8", texto: "#1E6B3A", ponto: "#1E6B3A", serie: "#1C2E45" },
-  perdido: { fundo: "#ECEEF1", texto: "#4A5868", ponto: "#B5BEC4", serie: "#C9D2DB" },
+  novo: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)", borda: "var(--st-azul-border)", ponto: "#1A66C2", serie: "#1A66C2" },
+  contato_feito: { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)", borda: "var(--st-laranja-border)", ponto: "#D98A1C", serie: "#5B93D6" },
+  entrou_no_grupo: { fundo: "var(--st-teal-bg)", texto: "var(--st-teal-text)", borda: "var(--st-teal-border)", ponto: "#2A8C9C", serie: "#9CC0EA" },
+  convertido: { fundo: "var(--st-verde-bg)", texto: "var(--st-verde-text)", borda: "var(--st-verde-border)", ponto: "#1E6B3A", serie: "var(--grafico-convertido)" },
+  perdido: { fundo: "var(--st-cinza-bg)", texto: "var(--st-cinza-text)", borda: "var(--st-cinza-border)", ponto: "#B5BEC4", serie: "#C9D2DB" },
 };
 
 /** Lead que começou o formulário e não enviou. */
-export const COR_PARCIAL = { fundo: "#FDF0DD", texto: "#8A4B08" };
+export const COR_PARCIAL = { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)", borda: "var(--st-laranja-border)" };
 
 export const COR_POST: Record<StatusConteudo, CorStatus> = {
-  ideia: { fundo: "#ECEEF1", texto: "#4A5868", ponto: "#B5BEC4", serie: "#B5BEC4" },
-  producao: { fundo: "#FDF0DD", texto: "#8A4B08", ponto: "#D98A1C", serie: "#D98A1C" },
-  aprovacao: { fundo: "#F3E8FB", texto: "#6B3696", ponto: "#8A4FC0", serie: "#8A4FC0" },
-  agendado: { fundo: "#E3EEFA", texto: "#1A57A6", ponto: "#1A66C2", serie: "#1A66C2" },
-  publicado: { fundo: "#E2F3E8", texto: "#1E6B3A", ponto: "#1E6B3A", serie: "#1E6B3A" },
+  ideia: { fundo: "var(--st-cinza-bg)", texto: "var(--st-cinza-text)", borda: "var(--st-cinza-border)", ponto: "#B5BEC4", serie: "#B5BEC4" },
+  producao: { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)", borda: "var(--st-laranja-border)", ponto: "#D98A1C", serie: "#D98A1C" },
+  aprovacao: { fundo: "var(--st-roxo-bg)", texto: "var(--st-roxo-text)", borda: "var(--st-roxo-border)", ponto: "#8A4FC0", serie: "#8A4FC0" },
+  agendado: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)", borda: "var(--st-azul-border)", ponto: "#1A66C2", serie: "#1A66C2" },
+  publicado: { fundo: "var(--st-verde-bg)", texto: "var(--st-verde-text)", borda: "var(--st-verde-border)", ponto: "#1E6B3A", serie: "#1E6B3A" },
 };
 
 export type StatusCampanha = "ativa" | "agendada" | "encerrada";
@@ -37,10 +42,10 @@ export const STATUS_CAMPANHA_LABEL: Record<StatusCampanha, string> = {
   encerrada: "Encerrada",
 };
 
-export const COR_CAMPANHA: Record<StatusCampanha, { fundo: string; texto: string }> = {
-  ativa: { fundo: "#E2F3E8", texto: "#1E6B3A" },
-  agendada: { fundo: "#FDF0DD", texto: "#8A4B08" },
-  encerrada: { fundo: "#ECEEF1", texto: "#4A5868" },
+export const COR_CAMPANHA: Record<StatusCampanha, { fundo: string; texto: string; borda: string }> = {
+  ativa: { fundo: "var(--st-verde-bg)", texto: "var(--st-verde-text)", borda: "var(--st-verde-border)" },
+  agendada: { fundo: "var(--st-laranja-bg)", texto: "var(--st-laranja-text)", borda: "var(--st-laranja-border)" },
+  encerrada: { fundo: "var(--st-cinza-bg)", texto: "var(--st-cinza-text)", borda: "var(--st-cinza-border)" },
 };
 
 /**
@@ -60,4 +65,5 @@ export function statusDaCampanha(c: Pick<Campaign, "inicio" | "fim">, hoje: stri
  */
 export const CORES_CAMPANHA = ["#1A66C2", "#2A8C9C", "#D98A1C", "#8A4FC0", "#1E6B3A", "#6B7682"];
 
-export const COR_TODAS_CAMPANHAS = "#1C2E45";
+/** O marinho de "todas as campanhas": no escuro é o marinho de fundo, mais claro. */
+export const COR_TODAS_CAMPANHAS = "var(--navy)";

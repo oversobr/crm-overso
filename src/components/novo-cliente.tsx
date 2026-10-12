@@ -119,10 +119,10 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
 
   const avatar = (
     <span
-      className="box-border flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-white text-[18px] font-extrabold text-white"
+      className="box-border flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-superficie text-[18px] font-extrabold text-white"
       style={{ background: "linear-gradient(135deg, #1A66C2 0%, #5C9DE6 100%)" }}
     >
-      {previaDoLogo ? <img src={previaDoLogo} alt="" className="h-full w-full bg-white object-contain" /> : iniciais(nomeLimpo)}
+      {previaDoLogo ? <img src={previaDoLogo} alt="" className="h-full w-full bg-superficie object-contain" /> : iniciais(nomeLimpo)}
     </span>
   );
 
@@ -227,8 +227,8 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                   aria-label="Enviar logo do cliente"
                   className={`flex h-[104px] w-[104px] flex-none flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[22px] p-0 transition-colors ${
                     previaDoLogo
-                      ? "border border-borda bg-white"
-                      : "border-[1.5px] border-dashed border-azul-borda bg-azul-claro text-[#1A57A6] hover:bg-azul-claro-2"
+                      ? "border border-borda bg-superficie"
+                      : "border-[1.5px] border-dashed border-azul-borda bg-azul-claro text-link-chip hover:bg-azul-claro-2"
                   }`}
                 >
                   {previaDoLogo ? (
@@ -260,8 +260,8 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                   className="campo min-h-12 text-[15px] font-semibold"
                 />
               </label>
-              <span className="flex items-start gap-2 rounded-[12px] bg-white p-3 text-[12px] leading-normal text-texto-2">
-                <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="mt-px flex-none" />
+              <span className="flex items-start gap-2 rounded-[12px] bg-superficie p-3 text-[12px] leading-normal text-texto-2">
+                <Info size={16} strokeWidth={2} color="var(--link)" aria-hidden className="mt-px flex-none" />
                 Só o nome é obrigatório. O resto dá para preencher agora ou depois, na ficha do cliente.
               </span>
             </ModalColuna>
@@ -344,7 +344,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
               <button
                 type="button"
                 onClick={() => setLinks((ls) => [...ls, { id: proximoId.current++, rotulo: "", url: "" }])}
-                className="btn btn-40 flex-none self-start border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-[#1A57A6] hover:bg-azul-claro-2"
+                className="btn btn-40 flex-none self-start border border-dashed border-azul-borda bg-azul-claro px-3 text-[12px] font-bold text-link-chip hover:bg-azul-claro-2"
               >
                 <Plus size={14} strokeWidth={2.2} aria-hidden />
                 Adicionar link
@@ -370,13 +370,13 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                   aria-checked={ligado}
                   onClick={() => setEscolha((e) => ({ ...e, [m.id]: !e[m.id] }))}
                   className={`relative flex flex-col items-start gap-3 rounded-[18px] border-2 p-[22px] text-left text-marinho transition-colors md:min-h-[200px] ${
-                    ligado ? "border-azul bg-azul-claro" : "border-borda-campo bg-white hover:border-nevoa"
+                    ligado ? "border-azul bg-azul-claro" : "border-borda-campo bg-superficie hover:border-nevoa"
                   }`}
                 >
                   <span
                     aria-hidden
                     className={`absolute right-4 top-4 box-border flex h-6 w-6 items-center justify-center rounded-[7px] border-2 text-white ${
-                      ligado ? "border-azul bg-azul" : "border-nevoa bg-white"
+                      ligado ? "border-azul bg-azul" : "border-nevoa bg-superficie"
                     }`}
                   >
                     {ligado && <Check size={14} strokeWidth={3.5} />}
@@ -391,7 +391,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
             })}
           </div>
           <span className="flex items-center gap-2 rounded-[12px] bg-superficie-2 px-3 py-2.5 text-[12px] leading-[1.45] text-texto-2">
-            <Lock size={16} strokeWidth={2} color="#55657A" aria-hidden className="flex-none" />
+            <Lock size={16} strokeWidth={2} color="var(--text-3)" aria-hidden className="flex-none" />
             Módulos não marcados continuam no menu do cliente, com cadeado.
           </span>
         </div>
@@ -402,7 +402,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
         // em tela baixa ele para em 240px e é o miolo do popup que rola.
         <div className="flex flex-[1_0_auto] flex-col gap-4 px-5 py-[22px] sm:px-7">
           <div className="flex flex-none flex-wrap items-center gap-3.5 rounded-[16px] bg-sucesso-fundo px-4 py-3.5 text-sucesso">
-            <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-sucesso text-white">
+            <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-verde text-white">
               <Check size={18} strokeWidth={3} aria-hidden />
             </span>
             <span className="min-w-[min(200px,100%)] flex-1 text-[14px] leading-[1.45]">
@@ -410,7 +410,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
             </span>
             <span className="flex gap-1.5">
               {MODULOS.filter((m) => criado.modulos[m.id]).map((m) => (
-                <span key={m.id} className="rounded-lg bg-white px-2.5 py-[5px] text-[12px] font-bold">
+                <span key={m.id} className="rounded-lg bg-superficie px-2.5 py-[5px] text-[12px] font-bold">
                   {MODULO_LABEL[m.id]}
                 </span>
               ))}
@@ -431,7 +431,7 @@ export function NovoCliente({ onFechar }: { onFechar: () => void }) {
                 <span className="text-[13px] text-texto-3">Cole o script abaixo na landing page do cliente para os leads caírem no CRM.</span>
               </div>
               <div className="grid flex-none gap-3 md:grid-cols-3">
-                <div className="flex min-w-0 flex-col gap-2 rounded-[14px] border border-borda-campo bg-white pb-3.5 pl-4 pr-3.5 pt-3">
+                <div className="flex min-w-0 flex-col gap-2 rounded-[14px] border border-borda-campo bg-superficie pb-3.5 pl-4 pr-3.5 pt-3">
                   <span className="flex items-center justify-between gap-2.5">
                     <span className="text-[11px] font-bold tracking-[0.1em] text-texto-3">CHAVE DE CAPTURA</span>
                     <BotaoCopiar texto={criado.ingest_key} rotulo="Copiar chave" copiado="Copiada" />

@@ -155,8 +155,8 @@ export function PostDetalhe({
       ? {
           titulo: "Ainda não foi para o cliente",
           texto: "Quando a arte e a legenda estiverem prontas, mude para Aprovação.",
-          classe: "border-borda bg-white",
-          cor: "#55657A",
+          classe: "border-borda bg-superficie",
+          cor: "var(--text-3)",
         }
       : iEtapa === 2
         ? {
@@ -164,16 +164,16 @@ export function PostDetalhe({
             texto: c.em_aprovacao_desde
               ? `Enviado para aprovação ${haQuantosDias(c.em_aprovacao_desde)}. Dá para aprovar ou pedir ajuste por aqui.`
               : `Última alteração ${haQuantosDias(c.atualizado_em)}. Dá para aprovar ou pedir ajuste por aqui.`,
-            classe: "border-[#D9BDEF] bg-[#F3E8FB]",
-            cor: "#6B3696",
+            classe: "border-[var(--st-roxo-border-forte)] bg-[var(--st-roxo-bg)]",
+            cor: "var(--st-roxo-text)",
           }
         : {
             titulo: "Aprovado",
             texto: c.aprovado_em
               ? `Aprovado${c.aprovado_por_nome ? ` por ${c.aprovado_por_nome}` : ""} em ${new Date(c.aprovado_em).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" })}.`
               : "Este post já passou pela aprovação do cliente.",
-            classe: "border-[#B5DFC3] bg-sucesso-fundo",
-            cor: "#1E6B3A",
+            classe: "border-[var(--st-verde-border-forte)] bg-sucesso-fundo",
+            cor: "var(--st-verde-text)",
           };
 
   const evento = c.evento_id ? eventos.find((e) => e.id === c.evento_id)?.nome : null;
@@ -200,7 +200,7 @@ export function PostDetalhe({
             {varias ? ` · ${midias.length} cards` : ""}
           </span>
           <span className={pilula}>{quando}</span>
-          <span className="rounded-full bg-white px-[9px] py-[3px] font-bold" style={{ color: COR_POST[status].texto }}>
+          <span className="rounded-full bg-superficie px-[9px] py-[3px] font-bold" style={{ color: COR_POST[status].texto }}>
             {STATUS_CONTEUDO_LABEL[status]}
           </span>
         </>
@@ -312,7 +312,7 @@ export function PostDetalhe({
                   type="button"
                   onClick={() => setCard((indice + midias.length - 1) % midias.length)}
                   aria-label="Card anterior"
-                  className="absolute left-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute left-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-[#1C2E45] transition-colors hover:bg-white"
                 >
                   <ChevronLeft size={16} strokeWidth={2.2} aria-hidden />
                 </button>
@@ -320,7 +320,7 @@ export function PostDetalhe({
                   type="button"
                   onClick={() => setCard((indice + 1) % midias.length)}
                   aria-label="Próximo card"
-                  className="absolute right-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-marinho transition-colors hover:bg-white"
+                  className="absolute right-2.5 top-1/2 -mt-5 flex h-10 w-10 items-center justify-center rounded-full border-0 bg-white/90 p-0 text-[#1C2E45] transition-colors hover:bg-white"
                 >
                   <ChevronRight size={16} strokeWidth={2.2} aria-hidden />
                 </button>
@@ -338,7 +338,7 @@ export function PostDetalhe({
                   aria-label={`Ver card ${i + 1}`}
                   aria-pressed={i === indice}
                   className={`box-border h-[52px] overflow-hidden rounded-[10px] border-[2.5px] bg-gelo p-0 text-[13px] font-extrabold text-texto-3 ${
-                    i === indice ? "border-azul" : "border-white"
+                    i === indice ? "border-azul" : "border-superficie"
                   }`}
                 >
                   {urls[m] ? <img src={urls[m]} alt="" className="h-full w-full object-cover" /> : i + 1}
@@ -394,7 +394,7 @@ export function PostDetalhe({
             <h3 className="m-0 text-[14px] font-bold">Redes</h3>
             {c.redes.length === 0 && <span className="text-[13px] text-texto-3">Nenhuma rede escolhida.</span>}
             {c.redes.map((r) => (
-              <span key={r} className="flex items-center gap-1.5 rounded-[10px] bg-azul-claro-2 px-3 py-1.5 text-[12px] font-bold text-[#1A57A6]">
+              <span key={r} className="flex items-center gap-1.5 rounded-[10px] bg-azul-claro-2 px-3 py-1.5 text-[12px] font-bold text-link-chip">
                 <Check size={12} strokeWidth={3} aria-hidden />
                 {REDE_LABEL[r]}
               </span>
@@ -403,15 +403,15 @@ export function PostDetalhe({
 
           <section className="grid flex-none grid-cols-2 gap-px overflow-hidden rounded-[14px] border border-borda bg-borda sm:grid-cols-3">
             {detalhes.map(([k, v]) => (
-              <div key={k} className="flex min-w-0 flex-col gap-1 bg-white px-3 py-2.5">
+              <div key={k} className="flex min-w-0 flex-col gap-1 bg-superficie px-3 py-2.5">
                 <span className="text-[10px] font-bold tracking-[0.06em] text-texto-3">{k}</span>
                 <span className="text-[13px] font-bold [overflow-wrap:anywhere]">{v}</span>
               </div>
             ))}
           </section>
 
-          <div className="flex flex-none items-center gap-2.5 rounded-[14px] border border-[#CFE0F5] bg-azul-claro px-3.5 py-3 text-[12px] leading-normal">
-            <Info size={18} strokeWidth={2} color="#1A66C2" aria-hidden className="flex-none" />
+          <div className="flex flex-none items-center gap-2.5 rounded-[14px] border border-[var(--border-info)] bg-azul-claro px-3.5 py-3 text-[12px] leading-normal">
+            <Info size={18} strokeWidth={2} color="var(--link)" aria-hidden className="flex-none" />
             A publicação é feita à mão em cada rede. Depois de postar, marque como Publicado aqui.
           </div>
         </ModalColuna>
@@ -439,7 +439,7 @@ export function PostDetalhe({
                     type="button"
                     onClick={() => mudarEtapa.mutate("agendado")}
                     disabled={ocupado}
-                    className="btn bg-sucesso text-white hover:bg-[#17552E] disabled:opacity-60"
+                    className="btn bg-verde text-white hover:bg-[#17552E] disabled:opacity-60"
                   >
                     Aprovar
                   </button>

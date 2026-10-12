@@ -73,7 +73,7 @@ export function TopBar({
             {selo != null && (
               <span
                 className={`whitespace-nowrap rounded-full px-[9px] py-[3px] text-[12px] font-bold ${
-                  seloTom === "erro" ? "bg-erro-fundo text-erro-texto" : "bg-azul-claro-2 text-[#1A57A6]"
+                  seloTom === "erro" ? "bg-erro-fundo text-erro-texto" : "bg-azul-claro-2 text-link-chip"
                 }`}
               >
                 {selo}
@@ -94,7 +94,7 @@ export function TopBar({
           to="/perfil"
           aria-label="Meu perfil"
           title={usuario.nome || "Meu perfil"}
-          className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-full bg-marinho text-[13px] font-bold text-white no-underline transition-colors hover:bg-marinho-hover"
+          className="flex h-11 w-11 flex-none items-center justify-center overflow-hidden rounded-full bg-navy text-[13px] font-bold text-white no-underline transition-colors hover:bg-navy-2"
         >
           {usuario.avatarUrl ? <img src={usuario.avatarUrl} alt="" className="h-full w-full object-cover" /> : usuario.iniciais}
         </Link>

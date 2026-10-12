@@ -212,7 +212,7 @@ export function NovaPostagem({
                 <select
                   value={formatoFora ? f.formato : ""}
                   onChange={(e) => e.target.value && set("formato", e.target.value as Formato)}
-                  className="cursor-pointer rounded-lg border border-borda-campo bg-white px-1.5 py-0.5 text-[12px] font-bold text-marinho"
+                  className="cursor-pointer rounded-lg border border-borda-campo bg-superficie px-1.5 py-0.5 text-[12px] font-bold text-marinho"
                 >
                   <option value="">Escolher</option>
                   {OUTROS_FORMATOS.map((o) => (
@@ -234,7 +234,7 @@ export function NovaPostagem({
                     aria-checked={marcado}
                     onClick={() => set("formato", o)}
                     className={`min-h-10 rounded-[11px] border-0 text-[13px] font-bold transition-[background-color,color,box-shadow] focus-visible:outline-offset-0 ${
-                      marcado ? "bg-white text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.14)]" : "bg-transparent text-texto-3 hover:text-marinho"
+                      marcado ? "bg-superficie text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.14)]" : "bg-transparent text-texto-3 hover:text-marinho"
                     }`}
                   >
                     {FORMATO_LABEL[o]}
@@ -256,12 +256,12 @@ export function NovaPostagem({
                     aria-pressed={marcada}
                     onClick={() => alternarRede(r)}
                     className={`flex min-h-10 items-center justify-center gap-1.5 rounded-[12px] border-[1.5px] px-1.5 text-[12px] font-semibold text-marinho transition-colors ${
-                      marcada ? "border-azul bg-azul-claro" : "border-borda-campo bg-white hover:border-borda-campo-hover"
+                      marcada ? "border-azul bg-azul-claro" : "border-borda-campo bg-superficie hover:border-borda-campo-hover"
                     }`}
                   >
                     <span
                       className={`box-border flex h-4 w-4 flex-none items-center justify-center rounded-[5px] border-[1.5px] text-white ${
-                        marcada ? "border-azul bg-azul" : "border-nevoa bg-white"
+                        marcada ? "border-azul bg-azul" : "border-nevoa bg-superficie"
                       }`}
                     >
                       {marcada && <Check size={10} strokeWidth={3.5} aria-hidden />}
@@ -365,7 +365,7 @@ export function NovaPostagem({
                 pedeAprovacao ? "justify-end bg-azul" : "justify-start bg-nevoa-2"
               }`}
             >
-              <span className="h-5 w-5 rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+              <span className="h-5 w-5 rounded-full bg-superficie shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
             </span>
           </button>
         </ModalColuna>

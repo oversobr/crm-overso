@@ -29,8 +29,8 @@ const GRUPOS = [
 
 /** Etiqueta do módulo: azul para CRM, verde-azulado para Conteúdo. */
 const COR_MODULO = {
-  CRM: { fundo: "#E3EEFA", texto: "#1A57A6" },
-  CONTEÚDO: { fundo: "#E3F1F3", texto: "#1F5F6B" },
+  CRM: { fundo: "var(--st-azul-bg)", texto: "var(--st-azul-text)" },
+  CONTEÚDO: { fundo: "var(--st-teal-bg)", texto: "var(--st-teal-text)" },
 } as const;
 
 /**
@@ -85,7 +85,7 @@ function Notificacoes() {
       />
 
       <div className="flex flex-wrap items-start gap-4">
-        <section className="flex min-w-0 flex-[2_1_562px] flex-col rounded-[20px] border border-borda bg-white">
+        <section className="flex min-w-0 flex-[2_1_562px] flex-col rounded-[20px] border border-borda bg-superficie">
           <div role="tablist" aria-label="Filtro" className="flex flex-wrap gap-x-[26px] gap-y-1 border-b border-borda px-[22px]">
             {abas.map((a) => (
               <button
@@ -119,7 +119,7 @@ function Notificacoes() {
           </div>
         </section>
 
-        <section className="flex min-w-0 flex-[1_1_366px] flex-col gap-3.5 rounded-[20px] border border-borda bg-white p-[22px]">
+        <section className="flex min-w-0 flex-[1_1_366px] flex-col gap-3.5 rounded-[20px] border border-borda bg-superficie p-[22px]">
           <div className="flex flex-col gap-1">
             <h2 className="m-0 text-[16px] font-bold">Quando avisar</h2>
             <span className="text-[12px] text-texto-3">Escolha o que vira notificação para você</span>
@@ -145,7 +145,7 @@ function Notificacoes() {
                     ligada ? "justify-end bg-azul" : "justify-start bg-nevoa-2"
                   }`}
                 >
-                  <span className="h-[18px] w-[18px] rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
+                  <span className="h-[18px] w-[18px] rounded-full bg-superficie shadow-[0_1px_2px_rgba(0,0,0,0.2)]" />
                 </span>
               </button>
             );
@@ -176,7 +176,7 @@ function ItemNotificacao({ n, lida }: { n: Notificacao; lida: boolean }) {
   const quando = grupoDoDia(n.quando) === "antes" ? `${quandoCurto(n.quando)}, ${horaCurta(n.quando)}` : horaCurta(n.quando);
 
   return (
-    <div className={`mb-2 flex items-start gap-3.5 rounded-[16px] border p-3.5 ${lida ? "border-borda bg-white" : "border-[#CFE0F5] bg-azul-claro"}`}>
+    <div className={`mb-2 flex items-start gap-3.5 rounded-[16px] border p-3.5 ${lida ? "border-borda bg-superficie" : "border-[var(--border-info)] bg-azul-claro"}`}>
       <span
         className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-[12px]"
         style={{ background: icone.fundo, color: icone.texto }}
@@ -234,7 +234,7 @@ function Canal({ rotulo, ligado = false }: { rotulo: string; ligado?: boolean })
     >
       <span
         className={`box-border flex h-[18px] w-[18px] items-center justify-center rounded-md border-[1.5px] text-white ${
-          ligado ? "border-azul bg-azul" : "border-nevoa-2 bg-white"
+          ligado ? "border-azul bg-azul" : "border-nevoa-2 bg-superficie"
         }`}
       >
         {ligado && <Check size={12} strokeWidth={3.5} aria-hidden />}

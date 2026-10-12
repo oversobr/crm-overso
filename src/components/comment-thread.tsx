@@ -101,7 +101,7 @@ export function CommentThread({
 
   const total = naFila ? pendentes.length : comentarios.length;
   const solta = variante !== "cartao";
-  const fundoDoBalao = solta ? "bg-white" : "bg-superficie-2";
+  const fundoDoBalao = solta ? "bg-superficie" : "bg-superficie-2";
 
   const cabecalho = (
     <div className="flex items-center justify-between">
@@ -109,18 +109,18 @@ export function CommentThread({
         <h3 className="m-0 text-[14px] font-bold">Comentários</h3>
       ) : (
         <span className="flex items-center gap-2 text-[13px] font-bold">
-          <MessageCircle size={16} strokeWidth={1.9} color="#1A66C2" aria-hidden />
+          <MessageCircle size={16} strokeWidth={1.9} color="var(--link)" aria-hidden />
           Comentários
         </span>
       )}
-      <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-[#1A57A6]">{total}</span>
+      <span className="rounded-full bg-azul-claro-2 px-2 py-0.5 text-[11px] font-bold text-link-chip">{total}</span>
     </div>
   );
 
   const corpo = (
     <>
       {observacaoAntiga && (
-        <div className={`rounded-[12px] border border-dashed border-nevoa px-2.5 py-2 ${solta ? "bg-white" : ""}`}>
+        <div className={`rounded-[12px] border border-dashed border-nevoa px-2.5 py-2 ${solta ? "bg-superficie" : ""}`}>
           <span className="text-[10px] font-bold tracking-[0.06em] text-texto-3">OBSERVAÇÃO ANTERIOR</span>
           <p className="m-0 mt-1 whitespace-pre-wrap text-[12px] leading-[1.45] [overflow-wrap:anywhere]">{observacaoAntiga}</p>
         </div>
@@ -242,7 +242,7 @@ export function CommentThread({
   }
 
   return (
-    <section aria-label="Comentários" className="flex flex-col gap-2.5 rounded-[18px] border border-borda bg-white p-3.5">
+    <section aria-label="Comentários" className="flex flex-col gap-2.5 rounded-[18px] border border-borda bg-superficie p-3.5">
       {cabecalho}
       {corpo}
       {campo}
@@ -252,8 +252,8 @@ export function CommentThread({
 
 const TOM_DO_SELO = {
   aviso: "bg-alerta-fundo text-alerta",
-  cliente: "bg-[#F3E8FB] text-[#6B3696]",
-  overso: "bg-azul-claro-2 text-[#1A57A6]",
+  cliente: "bg-[var(--st-roxo-bg)] text-[var(--st-roxo-text)]",
+  overso: "bg-azul-claro-2 text-link-chip",
 } as const;
 
 function Balao({
@@ -286,7 +286,7 @@ function Balao({
     <div className="group flex gap-2.5">
       <span
         className={`flex h-[30px] w-[30px] flex-none items-center justify-center rounded-full text-[10px] font-bold ${
-          meu ? "bg-marinho text-white" : "bg-azul-claro-2 text-[#1A57A6]"
+          meu ? "bg-navy text-white" : "bg-azul-claro-2 text-link-chip"
         }`}
       >
         {sigla}

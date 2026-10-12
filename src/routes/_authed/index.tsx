@@ -138,7 +138,7 @@ function AreaCrm({ comConteudo }: { comConteudo: boolean }) {
   const rotuloPeriodo = campanha ? periodoDaCampanha(campanha) : `${diasPeriodo} dias`;
 
   const etapas = [
-    { rotulo: "Abriram", n: aberturas, taxa: "100%", ponto: "#1C2E45" },
+    { rotulo: "Abriram", n: aberturas, taxa: "100%", ponto: "var(--grafico-enviaram)" },
     { rotulo: "Começaram", n: iniciaram, taxa: `${pct(iniciaram, aberturas)} de quem abriu`, ponto: "#1A66C2" },
     { rotulo: "Enviaram", n: enviaram, taxa: `${pct(enviaram, iniciaram)} de quem começou`, ponto: "#9CC0EA" },
   ];
@@ -227,8 +227,8 @@ function AreaCrm({ comConteudo }: { comConteudo: boolean }) {
           <div className="mt-auto flex h-7 gap-1" aria-hidden="true">
             {aberturas > 0 ? (
               <>
-                <div className="min-w-1 rounded-lg bg-marinho" style={{ flex: Math.max(conversao, 1) }} />
-                <div className="min-w-1 rounded-lg bg-[#B9D2EF]" style={{ flex: Math.max(100 - conversao, 1) }} />
+                <div className="min-w-1 rounded-lg bg-[var(--grafico-enviaram)]" style={{ flex: Math.max(conversao, 1) }} />
+                <div className="min-w-1 rounded-lg bg-[var(--grafico-desistiram)]" style={{ flex: Math.max(100 - conversao, 1) }} />
               </>
             ) : (
               <div className="flex-1 rounded-lg bg-gelo" />
@@ -463,15 +463,15 @@ function DiaDaSemana({
   return (
     <div
       className={`flex min-h-[220px] flex-col gap-2 rounded-[14px] border p-3 ${
-        hoje ? "border-azul bg-azul-claro" : "border-borda bg-white"
+        hoje ? "border-azul bg-azul-claro" : "border-borda bg-superficie"
       }`}
       aria-current={hoje ? "date" : undefined}
     >
       <span className="flex flex-col gap-0.5">
-        <span className={`text-[10px] font-bold tracking-[0.08em] ${hoje ? "text-azul" : "text-texto-3"}`}>
+        <span className={`text-[10px] font-bold tracking-[0.08em] ${hoje ? "text-link" : "text-texto-3"}`}>
           {fmt(dia, { weekday: "short" }).replace(".", "").toUpperCase()}
         </span>
-        <span className={`text-[20px] font-extrabold leading-tight ${hoje ? "text-azul" : "text-marinho"}`}>
+        <span className={`text-[20px] font-extrabold leading-tight ${hoje ? "text-link" : "text-marinho"}`}>
           {dia.slice(8, 10)}
         </span>
       </span>
@@ -486,7 +486,7 @@ function DiaDaSemana({
             search={{ abrir: c.id }}
             title={`${c.titulo} (${STATUS_CONTEUDO_LABEL[c.status]})`}
             className="chip-post flex flex-col gap-[3px] rounded-[10px] border px-2.5 py-2 no-underline"
-            style={{ background: cor.fundo, color: cor.texto, borderColor: cor.fundo }}
+            style={{ background: cor.fundo, color: cor.texto, borderColor: cor.borda }}
           >
             <span className="text-[10px] font-bold">{meta}</span>
             <span className="line-clamp-4 text-[12px] font-semibold leading-[1.35]">{c.titulo}</span>
@@ -500,7 +500,7 @@ function DiaDaSemana({
           key={t.id}
           to="/calendario"
           title={t.titulo}
-          className="chip-post flex flex-col gap-[3px] rounded-[10px] border border-dashed border-nevoa bg-white px-2.5 py-2 text-[#4A5868] no-underline"
+          className="chip-post flex flex-col gap-[3px] rounded-[10px] border border-dashed border-nevoa bg-superficie px-2.5 py-2 text-texto-4b no-underline"
         >
           <span className="text-[10px] font-bold">TAREFA</span>
           <span className="line-clamp-4 text-[12px] font-semibold leading-[1.35]">{t.titulo}</span>
@@ -518,7 +518,7 @@ function LinhaPost({ c }: { c: Conteudo }) {
       to="/postagens"
       search={{ abrir: c.id }}
       role="row"
-      className="linha-tabela grid min-h-[58px] grid-cols-[90px_2.4fr_1fr_1fr_1.1fr] items-center gap-3.5 border-b border-gelo px-3.5 py-1.5 text-[13px] text-marinho no-underline"
+      className="linha-tabela grid min-h-[58px] grid-cols-[90px_2.4fr_1fr_1fr_1.1fr] items-center gap-3.5 border-b border-divisor px-3.5 py-1.5 text-[13px] text-marinho no-underline"
     >
       <span role="cell" className="flex flex-col gap-0.5">
         <strong className="font-bold">

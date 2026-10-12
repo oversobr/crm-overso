@@ -152,7 +152,7 @@ export function Cabecalho({
                 { value: "", label: "Todo o período" },
                 ...campanhas.map((c) => ({ value: c.id, label: c.nome })),
               ]}
-              leading={<ChartColumn size={14} strokeWidth={1.8} className="shrink-0 text-azul" />}
+              leading={<ChartColumn size={14} strokeWidth={1.8} className="shrink-0 text-link" />}
               triggerClassName="btn btn-secundario btn-40"
             />
           )}

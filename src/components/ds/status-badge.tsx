@@ -12,11 +12,14 @@ import { STATUS_CONTEUDO_LABEL, STATUS_LABEL } from "@/lib/types";
 function Selo({
   fundo,
   texto,
+  borda,
   tamanho = "md",
   children,
 }: {
   fundo: string;
   texto: string;
+  /** Contorno por dentro (não muda o tamanho do selo): só se nota no tema escuro. */
+  borda: string;
   tamanho?: "md" | "lg" | undefined;
   children: ReactNode;
 }) {
@@ -25,7 +28,7 @@ function Selo({
       className={`inline-flex whitespace-nowrap rounded-lg font-bold ${
         tamanho === "lg" ? "px-3 py-1.5 text-[13px]" : "px-2.5 py-[5px] text-[12px]"
       }`}
-      style={{ background: fundo, color: texto }}
+      style={{ background: fundo, color: texto, boxShadow: `inset 0 0 0 1px ${borda}` }}
     >
       {children}
     </span>
@@ -41,7 +44,7 @@ type Props =
 export function StatusBadge(p: Props) {
   if (p.tipo === "parcial") {
     return (
-      <Selo fundo={COR_PARCIAL.fundo} texto={COR_PARCIAL.texto} tamanho={p.tamanho}>
+      <Selo fundo={COR_PARCIAL.fundo} texto={COR_PARCIAL.texto} borda={COR_PARCIAL.borda} tamanho={p.tamanho}>
         Parcial
       </Selo>
     );
@@ -49,7 +52,7 @@ export function StatusBadge(p: Props) {
   const cor = p.tipo === "lead" ? COR_LEAD[p.status] : COR_POST[p.status];
   const rotulo = p.tipo === "lead" ? STATUS_LABEL[p.status] : STATUS_CONTEUDO_LABEL[p.status];
   return (
-    <Selo fundo={cor.fundo} texto={cor.texto} tamanho={p.tamanho}>
+    <Selo fundo={cor.fundo} texto={cor.texto} borda={cor.borda} tamanho={p.tamanho}>
       {rotulo}
     </Selo>
   );
@@ -61,7 +64,7 @@ export function CampanhaBadge({ status }: { status: StatusCampanha }) {
   return (
     <span
       className="whitespace-nowrap rounded-full px-2 py-[3px] text-[10px] font-bold"
-      style={{ background: cor.fundo, color: cor.texto }}
+      style={{ background: cor.fundo, color: cor.texto, boxShadow: `inset 0 0 0 1px ${cor.borda}` }}
     >
       {STATUS_CAMPANHA_LABEL[status]}
     </span>

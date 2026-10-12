@@ -232,7 +232,7 @@ function FunilTela() {
                 : "Informe o investimento na campanha para calcular"
           }
         />
-        <div className="flex min-w-0 flex-col gap-2.5 rounded-[20px] border border-borda bg-white p-[22px]">
+        <div className="flex min-w-0 flex-col gap-2.5 rounded-[20px] border border-borda bg-superficie p-[22px]">
           <span className="flex items-center justify-between gap-2">
             <span className="text-[13px] font-semibold text-texto-3">Maior queda</span>
             {pior > 0 && (
@@ -264,7 +264,7 @@ function FunilTela() {
       </div>
 
       {/* Funil completo */}
-      <section className="flex flex-col gap-[18px] rounded-[20px] border border-borda bg-white px-6 py-[22px]">
+      <section className="flex flex-col gap-[18px] rounded-[20px] border border-borda bg-superficie px-6 py-[22px]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-col gap-1">
             <h2 className="m-0 text-[16px] font-bold">Funil completo</h2>
@@ -286,7 +286,7 @@ function FunilTela() {
                 aria-checked={modo === id}
                 onClick={() => setModo(id)}
                 className={`min-h-9 whitespace-nowrap rounded-[9px] border-0 px-3.5 text-[12px] font-bold transition-[background-color,color,box-shadow] ${
-                  modo === id ? "bg-white text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.12)]" : "bg-transparent text-texto-3 hover:text-marinho"
+                  modo === id ? "bg-superficie text-marinho shadow-[0_1px_3px_rgba(28,46,69,0.12)]" : "bg-transparent text-texto-3 hover:text-marinho"
                 }`}
               >
                 {rotulo}
@@ -309,7 +309,7 @@ function FunilTela() {
         ) : (
           <>
             <FunnelChart etapas={etapas} modo={modo} />
-            <div className="flex flex-wrap gap-x-[18px] gap-y-2 border-t border-gelo pt-3 text-[12px] text-texto-3">
+            <div className="flex flex-wrap gap-x-[18px] gap-y-2 border-t border-divisor pt-3 text-[12px] text-texto-3">
               <span className="flex items-center gap-2">
                 <span className="h-3 w-3 rounded" style={{ background: COR_ETAPA_LP }} />
                 Etapas da landing page (medidas pelo script)
@@ -327,7 +327,7 @@ function FunilTela() {
       </section>
 
       {/* Comparar campanhas */}
-      <section className="flex flex-col gap-3.5 rounded-[20px] border border-borda bg-white px-6 py-[22px]">
+      <section className="flex flex-col gap-3.5 rounded-[20px] border border-borda bg-superficie px-6 py-[22px]">
         <div className="flex flex-wrap items-baseline justify-between gap-2.5">
           <h2 className="m-0 text-[16px] font-bold">Comparar campanhas</h2>
           {campanhas.length > 0 && <span className="text-[12px] text-texto-3">Clique numa linha para ver o funil dela</span>}
@@ -376,7 +376,7 @@ function FunilTela() {
             </span>
           </div>
           <span className="flex items-start gap-2 rounded-[12px] bg-azul-claro px-3 py-2.5 text-[12px] leading-normal">
-            <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="mt-px flex-none" />
+            <Info size={16} strokeWidth={2} color="var(--link)" aria-hidden className="mt-px flex-none" />
             Assim que esse registro existir, este card mostra a conversão de quem é chamado em até 1 hora, de 1h a 24h e depois de 24h.
           </span>
         </Card>
@@ -431,7 +431,7 @@ function LinhaDeCampanha({
       type="button"
       onClick={onEscolher}
       aria-pressed={escolhida}
-      className={`${GRADE_CAMPANHAS} min-h-14 rounded-[12px] border-0 border-b border-solid border-gelo px-3.5 py-1.5 text-left text-[13px] text-marinho transition-colors ${
+      className={`${GRADE_CAMPANHAS} min-h-14 rounded-[12px] border-0 border-b border-solid border-divisor px-3.5 py-1.5 text-left text-[13px] text-marinho transition-colors ${
         escolhida ? "bg-azul-claro shadow-[inset_0_0_0_1.5px_#1A66C2]" : "bg-transparent hover:bg-superficie-2"
       }`}
     >

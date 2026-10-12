@@ -164,7 +164,7 @@ function CortinaDeTroca() {
       // key: a cada troca a cortina renasce, e as animações de entrada e da
       // barra recomeçam do zero.
       key={trocas}
-      className={`cortina-troca fixed inset-0 z-[90] flex items-center justify-center overflow-hidden text-white ${
+      className={`sobre-degrade cortina-troca fixed inset-0 z-[90] flex items-center justify-center overflow-hidden text-white ${
         fase === "saindo" ? "cortina-saindo" : ""
       }`}
       // Degradê profundo: o mesmo dos cabeçalhos de popup e do login.
@@ -187,7 +187,7 @@ function CortinaDeTroca() {
           {projeto?.nome}
         </p>
         <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-white/15">
-          <div className="cortina-progresso h-full rounded-full bg-white" />
+          <div className="cortina-progresso h-full rounded-full bg-superficie" />
         </div>
       </div>
     </div>

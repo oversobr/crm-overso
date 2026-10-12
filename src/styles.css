@@ -3,8 +3,8 @@
 /* A Montserrat é carregada por <link> no __root.tsx. Aqui ela seria um
    @import depois das regras do Tailwind, que é inválido e acabava descartado. */
 
-/* `dark:` segue o data-theme, que hoje é sempre "light" (ver abaixo). */
-@custom-variant dark (&:where([data-theme="dark"] *));
+/* `dark:` (usado pelas telas antigas) segue o tema escuro do portal. */
+@custom-variant dark (&:where([data-theme="escuro"] *));
 
 /* ═══════════════════════════════════════════════════════════════════
    DESIGN SYSTEM OVERSO (portal-overso-design/HANDOFF.md, seção 3)
@@ -15,9 +15,10 @@
       apontam para a paleta nova. As telas ainda não refeitas ficam
       coerentes sem tocar nelas; quando a última migrar, este bloco sai.
 
-   O portal é só claro: o design não tem versão escura. O variante
-   `dark:` continua declarado para as classes antigas compilarem, mas
-   o data-theme é sempre "light" e ele nunca casa.
+   As cores que mudam com o tema estão mais abaixo, em "CORES POR TEMA".
+   O tema escuro ainda não está ligado: o data-theme segue "light". O
+   variante `dark:` continua declarado só para as classes antigas
+   compilarem, e nunca casa.
    ═══════════════════════════════════════════════════════════════════ */
 @theme {
   /* ---- 1. TOKENS DO HANDOFF ---- */
@@ -26,32 +27,9 @@
   --color-azul-pressed: #124c93;
   --color-azul-profundo: #0f3a70;
   --color-azul-desabilitado: #b9d2ef;
-  --color-azul-claro: #f5f9fe; /* selecionado */
-  --color-azul-claro-2: #e3eefa; /* chips, pressionado */
-  --color-azul-borda: #9cc0ea; /* borda do hover de cards e ícones */
-  --color-marinho: #1c2e45; /* texto principal, botão escuro */
-  --color-marinho-hover: #2d4260;
   --color-marinho-pressed: #121e2e;
-  --color-grafite: #1a1f26;
-  --color-nevoa: #b5bec4; /* bordas fortes, dados neutros */
-  --color-nevoa-2: #c9d2db;
-  --color-gelo: #edf1f4; /* fundo da aplicação e do menu */
-  --color-superficie: #ffffff;
-  --color-superficie-2: #f4f6f8; /* blocos internos, hover de linha */
-  --color-superficie-3: #f7f9fa;
-  --color-borda: #e1e6eb; /* cards */
-  --color-borda-campo: #dce2e8; /* campos e botões secundários */
-  --color-borda-campo-hover: #9da9b6;
-  --color-texto-2: #3e4f64;
-  --color-texto-3: #55657a; /* legendas: 4.5:1 sobre branco */
-  --color-texto-4: #8d99a6; /* desabilitado, vazio */
   --color-erro: #c8372d;
-  --color-erro-texto: #a3322a;
-  --color-erro-fundo: #fbe6e4;
-  --color-sucesso: #1e6b3a;
-  --color-sucesso-fundo: #e2f3e8;
-  --color-alerta: #8a4b08;
-  --color-alerta-fundo: #fdf0dd;
+  --color-verde: #1e6b3a; /* botão Aprovar: igual nos dois temas */
 
   /* ---- 2. LEGADO (telas ainda não refeitas) ---- */
   --color-brand-950: #0f3a70;
@@ -65,18 +43,9 @@
   --color-brand-200: #dce2e8;
   --color-brand-100: #edf1f4;
 
-  --color-base: #edf1f4;
-  --color-sidebar: #edf1f4;
-  --color-surface: #ffffff;
-  --color-surface-2: #f4f6f8;
-  --color-line: #c9d2db;
-  --color-ink: #1c2e45;
-  --color-muted: #55657a;
   --color-gold: #1a66c2;
-  --color-accent: #1a66c2;
   --color-gold-dim: #155ab0;
   --color-fill: #1a66c2;
-  --color-fill-2: #b5bec4;
 
   --font-sans: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Montserrat", system-ui, sans-serif;
@@ -89,6 +58,233 @@
   --ease-gaveta: cubic-bezier(0.32, 0.72, 0, 1);
   --default-transition-duration: 150ms;
   --default-transition-timing-function: var(--ease-suave);
+}
+
+/* Tokens que mudam com o tema. `inline` faz a classe do Tailwind usar a
+   variável do tema direto (bg-superficie vira background: var(--surface)),
+   e é isso que deixa um trecho com .sobre-degrade voltar ao claro. */
+@theme inline {
+  --color-azul-claro: var(--selected);
+  --color-azul-claro-2: var(--chip-blue);
+  --color-azul-borda: var(--border-dashed);
+  --color-marinho: var(--text);
+  --color-marinho-hover: var(--navy-2);
+  --color-grafite: var(--text-strong);
+  --color-nevoa: var(--neutral-strong);
+  --color-nevoa-2: var(--off);
+  --color-gelo: var(--bg-app);
+  --color-superficie: var(--surface);
+  --color-superficie-2: var(--surface-2);
+  --color-superficie-3: var(--surface-3);
+  --color-borda: var(--border);
+  --color-borda-campo: var(--border-field);
+  --color-borda-campo-hover: var(--border-field-hover);
+  --color-texto-2: var(--text-2);
+  --color-texto-3: var(--text-3);
+  --color-texto-4: var(--text-disabled);
+  --color-erro-texto: var(--st-vermelho-text);
+  --color-erro-fundo: var(--st-vermelho-bg);
+  --color-sucesso: var(--st-verde-text);
+  --color-sucesso-fundo: var(--st-verde-bg);
+  --color-alerta: var(--st-laranja-text);
+  --color-alerta-fundo: var(--st-laranja-bg);
+  --color-base: var(--bg-app);
+  --color-sidebar: var(--bg-app);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--off);
+  --color-ink: var(--text);
+  --color-muted: var(--text-3);
+  --color-accent: var(--link);
+  --color-fill-2: var(--neutral-strong);
+
+  /* Papéis que antes dividiam um token com outro uso. */
+  --color-navy: var(--navy);
+  --color-navy-2: var(--navy-2);
+  --color-divisor: var(--divider);
+  --color-grupo: var(--group-bg);
+  --color-link: var(--link);
+  --color-link-chip: var(--link-chip);
+  --color-link-hover: var(--link-hover);
+  --color-texto-4b: var(--text-4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CORES POR TEMA (portal-overso-design/HANDOFF.md, seção 7)
+   Cada variável tem o valor do tema claro e o do escuro. O tema é o
+   atributo data-theme do <html>: "escuro" liga o conjunto de baixo.
+
+   Iguais nos dois temas, e por isso fora daqui: os degradês, o azul de
+   fundo dos botões (#1A66C2), o verde do Aprovar, o vermelho do
+   contador de notificações, as cores de campanha e o texto branco
+   sobre azul.
+
+   .sobre-degrade devolve os valores do claro a um trecho da tela: o
+   que fica em cima de degradê (cabeçalho de popup, capa, card de
+   destaque) é igual nos dois temas, com seus botões brancos e selos.
+   ═══════════════════════════════════════════════════════════════════ */
+:root,
+.sobre-degrade {
+  /* Fundos */
+  --bg-app: #edf1f4; /* fundo do app e trilhos de barra dentro de cards */
+  --surface: #ffffff; /* cards, popups, menus */
+  --surface-2: #f4f6f8; /* blocos internos, cabeçalho de tabela, aside dos popups */
+  --surface-3: #f7f9fa;
+  --selected: #f5f9fe; /* item selecionado, hover de linha */
+  --chip-blue: #e3eefa;
+  --group-bg: #dce2e8; /* fundo de grupo de filtros / segmented */
+  --soft-bg: #e4e9ee;
+  --navy: #1c2e45; /* botão escuro, card Módulo Eventos, tooltip */
+  --navy-2: #2d4260;
+  --navy-interno: #24395a; /* bloco dentro de um card marinho */
+  --off: #c9d2db; /* switch desligado, pontos inativos */
+  --neutral-strong: #b5bec4;
+  --overlay: rgba(28, 46, 69, 0.55); /* fundo atrás dos popups */
+  --azul-desabilitado: #b9d2ef; /* botão principal desabilitado */
+  --azul-desabilitado-texto: #ffffff;
+
+  /* Texto */
+  --text: #1c2e45;
+  --text-strong: #1a1f26;
+  --text-2: #3e4f64;
+  --text-3: #55657a; /* legendas, placeholder, ícones de campo */
+  --text-4: #4a5868;
+  --text-disabled: #8d99a6;
+  --text-neutro: #6b7682;
+  --link: #1a66c2; /* texto e link azul; o FUNDO azul dos botões é #1A66C2 nos dois temas */
+  --link-chip: #1a57a6;
+  --link-hover: #124c93;
+
+  /* Bordas */
+  --border: #e1e6eb; /* cards */
+  --border-field: #dce2e8; /* campos e botões secundários */
+  --border-field-hover: #9da9b6;
+  --divider: #edf1f4; /* linhas de tabela, grade de gráfico */
+  --border-strong: #b5bec4;
+  --border-dashed: #9cc0ea; /* área de upload, adicionar link */
+  --border-info: #cfe0f5;
+  --border-selected: #f5f9fe;
+  --border-navy: #1c2e45;
+
+  /* Status: fundo, texto e borda de cada família */
+  --st-azul-bg: #e3eefa; /* Novo, Agendado */
+  --st-azul-text: #1a57a6;
+  --st-azul-border: #e3eefa;
+  --st-laranja-bg: #fdf0dd; /* Contato feito, Produção, alertas */
+  --st-laranja-text: #8a4b08;
+  --st-laranja-border: #fdf0dd;
+  --st-verde-bg: #e2f3e8; /* Convertido, Publicado, sucesso */
+  --st-verde-text: #1e6b3a;
+  --st-verde-border: #e2f3e8;
+  --st-verde-bg-hover: #cdebd7;
+  --st-verde-border-forte: #b5dfc3;
+  --st-teal-bg: #e3f1f3; /* Entrou no grupo */
+  --st-teal-text: #1f5f6b;
+  --st-teal-border: #e3f1f3;
+  --st-roxo-bg: #f3e8fb; /* Aprovação */
+  --st-roxo-text: #6b3696;
+  --st-roxo-border: #f3e8fb;
+  --st-roxo-border-forte: #d9bdef;
+  --st-roxo-border-suave: #e8d7f5;
+  --st-vermelho-bg: #fbe6e4; /* erro, remover */
+  --st-vermelho-text: #a3322a;
+  --st-vermelho-border: #fbe6e4;
+  --st-vermelho-border-forte: #f2c7c2;
+  --st-cinza-bg: #eceef1; /* Perdido, Ideia, Encerrada */
+  --st-cinza-text: #4a5868;
+  --st-cinza-border: #eceef1;
+
+  /* Gráficos: os casos em que a cor da série muda com o tema */
+  --grafico-grade: #edf1f4;
+  --grafico-convertido: #1c2e45; /* status Convertido no Dashboard */
+  --grafico-enviaram: #1c2e45; /* barra da conversão do formulário */
+  --grafico-desistiram: #b9d2ef;
+  --grafico-crm: #1c2e45; /* barras e legenda do CRM no Funil */
+}
+
+[data-theme="escuro"] {
+  /* Campos, barras de rolagem e seletores nativos do navegador no escuro. */
+  color-scheme: dark;
+
+  /* Fundos */
+  --bg-app: #0e1620;
+  --surface: #16202c;
+  --surface-2: #1c2836;
+  --surface-3: #1a2533;
+  --selected: #13263d;
+  --chip-blue: #17345a;
+  --group-bg: #263445;
+  --soft-bg: #1f2a38;
+  --navy: #24364d;
+  --navy-2: #31476a;
+  --navy-interno: #31476a;
+  --off: #3a4a5d;
+  --neutral-strong: #4b5b6e;
+  --overlay: rgba(3, 7, 12, 0.72);
+  --azul-desabilitado: #1f3a5c;
+  --azul-desabilitado-texto: #7f93ab;
+
+  /* Texto */
+  --text: #e7edf3;
+  --text-strong: #f3f6f9;
+  --text-2: #b6c2cf;
+  --text-3: #93a2b3;
+  --text-4: #a7b4c2;
+  --text-disabled: #66758a;
+  --text-neutro: #9aa7b5;
+  --link: #6ea8ee;
+  --link-chip: #8dbdf4;
+  --link-hover: #a9cdf7;
+
+  /* Bordas */
+  --border: #263546;
+  --border-field: #2d3d50;
+  --border-field-hover: #4b5b6e;
+  --divider: #213041;
+  --border-strong: #4b5b6e;
+  --border-dashed: #3b6599;
+  --border-info: #23466f;
+  --border-selected: #1f3a5c;
+  --border-navy: #2d3d50;
+
+  /* Status: fundo, texto e borda de cada família */
+  --st-azul-bg: #17345a;
+  --st-azul-text: #8dbdf4;
+  --st-azul-border: #24497a;
+  --st-laranja-bg: #3b2a12;
+  --st-laranja-text: #f0b464;
+  --st-laranja-border: #5a4220;
+  --st-verde-bg: #143221;
+  --st-verde-text: #7cd39a;
+  --st-verde-border: #22513a;
+  --st-verde-bg-hover: #22513a;
+  --st-verde-border-forte: #2e6a44;
+  --st-teal-bg: #123139;
+  --st-teal-text: #7acad7;
+  --st-teal-border: #1f4c57;
+  --st-roxo-bg: #2c1e3e;
+  --st-roxo-text: #c9a0ee;
+  --st-roxo-border: #46305f;
+  --st-roxo-border-forte: #563a75;
+  --st-roxo-border-suave: #4a3463;
+  --st-vermelho-bg: #3d1d1b;
+  --st-vermelho-text: #f3968d;
+  --st-vermelho-border: #5e2d2a;
+  --st-vermelho-border-forte: #5a2b28;
+  --st-cinza-bg: #253140;
+  --st-cinza-text: #a7b4c2;
+  --st-cinza-border: #384658;
+
+  /* Gráficos: os casos em que a cor da série muda com o tema */
+  --grafico-grade: #213041;
+  --grafico-convertido: #dce8f7;
+  --grafico-enviaram: #6ea8ee;
+  --grafico-desistiram: #2a3f5c;
+  --grafico-crm: #3d5a80;
+}
+
+.sobre-degrade {
+  color-scheme: light;
 }
 
 :root {
@@ -169,38 +365,39 @@
   }
   .btn-primario:disabled,
   .btn-primario[aria-disabled="true"] {
-    background: var(--color-azul-desabilitado);
+    background: var(--azul-desabilitado);
+    color: var(--azul-desabilitado-texto);
     box-shadow: none;
     transform: none;
   }
 
   .btn-secundario {
-    border: 1px solid var(--color-borda-campo);
-    background: #ffffff;
-    color: var(--color-marinho);
+    border: 1px solid var(--border-field);
+    background: var(--surface);
+    color: var(--text);
     font-weight: 600;
   }
   .btn-secundario:hover {
-    border-color: var(--color-nevoa);
-    background: var(--color-gelo);
+    border-color: var(--neutral-strong);
+    background: var(--bg-app);
   }
   .btn-secundario:active {
-    border-color: var(--color-nevoa);
-    background: var(--color-borda-campo);
+    border-color: var(--neutral-strong);
+    background: var(--border-field);
   }
   .btn-secundario:disabled,
   .btn-secundario[aria-disabled="true"] {
-    border-color: var(--color-borda);
-    background: var(--color-superficie-2);
-    color: var(--color-texto-4);
+    border-color: var(--border);
+    background: var(--surface-2);
+    color: var(--text-disabled);
   }
 
   .btn-escuro {
-    background: var(--color-marinho);
+    background: var(--navy);
     color: #ffffff;
   }
   .btn-escuro:hover {
-    background: var(--color-marinho-hover);
+    background: var(--navy-2);
     box-shadow: 0 6px 16px rgba(28, 46, 69, 0.28);
   }
   .btn-escuro:active {
@@ -209,20 +406,21 @@
   }
   .btn-escuro:disabled,
   .btn-escuro[aria-disabled="true"] {
-    background: var(--color-nevoa-2);
+    background: var(--off);
     box-shadow: none;
   }
 
-  /* Branco sobre o degradê (card de destaque, aviso de módulo). */
+  /* Branco sobre o degradê ou sobre um card marinho (card de destaque, aviso
+     de módulo). Igual nos dois temas: o fundo em que ele fica não muda. */
   .btn-claro {
     background: #ffffff;
-    color: var(--color-marinho);
+    color: #1c2e45;
   }
   .btn-claro:hover {
-    background: var(--color-gelo);
+    background: #edf1f4;
   }
   .btn-claro:active {
-    background: var(--color-borda-campo);
+    background: #dce2e8;
   }
 
   /* Sino, WhatsApp, fechar. */
@@ -235,29 +433,29 @@
     height: 44px;
     padding: 0;
     border-radius: 99px;
-    border: 1.5px solid var(--color-borda-campo);
-    background: #ffffff;
-    color: var(--color-marinho);
+    border: 1.5px solid var(--border-field);
+    background: var(--surface);
+    color: var(--text);
     transition:
       background-color 150ms ease-out,
       border-color 150ms ease-out,
       color 150ms ease-out;
   }
   .btn-icone:hover {
-    border-color: var(--color-azul-borda);
-    background: var(--color-azul-claro);
-    color: var(--color-azul);
+    border-color: var(--border-dashed);
+    background: var(--selected);
+    color: var(--link);
   }
   .btn-icone:active,
   .btn-icone[aria-expanded="true"] {
     border-color: var(--color-azul);
-    background: var(--color-azul-claro-2);
-    color: var(--color-azul);
+    background: var(--chip-blue);
+    color: var(--link);
   }
   .btn-icone:disabled {
-    border-color: var(--color-borda);
-    background: var(--color-superficie-2);
-    color: var(--color-nevoa);
+    border-color: var(--border);
+    background: var(--surface-2);
+    color: var(--neutral-strong);
   }
 
   /* ── Item do menu lateral ─────────────────────────────────────── */
@@ -272,38 +470,38 @@
     text-decoration: none;
     font-size: 14px;
     font-weight: 600;
-    color: var(--color-texto-2);
+    color: var(--text-2);
     transition:
       background-color 150ms ease-out,
       color 150ms ease-out,
       box-shadow 150ms ease-out;
   }
   .item-menu:hover {
-    background: rgba(255, 255, 255, 0.65);
-    color: var(--color-marinho);
+    background: color-mix(in srgb, var(--surface) 65%, transparent);
+    color: var(--text);
   }
   .item-menu:hover .item-menu-icone {
-    color: var(--color-azul);
+    color: var(--link);
   }
   /* Ativo: pílula branca com o ícone cheio. */
   .item-menu[aria-current="page"] {
-    background: #ffffff;
+    background: var(--surface);
     box-shadow: 0 1px 3px rgba(28, 46, 69, 0.1);
     font-weight: 700;
-    color: var(--color-marinho);
+    color: var(--text);
   }
   .item-menu[aria-current="page"] .item-menu-icone {
-    color: var(--color-azul);
+    color: var(--link);
   }
   .item-menu:focus-visible {
     outline-offset: 0;
-    color: var(--color-marinho);
+    color: var(--text);
   }
   /* Módulo não contratado: fica no menu, apagado e com cadeado. */
   .item-menu[data-bloqueado],
   .item-menu[data-bloqueado]:hover {
     background: transparent;
-    color: var(--color-texto-4);
+    color: var(--text-disabled);
   }
   .item-menu[data-bloqueado]:hover .item-menu-icone {
     color: inherit;
@@ -319,31 +517,31 @@
     background: transparent;
     font-size: 14px;
     font-weight: 500;
-    color: var(--color-texto-3);
+    color: var(--text-3);
     white-space: nowrap;
     transition:
       border-color 150ms ease-out,
       color 150ms ease-out;
   }
   .aba:hover {
-    border-bottom-color: var(--color-nevoa-2);
+    border-bottom-color: var(--off);
     font-weight: 600;
-    color: var(--color-marinho);
+    color: var(--text);
   }
   .aba[aria-selected="true"] {
     border-bottom-color: var(--color-azul);
     font-weight: 700;
-    color: var(--color-marinho);
+    color: var(--text);
   }
   .aba:focus-visible {
     outline-offset: 0;
     border-radius: 8px 8px 0 0;
-    color: var(--color-marinho);
+    color: var(--text);
   }
   .aba:disabled {
     border-bottom-color: transparent;
     font-weight: 500;
-    color: var(--color-nevoa);
+    color: var(--neutral-strong);
   }
 
   /* ── Campo de texto ───────────────────────────────────────────────
@@ -354,20 +552,20 @@
     padding: 0 14px;
     box-sizing: border-box;
     border-radius: 12px;
-    border: 1px solid var(--color-borda-campo);
-    background: #ffffff;
+    border: 1px solid var(--border-field);
+    background: var(--surface);
     font-size: 14px;
-    color: var(--color-marinho);
+    color: var(--text);
     transition:
       border-color 150ms ease-out,
       box-shadow 150ms ease-out;
   }
   .campo::placeholder,
   .campo input::placeholder {
-    color: var(--color-texto-3);
+    color: var(--text-3);
   }
   .campo:hover {
-    border-color: var(--color-borda-campo-hover);
+    border-color: var(--border-field-hover);
   }
   .campo:focus,
   .campo:focus-within {
@@ -382,9 +580,9 @@
     box-shadow: 0 0 0 0.5px var(--color-erro);
   }
   .campo:disabled {
-    border-color: var(--color-borda);
-    background: var(--color-superficie-2);
-    color: var(--color-nevoa);
+    border-color: var(--border);
+    background: var(--surface-2);
+    color: var(--neutral-strong);
   }
   .campo input {
     outline: none;
@@ -392,8 +590,8 @@
 
   /* ── Card clicável: sobe 2px com borda azul clara ─────────────── */
   .card-clicavel {
-    border: 1.5px solid var(--color-borda);
-    background: #ffffff;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
     transition:
       border-color 150ms ease-out,
       box-shadow 150ms ease-out,
@@ -401,14 +599,14 @@
       background-color 150ms ease-out;
   }
   .card-clicavel:hover {
-    border-color: var(--color-azul-borda);
+    border-color: var(--border-dashed);
     box-shadow: 0 10px 24px rgba(28, 46, 69, 0.1);
     transform: translateY(-2px);
   }
   .card-clicavel:active,
   .card-clicavel[aria-selected="true"] {
     border-color: var(--color-azul);
-    background: var(--color-azul-claro);
+    background: var(--selected);
     box-shadow: none;
     transform: none;
   }
@@ -418,10 +616,10 @@
     transition: background-color 150ms ease-out;
   }
   .linha-tabela:hover {
-    background: var(--color-superficie-2);
+    background: var(--surface-2);
   }
   .linha-tabela[aria-selected="true"] {
-    background: var(--color-azul-claro-2);
+    background: var(--chip-blue);
   }
   .linha-tabela:focus-visible {
     outline-offset: -2px;
@@ -432,10 +630,10 @@
     transition: background-color 150ms ease-out;
   }
   .opcao:hover {
-    background: var(--color-superficie-2);
+    background: var(--surface-2);
   }
   .opcao[aria-selected="true"] {
-    background: var(--color-azul-claro);
+    background: var(--selected);
   }
   .opcao:focus-visible {
     outline-offset: -2px;
@@ -444,17 +642,17 @@
   /* ── Link de texto ────────────────────────────────────────────── */
   .link {
     font-weight: 600;
-    color: var(--color-azul);
+    color: var(--link);
     text-decoration: none;
     text-underline-offset: 3px;
     transition: color 150ms ease-out;
   }
   .link:hover {
-    color: var(--color-azul-pressed);
+    color: var(--link-hover);
     text-decoration: underline;
   }
   .link:active {
-    color: var(--color-azul-profundo);
+    color: var(--link-hover);
     text-decoration: underline;
   }
   .link:focus-visible {
@@ -513,8 +711,8 @@ button:disabled,
 html, body, #root { height: 100%; }
 
 body {
-  background: var(--color-base);
-  color: var(--color-ink);
+  background: var(--bg-app);
+  color: var(--text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   }
@@ -575,9 +773,9 @@ body {
 .sem-barra::-webkit-scrollbar { display: none; }
 
 /* Barra de rolagem discreta pra listas que rolam dentro de um card. */
-.rolagem-fina { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+.rolagem-fina { scrollbar-width: thin; scrollbar-color: var(--off) transparent; }
 .rolagem-fina::-webkit-scrollbar { width: 6px; }
-.rolagem-fina::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
+.rolagem-fina::-webkit-scrollbar-thumb { background: var(--off); border-radius: 999px; }
 
 @media (prefers-reduced-motion: reduce) {
   .cortina-troca,
@@ -616,7 +814,7 @@ main[data-atualizando] > div > * > :not(header) {
   z-index: 90;
   height: 3px;
   overflow: hidden;
-  background: var(--color-azul-claro-2);
+  background: var(--chip-blue);
 }
 .barra-atualizando::after {
   content: "";
@@ -645,18 +843,18 @@ main[data-atualizando] > div > * > :not(header) {
 /* Barra de rolagem: discreta e coerente com o tema. */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
+::-webkit-scrollbar-thumb { background: var(--off); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
 
 /* Autofill do Chrome: por padrão ele pinta o campo de branco/amarelo e o texto
    some no tema escuro. O box-shadow interno repinta o fundo com o nosso token. */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--color-ink);
-  -webkit-box-shadow: 0 0 0 1000px var(--color-surface-2) inset;
-  box-shadow: 0 0 0 1000px var(--color-surface-2) inset;
-  caret-color: var(--color-ink);
+  -webkit-text-fill-color: var(--text);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset;
+  box-shadow: 0 0 0 1000px var(--surface-2) inset;
+  caret-color: var(--text);
   transition: background-color 9999s ease-in-out 0s;
 }
 

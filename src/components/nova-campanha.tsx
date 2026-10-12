@@ -239,8 +239,8 @@ export function NovaCampanha({
                     aria-pressed={aceso}
                     className={`min-h-9 rounded-full border-[1.5px] px-3 text-[12px] font-bold transition-colors ${
                       aceso
-                        ? "border-azul bg-azul-claro-2 text-[#1A57A6]"
-                        : "border-borda-campo bg-white text-texto-2 hover:border-borda-campo-hover"
+                        ? "border-azul bg-azul-claro-2 text-link-chip"
+                        : "border-borda-campo bg-superficie text-texto-2 hover:border-borda-campo-hover"
                     }`}
                   >
                     {a.rotulo}
@@ -273,12 +273,12 @@ export function NovaCampanha({
                         setEscolhidas((l) => (marcada ? l.filter((x) => x !== p.endereco) : [...l, p.endereco]))
                       }
                       className={`flex min-h-11 items-center gap-2 rounded-[12px] border-[1.5px] px-3.5 text-[13px] font-semibold text-marinho transition-colors ${
-                        marcada ? "border-azul bg-azul-claro" : "border-borda-campo bg-white hover:border-borda-campo-hover"
+                        marcada ? "border-azul bg-azul-claro" : "border-borda-campo bg-superficie hover:border-borda-campo-hover"
                       }`}
                     >
                       <span
                         className={`box-border flex h-[18px] w-[18px] flex-none items-center justify-center rounded-md border-[1.5px] text-white ${
-                          marcada ? "border-azul bg-azul" : "border-nevoa bg-white"
+                          marcada ? "border-azul bg-azul" : "border-nevoa bg-superficie"
                         }`}
                       >
                         {marcada && <Check size={12} strokeWidth={3.5} aria-hidden />}
@@ -307,7 +307,7 @@ export function NovaCampanha({
                     aria-checked={marcada}
                     onClick={() => setRegra(r.id)}
                     className={`flex items-start gap-3 rounded-[14px] border-2 px-3.5 py-3 text-left text-marinho transition-colors ${
-                      marcada ? "border-azul bg-azul-claro" : "border-borda bg-white hover:border-borda-campo-hover"
+                      marcada ? "border-azul bg-azul-claro" : "border-borda bg-superficie hover:border-borda-campo-hover"
                     }`}
                   >
                     <span
@@ -334,7 +334,7 @@ export function NovaCampanha({
                   onChange={(e) => setUtm(e.target.value)}
                   placeholder="black-november"
                   spellCheck={false}
-                  className="min-w-0 flex-1 border-0 bg-transparent font-mono text-[13px] font-semibold text-[#1A57A6]"
+                  className="min-w-0 flex-1 border-0 bg-transparent font-mono text-[13px] font-semibold text-link-chip"
                 />
               </label>
             )}
@@ -385,8 +385,8 @@ export function NovaCampanha({
                   aria-label={c.nome}
                   title={c.nome}
                   onClick={() => setCor(c.hex)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border-[3px] bg-white p-0 transition-colors"
-                  style={{ borderColor: cor === c.hex ? c.hex : "#FFFFFF" }}
+                  className="flex h-11 w-11 items-center justify-center rounded-full border-[3px] bg-superficie p-0 transition-colors"
+                  style={{ borderColor: cor === c.hex ? c.hex : "var(--surface)" }}
                 >
                   <span className="h-[30px] w-[30px] rounded-full" style={{ background: c.hex }} />
                 </button>
@@ -398,7 +398,7 @@ export function NovaCampanha({
         {/* Coluna 3: a prévia */}
         <ModalColuna aria-label="Resumo da campanha" fundo className="!gap-3.5">
           <span className="text-[11px] font-bold tracking-[0.1em] text-texto-3">COMO VAI APARECER</span>
-          <div className="flex flex-col gap-3.5 rounded-[18px] border border-borda bg-white p-[18px]">
+          <div className="flex flex-col gap-3.5 rounded-[18px] border border-borda bg-superficie p-[18px]">
             <span className="flex items-center gap-3">
               <span
                 className="flex h-[42px] w-[42px] flex-none items-center justify-center rounded-[12px] text-white transition-colors"
@@ -433,9 +433,9 @@ export function NovaCampanha({
               <span className="h-2.5 rounded-full bg-gelo" />
             </span>
           </div>
-          <p className="m-0 rounded-[14px] bg-white p-3.5 text-[12px] leading-[1.55] text-texto-2">{textoDaRegra}</p>
+          <p className="m-0 rounded-[14px] bg-superficie p-3.5 text-[12px] leading-[1.55] text-texto-2">{textoDaRegra}</p>
           <span className="flex gap-2.5 text-[12px] leading-normal text-texto-2">
-            <Info size={16} strokeWidth={2} color="#1A66C2" aria-hidden className="mt-0.5 flex-none" />A campanha aparece no
+            <Info size={16} strokeWidth={2} color="var(--link)" aria-hidden className="mt-0.5 flex-none" />A campanha aparece no
             seletor de campanha das telas de Leads e Dashboard.
           </span>
         </ModalColuna>

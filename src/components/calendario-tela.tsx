@@ -358,7 +358,7 @@ export function CalendarioTela({
           {STATUS_POST.map((s) => {
             const n = doMes.filter((p) => p.status === s).length;
             return (
-              <div key={s} className="flex flex-col gap-2 rounded-[18px] border border-borda bg-white px-[18px] py-4">
+              <div key={s} className="flex flex-col gap-2 rounded-[18px] border border-borda bg-superficie px-[18px] py-4">
                 <span
                   className="self-start rounded-lg px-2.5 py-1 text-[12px] font-bold"
                   style={{ background: COR_POST[s].fundo, color: COR_POST[s].texto }}
@@ -384,7 +384,7 @@ export function CalendarioTela({
       )}
 
       <div className="flex flex-col gap-4">
-        <section aria-label={titulo} className="flex min-w-0 flex-col gap-4 rounded-[20px] border border-borda bg-white p-5">
+        <section aria-label={titulo} className="flex min-w-0 flex-col gap-4 rounded-[20px] border border-borda bg-superficie p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               <button
@@ -416,7 +416,7 @@ export function CalendarioTela({
                   onClick={() => setComEventos((v) => !v)}
                   aria-pressed={comEventos}
                   title={comEventos ? "Esconder os eventos do calendário" : "Mostrar os eventos no calendário"}
-                  className={`btn btn-secundario gap-1.5 px-3 text-[12px] ${comEventos ? "!border-azul !bg-azul-claro text-azul" : ""}`}
+                  className={`btn btn-secundario gap-1.5 px-3 text-[12px] ${comEventos ? "!border-azul !bg-azul-claro text-link" : ""}`}
                 >
                   <span className={`h-2.5 w-2.5 rounded-full ${comEventos ? "bg-azul" : "bg-nevoa"}`} />
                   Eventos
@@ -426,7 +426,7 @@ export function CalendarioTela({
                   type="button"
                   disabled
                   title="Módulo Eventos não contratado"
-                  className="flex min-h-11 items-center gap-1.5 rounded-[12px] border border-dashed border-nevoa bg-transparent px-3 text-[12px] font-semibold text-[#6B7682]"
+                  className="flex min-h-11 items-center gap-1.5 rounded-[12px] border border-dashed border-nevoa bg-transparent px-3 text-[12px] font-semibold text-[var(--text-neutro)]"
                 >
                   <Lock size={14} strokeWidth={2} aria-hidden />
                   Eventos
@@ -480,7 +480,7 @@ export function CalendarioTela({
 
         {resumoDePosts && mods.conteudo && (
           <div className="flex flex-wrap items-stretch gap-4">
-            <section className="flex min-w-0 flex-[3_1_602px] flex-col gap-3 rounded-[20px] border border-borda bg-white p-5">
+            <section className="flex min-w-0 flex-[3_1_602px] flex-col gap-3 rounded-[20px] border border-borda bg-superficie p-5">
               <div className="flex items-center justify-between">
                 <h2 className="m-0 text-[16px] font-bold">Esperando aprovação</h2>
                 <span
@@ -506,7 +506,7 @@ export function CalendarioTela({
                         <span className="text-[11px] font-bold tracking-[0.04em] text-texto-3">{metaDoPost(p)}</span>
                         <span className="text-[13px] font-bold leading-[1.35]">{p.titulo}</span>
                         {recado && (
-                          <span className="flex gap-2 rounded-[10px] bg-white px-2.5 py-2 text-[12px] leading-[1.45] text-texto-2">
+                          <span className="flex gap-2 rounded-[10px] bg-superficie px-2.5 py-2 text-[12px] leading-[1.45] text-texto-2">
                             <strong className="flex-none font-bold text-marinho">{recado.autor_nome.split(" ")[0] || "Recado"}:</strong>
                             <span className="line-clamp-3 [overflow-wrap:anywhere]">{separarCard(recado.texto).texto}</span>
                           </span>
@@ -518,11 +518,11 @@ export function CalendarioTela({
               )}
             </section>
 
-            <section className="flex min-w-0 flex-[2_1_420px] flex-col gap-3 rounded-[20px] bg-marinho p-5 text-gelo">
+            <section className="flex min-w-0 flex-[2_1_420px] flex-col gap-3 rounded-[20px] bg-navy p-5 text-[#EDF1F4]">
               <h2 className="m-0 text-[16px] font-bold">Sem arte anexada</h2>
               <span className="text-[12px] text-[#C9D6E6]">Posts agendados que ainda não têm imagem ou vídeo</span>
               {semArte.length === 0 ? (
-                <p className="m-0 rounded-[14px] bg-[#24395A] px-3 py-3.5 text-[13px] text-[#C9D6E6]">
+                <p className="m-0 rounded-[14px] bg-[var(--navy-interno)] px-3 py-3.5 text-[13px] text-[#C9D6E6]">
                   Todos os posts agendados de {nomeDoMes} já têm arte.
                 </p>
               ) : (
@@ -532,9 +532,9 @@ export function CalendarioTela({
                       key={p.id}
                       to={rota}
                       search={{ abrir: p.id }}
-                      className="flex min-h-14 items-center gap-3 rounded-[14px] bg-[#24395A] px-3 py-2.5 text-white no-underline transition-colors hover:bg-marinho-hover focus-visible:outline-white"
+                      className="flex min-h-14 items-center gap-3 rounded-[14px] bg-[var(--navy-interno)] px-3 py-2.5 text-white no-underline transition-colors hover:bg-navy-2 focus-visible:outline-white"
                     >
-                      <span className="flex h-[42px] w-[42px] flex-none flex-col items-center justify-center rounded-[10px] bg-white text-marinho">
+                      <span className="flex h-[42px] w-[42px] flex-none flex-col items-center justify-center rounded-[10px] bg-superficie text-marinho">
                         <span className="text-[9px] font-bold">{fmt(p.data, { weekday: "short" }).replace(".", "").toUpperCase()}</span>
                         <span className="text-[15px] font-extrabold leading-tight">{p.data.slice(8, 10)}</span>
                       </span>
@@ -616,7 +616,7 @@ function Celula({ fora, ...p }: PropsDia & { fora: boolean }) {
   return (
     <div
       {...p.soltavel}
-      className={`group box-border flex min-h-[156px] flex-col gap-1.5 border-b border-r border-gelo p-2.5 transition-colors ${p.alvo ? "bg-azul-claro-2 shadow-[inset_0_0_0_2px_#1A66C2]" : fora ? "bg-superficie-3" : p.hoje ? "bg-azul-claro" : "bg-white"}`}
+      className={`group box-border flex min-h-[156px] flex-col gap-1.5 border-b border-r border-divisor p-2.5 transition-colors ${p.alvo ? "bg-azul-claro-2 shadow-[inset_0_0_0_2px_#1A66C2]" : fora ? "bg-superficie-3" : p.hoje ? "bg-azul-claro" : "bg-superficie"}`}
     >
       <div className="flex items-center justify-between">
         <button
@@ -689,14 +689,14 @@ function GradeHorarios({
 
   const umDia = dias.length === 1;
   const colunas = { gridTemplateColumns: `76px repeat(${dias.length}, minmax(0, 1fr))` };
-  const rotuloDaLinha = "border-r border-gelo px-2 py-2.5 text-right text-[11px] font-bold tabular-nums text-texto-3";
+  const rotuloDaLinha = "border-r border-divisor px-2 py-2.5 text-right text-[11px] font-bold tabular-nums text-texto-3";
 
   const fundo = (dia: string, faixa: Faixa) =>
     alvo === chaveDoAlvo(dia, faixa)
       ? "bg-azul-claro-2 shadow-[inset_0_0_0_2px_#1A66C2]"
       : dia === hoje
         ? "bg-azul-claro"
-        : "bg-white";
+        : "bg-superficie";
 
   return (
     <div className="overflow-x-auto">
@@ -716,7 +716,7 @@ function GradeHorarios({
                 aria-current={eHoje ? "date" : undefined}
                 className="flex items-center gap-2 border-0 bg-transparent px-3 py-1.5 text-left transition-colors enabled:hover:bg-gelo"
               >
-                <span className={`text-[11px] font-bold tracking-[0.1em] ${eHoje ? "text-azul" : "text-texto-3"}`}>
+                <span className={`text-[11px] font-bold tracking-[0.1em] ${eHoje ? "text-link" : "text-texto-3"}`}>
                   {DIAS_DA_SEMANA[deYmd(dia).getDay()]}
                 </span>
                 <span
@@ -742,7 +742,7 @@ function GradeHorarios({
               key={dia}
               {...soltavel(dia, "sem")}
               role="gridcell"
-              className={`flex min-h-[56px] flex-col gap-1.5 border-r border-gelo p-1.5 transition-colors ${fundo(dia, "sem")}`}
+              className={`flex min-h-[56px] flex-col gap-1.5 border-r border-divisor p-1.5 transition-colors ${fundo(dia, "sem")}`}
             >
               {eventos.map((e) => (
                 <FaixaEvento key={e.id} e={e} dia={dia} onAbrir={() => onAbrirEvento(e)} />
@@ -757,7 +757,7 @@ function GradeHorarios({
         </div>
 
         {horas.map((h) => (
-          <div key={h} className="grid border-b border-gelo last:border-b-0" style={colunas} role="row">
+          <div key={h} className="grid border-b border-divisor last:border-b-0" style={colunas} role="row">
             <span className={rotuloDaLinha}>{doisDigitos(h)}:00</span>
             {porDia.map(({ dia, itens }) => (
               <div
@@ -765,7 +765,7 @@ function GradeHorarios({
                 {...soltavel(dia, h)}
                 role="gridcell"
                 aria-label={`${diaExtenso(dia)}, ${doisDigitos(h)}h`}
-                className={`flex min-h-[60px] flex-col gap-1.5 border-r border-gelo p-1.5 transition-colors ${fundo(dia, h)}`}
+                className={`flex min-h-[60px] flex-col gap-1.5 border-r border-divisor p-1.5 transition-colors ${fundo(dia, h)}`}
               >
                 {itens
                   .filter((i) => horaDoItem(i.hora) === h)
@@ -789,7 +789,7 @@ function FaixaEvento({ e, dia, onAbrir }: { e: Evento; dia: string; onAbrir: () 
       type="button"
       onClick={onAbrir}
       title={`Evento: ${e.nome}`}
-      className="flex flex-col gap-0.5 rounded-[10px] border-0 bg-marinho px-2 py-1.5 text-left text-white transition-colors hover:bg-marinho-hover"
+      className="flex flex-col gap-0.5 rounded-[10px] border-0 bg-navy px-2 py-1.5 text-left text-white transition-colors hover:bg-navy-2"
     >
       <span className="text-[10px] font-bold tracking-[0.04em] text-[#C9D6E6]">{inicio ? "EVENTO" : "EVENTO · CONTINUA"}</span>
       <span className="line-clamp-2 text-[12px] font-semibold leading-[1.3]">{e.nome}</span>
@@ -825,9 +825,9 @@ function ChipItem({ item, onAbrir, solto = false }: { item: Item; onAbrir: () =>
       onClick={onAbrir}
       title={dica}
       className={`chip-post flex cursor-grab flex-col gap-0.5 rounded-[10px] border px-2 py-1.5 text-left active:cursor-grabbing ${
-        post ? "" : "border-dashed border-nevoa bg-white text-[#4A5868]"
+        post ? "" : "border-dashed border-nevoa bg-superficie text-texto-4b"
       }`}
-      style={cor ? { background: cor.fundo, color: cor.texto, borderColor: cor.fundo } : undefined}
+      style={cor ? { background: cor.fundo, color: cor.texto, borderColor: cor.borda } : undefined}
     >
       <span className="text-[10px] font-bold tracking-[0.04em]">{meta}</span>
       <span className={`text-[12px] font-semibold leading-[1.3] ${solto ? "" : "line-clamp-2"} ${concluida ? "line-through opacity-70" : ""}`}>

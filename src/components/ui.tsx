@@ -24,7 +24,7 @@ export function Card({
 }) {
   return (
     <section
-      className={`rounded-[20px] border border-borda bg-white p-[22px] ${className}`}
+      className={`rounded-[20px] border border-borda bg-superficie p-[22px] ${className}`}
     >
       {(titulo || acao) && (
         <header className="mb-5 flex items-center justify-between gap-4">

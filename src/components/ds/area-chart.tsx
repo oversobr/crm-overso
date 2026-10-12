@@ -113,7 +113,7 @@ export function AreaChart({
           onKeyDown={tecla}
           onBlur={() => setSobre(null)}
           className="relative h-[180px] rounded-[4px]"
-          style={{ backgroundImage: "linear-gradient(#EDF1F4 1px, transparent 1px)", backgroundSize: "100% 45px" }}
+          style={{ backgroundImage: "linear-gradient(var(--grafico-grade) 1px, transparent 1px)", backgroundSize: "100% 45px" }}
         >
           <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true" className="block">
             <defs>
@@ -131,11 +131,11 @@ export function AreaChart({
             style={{ left: `${tipX}%`, top: `${tipY}%` }}
           />
           <div
-            className="pointer-events-none absolute -ml-[7px] -mt-[7px] h-3.5 w-3.5 rounded-full border-[3px] border-white bg-azul shadow-[0_2px_6px_rgba(28,46,69,0.25)]"
+            className="pointer-events-none absolute -ml-[7px] -mt-[7px] h-3.5 w-3.5 rounded-full border-[3px] border-superficie bg-azul shadow-[0_2px_6px_rgba(28,46,69,0.25)]"
             style={{ left: `${tipX}%`, top: `${tipY}%` }}
           />
           <div
-            className="pointer-events-none absolute z-[1] flex flex-col gap-1 whitespace-nowrap rounded-[12px] border border-borda bg-white px-3 py-2.5 shadow-[0_6px_18px_rgba(28,46,69,0.12)]"
+            className="pointer-events-none absolute z-[1] flex flex-col gap-1 whitespace-nowrap rounded-[12px] border border-borda bg-superficie px-3 py-2.5 shadow-[0_6px_18px_rgba(28,46,69,0.12)]"
             style={{ left: `${tipX}%`, top: `${tipY}%`, transform: tipLado }}
           >
             <span className="text-[11px] font-semibold text-texto-3">{pontos[ativo]!.titulo}</span>
