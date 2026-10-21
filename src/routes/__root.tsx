@@ -1,7 +1,11 @@
+import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
+
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 import styles from "../styles.css?url";
 
@@ -30,6 +34,29 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 /**
+ * O cache de dados (nome e foto do usuário, clientes, permissões, posts) é
+ * da conta que estava logada. Sair e entrar com outra conta sem recarregar a
+ * página deixava a conta nova vendo o que ficou guardado da anterior, como se
+ * o login não tivesse trocado. Toda vez que a conta muda (saiu, entrou outra,
+ * a sessão curta venceu), o cache inteiro é apagado.
+ */
+function LimparAoTrocarDeConta({ queryClient }: { queryClient: QueryClient }) {
+  const conta = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    const { data } = getSupabaseBrowserClient().auth.onAuthStateChange((_evento: AuthChangeEvent, sessao: Session | null) => {
+      const id = sessao?.user.id ?? null;
+      // A primeira notícia (INITIAL_SESSION) só diz quem já estava logado.
+      if (conta.current !== undefined && conta.current !== id) queryClient.clear();
+      conta.current = id;
+    });
+    return () => data.subscription.unsubscribe();
+  }, [queryClient]);
+
+  return null;
+}
+
+/**
  * Roda no <head>, antes de a tela ser pintada: lê o tema guardado neste
  * navegador e marca o <html>. Sem isto, quem usa o escuro veria o portal
  * claro por um instante a cada carregamento. A chave é a de lib/tema.ts.
@@ -51,7 +78,10 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <LimparAoTrocarDeConta queryClient={queryClient} />
+          {children}
+        </QueryClientProvider>
         <Scripts />
       </body>
     </html>

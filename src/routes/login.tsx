@@ -73,7 +73,16 @@ function Login() {
     setCarregando(true);
     setErro(null);
 
-    const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password: senha });
+    // Lê o que está escrito nos campos agora, não o que o React guardou: ao
+    // escolher outra conta salva, o navegador troca o texto dos campos sem
+    // sempre avisar, e o login ia com o e-mail e a senha da conta anterior.
+    const campos = new FormData(e.currentTarget as HTMLFormElement);
+    const emailAgora = String(campos.get("email") ?? email).trim();
+    const senhaAgora = String(campos.get("senha") ?? senha);
+    setEmail(emailAgora);
+    setSenha(senhaAgora);
+
+    const { error } = await sb.auth.signInWithPassword({ email: emailAgora, password: senhaAgora });
     if (error) {
       setErro(traduzir(error.message));
       setCarregando(false);
@@ -139,6 +148,7 @@ function Login() {
       invalido={Boolean(erro)}
       type={verSenha ? "text" : "password"}
       autoComplete={preenchimento}
+      name="senha"
       placeholder={dica}
       value={senha}
       onChange={(ev) => setSenha(ev.target.value)}
@@ -179,6 +189,7 @@ function Login() {
                 invalido={Boolean(erro)}
                 type="email"
                 autoComplete="email"
+                name="email"
                 placeholder="voce@empresa.com.br"
                 value={email}
                 onChange={(ev) => setEmail(ev.target.value)}
@@ -226,6 +237,7 @@ function Login() {
                 invalido={Boolean(erro)}
                 type="email"
                 autoComplete="email"
+                name="email"
                 placeholder="voce@empresa.com.br"
                 value={email}
                 onChange={(ev) => setEmail(ev.target.value)}
