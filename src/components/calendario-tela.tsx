@@ -170,18 +170,23 @@ export function CalendarioTela({
     ),
   );
 
-  // Post aberto pela URL (?abrir=id). O clique vem de um post que já está na
-  // lista; o link de outra tela pode apontar para um post de outro mês, e aí
-  // ele é buscado pelo id. A RLS garante que só vem post de cliente acessível;
-  // o filtro por cliente evita abrir, por um link antigo, o post de outro.
+  // Post aberto pela URL (?abrir=id). Ele é sempre buscado de novo pelo id: a
+  // cópia da lista pode ser de antes de alguém da equipe mexer no post (o link
+  // colado, a arte nova) e o popup mostraria a versão velha. Enquanto a busca
+  // não volta, a cópia da lista abre o popup na hora. O link de outra tela
+  // pode apontar para um post de outro mês, que só chega pela busca. A RLS
+  // garante que só vem post de cliente acessível; o filtro por cliente evita
+  // abrir, por um link antigo, o post de outro.
   const { data: postBuscado } = useQuery({
-    queryKey: ["conteudo", abrir],
-    enabled: Boolean(abrir) && !posts.some((p) => p.id === abrir),
+    // Debaixo de "conteudos": salvar, mover ou excluir um post já manda
+    // buscar de novo tudo o que começa com essa chave, este inclusive.
+    queryKey: ["conteudos", "um", abrir],
+    enabled: Boolean(abrir),
+    staleTime: 0,
     queryFn: () => buscarConteudo(abrir!),
   });
-  const postAberto = abrir
-    ? (posts.find((p) => p.id === abrir) ?? (postBuscado?.project_id === projeto?.id ? postBuscado : null) ?? null)
-    : null;
+  const daLista = posts.find((p) => p.id === abrir);
+  const postAberto = abrir ? ((postBuscado?.project_id === projeto?.id ? postBuscado : null) ?? daLista ?? null) : null;
   const fecharPopup = () => void router.navigate({ to: rota, search: {}, replace: true });
 
   const itens: Item[] = [

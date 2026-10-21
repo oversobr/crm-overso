@@ -142,7 +142,6 @@ export function NovaPostagem({
       void removerMidias([...enviadas.current, ...originais].filter((m) => !midiasSalvas.includes(m)));
       toast(editando ? "Post atualizado." : status === "ideia" ? "Ideia guardada no calendário." : "Post adicionado ao calendário.");
       void qc.invalidateQueries({ queryKey: ["conteudos"] });
-      void qc.invalidateQueries({ queryKey: ["conteudo"] });
       void qc.invalidateQueries({ queryKey: ["notificacoes"] });
       onFechar();
     },

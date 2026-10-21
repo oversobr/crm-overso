@@ -516,6 +516,9 @@ export const conteudosQuery = (projectId: string | undefined, de: string, ate: s
     enabled: Boolean(projectId),
     // Sem retry: se a tabela não existe, repetir só atrasa o aviso.
     retry: false,
+    // O calendário é mexido por várias pessoas ao mesmo tempo: voltar para a
+    // aba busca de novo, para não mostrar post de antes de alguém editar.
+    refetchOnWindowFocus: true,
     queryFn: async (): Promise<Conteudo[]> => {
       const { data, error } = await getSupabaseBrowserClient()
         .from("conteudos")

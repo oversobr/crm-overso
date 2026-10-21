@@ -64,7 +64,6 @@ export function PostDetalhe({
 
   function recarregar() {
     void qc.invalidateQueries({ queryKey: ["conteudos"] });
-    void qc.invalidateQueries({ queryKey: ["conteudo"] });
     void qc.invalidateQueries({ queryKey: ["notificacoes"] });
   }
 
