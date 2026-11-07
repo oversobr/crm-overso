@@ -95,6 +95,12 @@ export const IconeEventos: IconeMenu = ({ ativo, tamanho }) => (
   </Base>
 );
 
+export const IconeRelatorios: IconeMenu = ({ ativo, tamanho }) => (
+  <Base ativo={ativo} tamanho={tamanho}>
+    <path d="M4 20V10M10 20V4M16 20v-7M21 20H3" />
+  </Base>
+);
+
 export const IconeClientes: IconeMenu = ({ ativo, tamanho }) => (
   <Base ativo={ativo} tamanho={tamanho}>
     <g fill={ativo ? "currentColor" : "none"}>

@@ -18,6 +18,10 @@
   RewriteCond %{REQUEST_FILENAME} -d
   RewriteRule ^ - [L]
 
+  # Link do relatório do cliente: a página é a mesma, o nome no endereço
+  # escolhe os dados. Fica fora do painel e não pede login.
+  RewriteRule ^relatorio/[a-z0-9-]+/?$ relatorio/index.html [L]
+
   # Todo o resto é rota do painel: entrega o index.html e o router resolve.
   RewriteRule ^ index.html [L]
 </IfModule>
@@ -57,6 +61,10 @@
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
   # Sempre por HTTPS, por um ano.
   Header always set Strict-Transport-Security "max-age=31536000"
+
+  # Relatório de cliente abre por link e não pode aparecer em buscadores.
+  SetEnvIf Request_URI "^/relatorio" OVERSO_RELATORIO=1
+  Header always set X-Robots-Tag "noindex, nofollow, noarchive" env=OVERSO_RELATORIO
 
   # O script das landing pages roda dentro dos sites dos clientes e precisa
   # continuar carregável de lá.

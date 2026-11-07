@@ -25,6 +25,7 @@ import {
   IconeFunil,
   IconeLeads,
   IconePerfil,
+  IconeRelatorios,
   MarcaOverso,
 } from "./icones-menu";
 
@@ -49,7 +50,10 @@ const MODULOS: Item[] = [
 ];
 
 /** Só a equipe OVERSO (super-admin) vê este grupo. */
-const ADMIN: Item[] = [{ to: "/clientes", rotulo: "Clientes", Icone: IconeClientes }];
+const ADMIN: Item[] = [
+  { to: "/clientes", rotulo: "Clientes", Icone: IconeClientes },
+  { to: "/relatorios", rotulo: "Relatórios", Icone: IconeRelatorios },
+];
 
 const CONTA: Item[] = [
   { to: "/perfil", rotulo: "Perfil", Icone: IconePerfil },

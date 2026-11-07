@@ -37,6 +37,14 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
+      # A página do relatório é estática e não passa pelo build: a URL e a anon
+      # key do Supabase (públicas, as mesmas do painel) entram neste arquivo.
+      - name: Configurar relatório
+        run: node -e "require('fs').writeFileSync('dist/client/relatorio/config.js','window.RELATORIO_CFG='+JSON.stringify({url:process.env.VITE_SUPABASE_URL,chave:process.env.VITE_SUPABASE_ANON_KEY})+';\\n')"
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
       # Regras de rota/cache do Apache viajam junto com os arquivos.
       - name: Incluir .htaccess
         run: cp deploy/.htaccess dist/client/.htaccess

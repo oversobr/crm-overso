@@ -23,6 +23,7 @@ import { Route as AuthedLeadsRouteImport } from './routes/_authed/leads'
 import { Route as AuthedNotificacoesRouteImport } from './routes/_authed/notificacoes'
 import { Route as AuthedPerfilRouteImport } from './routes/_authed/perfil'
 import { Route as AuthedPostagensRouteImport } from './routes/_authed/postagens'
+import { Route as AuthedRelatoriosRouteImport } from './routes/_authed/relatorios'
 import { Route as AuthedClientesClienteIdRouteImport } from './routes/_authed/clientes_.$clienteId'
 import { Route as AuthedEventosIndexRouteImport } from './routes/_authed/eventos/index'
 import { Route as AuthedEventosEventoIdRouteImport } from './routes/_authed/eventos/$eventoId'
@@ -96,6 +97,11 @@ const AuthedPostagensRoute = AuthedPostagensRouteImport.update({
   path: '/postagens',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedRelatoriosRoute = AuthedRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedClientesClienteIdRoute = AuthedClientesClienteIdRouteImport.update({
   id: '/clientes_/$clienteId',
   path: '/clientes/$clienteId',
@@ -126,6 +132,7 @@ export interface FileRoutesByFullPath {
   '/notificacoes': typeof AuthedNotificacoesRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
+  '/relatorios': typeof AuthedRelatoriosRoute
   '/clientes/$clienteId': typeof AuthedClientesClienteIdRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
   '/eventos/': typeof AuthedEventosIndexRoute
@@ -143,6 +150,7 @@ export interface FileRoutesByTo {
   '/notificacoes': typeof AuthedNotificacoesRoute
   '/perfil': typeof AuthedPerfilRoute
   '/postagens': typeof AuthedPostagensRoute
+  '/relatorios': typeof AuthedRelatoriosRoute
   '/': typeof AuthedIndexRoute
   '/clientes/$clienteId': typeof AuthedClientesClienteIdRoute
   '/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/_authed/notificacoes': typeof AuthedNotificacoesRoute
   '/_authed/perfil': typeof AuthedPerfilRoute
   '/_authed/postagens': typeof AuthedPostagensRoute
+  '/_authed/relatorios': typeof AuthedRelatoriosRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/clientes_/$clienteId': typeof AuthedClientesClienteIdRoute
   '/_authed/eventos/$eventoId': typeof AuthedEventosEventoIdRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/perfil'
     | '/postagens'
+    | '/relatorios'
     | '/clientes/$clienteId'
     | '/eventos/$eventoId'
     | '/eventos/'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/notificacoes'
     | '/perfil'
     | '/postagens'
+    | '/relatorios'
     | '/'
     | '/clientes/$clienteId'
     | '/eventos/$eventoId'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/_authed/notificacoes'
     | '/_authed/perfil'
     | '/_authed/postagens'
+    | '/_authed/relatorios'
     | '/_authed/'
     | '/_authed/clientes_/$clienteId'
     | '/_authed/eventos/$eventoId'
@@ -331,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPostagensRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/relatorios': {
+      id: '/_authed/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof AuthedRelatoriosRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/clientes_/$clienteId': {
       id: '/_authed/clientes_/$clienteId'
       path: '/clientes/$clienteId'
@@ -367,6 +386,7 @@ interface AuthedRouteChildren {
   AuthedNotificacoesRoute: typeof AuthedNotificacoesRoute
   AuthedPerfilRoute: typeof AuthedPerfilRoute
   AuthedPostagensRoute: typeof AuthedPostagensRoute
+  AuthedRelatoriosRoute: typeof AuthedRelatoriosRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedClientesClienteIdRoute: typeof AuthedClientesClienteIdRoute
   AuthedEventosEventoIdRoute: typeof AuthedEventosEventoIdRoute
@@ -385,6 +405,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedNotificacoesRoute: AuthedNotificacoesRoute,
   AuthedPerfilRoute: AuthedPerfilRoute,
   AuthedPostagensRoute: AuthedPostagensRoute,
+  AuthedRelatoriosRoute: AuthedRelatoriosRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedClientesClienteIdRoute: AuthedClientesClienteIdRoute,
   AuthedEventosEventoIdRoute: AuthedEventosEventoIdRoute,
