@@ -167,6 +167,29 @@ h3{font-weight:500;font-size:clamp(19px,1.6vw,23px);letter-spacing:-.015em;line-
 .tab td.res{white-space:normal;min-width:92px}
 .media{min-width:680px}
 
+/* tabela maior que a tela: mostra que ela continua para o lado */
+.rol-wrap{position:relative}
+.rol-pe{display:none}
+.com-dica:not(.cabe)::after{content:"";position:absolute;top:0;right:0;bottom:30px;width:42px;background:linear-gradient(90deg,transparent,var(--card));pointer-events:none;transition:opacity .25s}
+.com-dica.no-fim::after{opacity:0}
+.com-dica .rolagem{scrollbar-width:none}
+.com-dica .rolagem::-webkit-scrollbar{display:none}
+.com-dica:not(.cabe) .rol-pe{display:flex;align-items:center;gap:12px;height:18px;margin-top:12px}
+.rol-barra{flex:1;min-width:0;height:3px;border-radius:3px;background:var(--rule);overflow:hidden}
+.rol-barra i{display:block;height:100%;border-radius:3px;background:var(--bom);transition:width .12s linear}
+.rol-dica{display:inline-flex;align-items:center;gap:6px;flex:none;font-size:12.5px;font-weight:500;color:var(--sub);transition:opacity .3s}
+.rol-dica svg{width:14px;height:14px;animation:rol-seta 1.5s ease-in-out infinite}
+.ja-rolou .rol-dica{opacity:0}
+.ja-rolou .rol-dica svg{animation:none}
+@keyframes rol-seta{0%,100%{transform:none}50%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){.rol-dica svg{animation:none}}
+@media (max-width:760px){
+  /* borda separada: em tabela colapsada a linha da célula fixa some ao deslizar */
+  .com-dica .tab{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}
+  .com-dica .media th:first-child,.com-dica .media td:first-child,.com-dica .larga th:nth-child(2),.com-dica .larga td:nth-child(2){position:sticky;left:0;z-index:1;width:136px;min-width:136px;max-width:136px;text-align:left;white-space:normal;overflow-wrap:anywhere;background:var(--card);border-right:1px solid transparent;transition:border-color .2s}
+  .com-dica.rolou .media th:first-child,.com-dica.rolou .media td:first-child,.com-dica.rolou .larga th:nth-child(2),.com-dica.rolou .larga td:nth-child(2){border-right-color:var(--rule)}
+}
+
 /* evolução */
 .quatro{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .mini{background:var(--card);border-radius:20px;padding:clamp(18px,1.9vw,24px);min-width:0;display:flex;flex-direction:column;gap:16px}
@@ -505,6 +528,35 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
   }
 
   /* página */
+  /* tabela que não cabe na tela ganha esmaecido, aviso e barra de progresso */
+  var larguraDicas=0;
+  function dicasRolagem(){
+    larguraDicas=innerWidth;
+    $$('.rolagem',app).forEach(function(r){
+      var w=r.parentNode;
+      if(w.classList.contains('com-dica'))w.classList.remove('com-dica');
+      var precisa=r.scrollWidth>r.clientWidth+1;
+      if(!w.classList.contains('rol-wrap')){
+        if(!precisa)return;
+        w=document.createElement('div');w.className='rol-wrap';
+        r.parentNode.insertBefore(w,r);w.appendChild(r);
+        w.insertAdjacentHTML('beforeend','<div class="rol-pe" aria-hidden="true"><span class="rol-barra"><i></i></span><span class="rol-dica">Deslize para ver mais <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>');
+        r.addEventListener('scroll',function(){marcarRolagem(r)},{passive:true});
+      }
+      w.classList.toggle('com-dica',precisa);
+      /* no celular a tabela encolhe: se passar a caber inteira, não há o que indicar */
+      w.classList.toggle('cabe',r.scrollWidth<=r.clientWidth+1);
+      marcarRolagem(r);
+    });
+  }
+  function marcarRolagem(r){
+    var w=r.parentNode,x=r.scrollLeft,c=w.classList;
+    c.toggle('rolou',x>2);
+    if(x>2)c.add('ja-rolou');
+    c.toggle('no-fim',x>=r.scrollWidth-r.clientWidth-2);
+    $('.rol-barra i',w).style.width=Math.min(100,(r.clientWidth+x)/r.scrollWidth*100)+'%';
+  }
+
   function render(id){
     var i=D.meses.findIndex(function(m){return m.id===id});if(i<0)i=D.meses.length-1;
     var m=D.meses[i],p=D.meses[i-1]||null,g=m.google||null,a=m.meta||null,s=m.social||null,ant=p?p.mes:'',ate=D.meses.slice(0,i+1);
@@ -593,7 +645,8 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     vidro.montar($('.estrias',app));
     $('#links').innerHTML=panels.filter(function(x){return MENU.indexOf(x.dataset.nav)>=0}).map(function(x,k){return '<button data-ir="'+x.dataset.nav+'" style="--k:'+k+'">'+x.dataset.nav+'</button>'}).join('');
     $$('[data-ir]').forEach(function(b){b.onclick=function(){ir(b.getAttribute('data-ir'))}});
-    $$('details',app).forEach(function(d){d.addEventListener('toggle',function(){medir();aoRolar()})});
+    $$('details',app).forEach(function(d){d.addEventListener('toggle',function(){dicasRolagem();medir();aoRolar()})});
+    dicasRolagem();
     medir();
     if(lenis)lenis.scrollTo(0,{immediate:true,force:true});else window.scrollTo(0,0);
     observar();aoRolar();
@@ -895,7 +948,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     render(id);
     sel.onchange=function(){try{history.replaceState(null,'','#'+sel.value)}catch(e){}render(sel.value)};
     if(window.ResizeObserver)new ResizeObserver(medir).observe(app);
-    addEventListener('resize',function(){medir();aoRolar()});
+    addEventListener('resize',function(){if(innerWidth!==larguraDicas)dicasRolagem();medir();aoRolar()});
     addEventListener('scroll',aoRolar,{passive:true});
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(medir);
     intro.pronto(D);
