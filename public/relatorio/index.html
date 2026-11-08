@@ -77,6 +77,9 @@ h3{font-weight:500;font-size:clamp(19px,1.6vw,23px);letter-spacing:-.015em;line-
 #mes{appearance:none;-webkit-appearance:none;background:var(--azul);border:0;border-radius:999px;padding:10px 36px 10px 17px;font-weight:600;font-size:14px;color:#fff;cursor:pointer}
 #mes option{background:#171F26;color:#fff}
 .mesbox::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+/* menu do celular: fica escondido no computador */
+.nav .wrap{position:relative}
+.hamb,.menu-m{display:none}
 #prog{position:absolute;left:30px;right:30px;bottom:-1px;height:2px;transform-origin:0 50%;transform:scaleX(var(--p,0));background:var(--ceu);border-radius:2px}
 
 /* capa */
@@ -319,6 +322,26 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
 
 @media (max-width:760px){
   .links{display:none}
+  .bar{width:100%;justify-content:space-between}
+  .bar .mesbox{display:none}
+  .hamb{display:block;position:relative;flex:none;width:46px;height:46px;padding:0;border:0;border-radius:999px;background:var(--azul);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .hamb i{position:absolute;left:14px;right:14px;top:50%;height:2px;margin-top:-1px;border-radius:2px;background:#fff;transition:transform .4s cubic-bezier(.65,0,.2,1),opacity .2s}
+  .hamb i:nth-child(1){transform:translateY(-6px)}
+  .hamb i:nth-child(3){transform:translateY(6px)}
+  .menu-on .hamb i:nth-child(1){transform:rotate(45deg)}
+  .menu-on .hamb i:nth-child(2){opacity:0}
+  .menu-on .hamb i:nth-child(3){transform:rotate(-45deg)}
+  .menu-m{display:block;position:absolute;left:var(--gl);right:var(--gr);top:calc(100% + 8px);padding:18px 14px 16px;border-radius:26px;background:rgba(23,31,38,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);color:var(--fg-d);box-shadow:0 26px 50px -26px rgba(0,0,0,.7);pointer-events:none;visibility:hidden;opacity:0;transform:translateY(-10px) scale(.98);transform-origin:50% 0;transition:opacity .3s ease,transform .45s cubic-bezier(.65,0,.2,1),visibility 0s .45s}
+  .menu-on .menu-m{pointer-events:auto;visibility:visible;opacity:1;transform:none;transition:opacity .3s ease,transform .45s cubic-bezier(.65,0,.2,1),visibility 0s}
+  .menu-t{font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--sub-d);margin:0 0 8px 14px}
+  #menuSec{display:flex;flex-direction:column;gap:2px;margin-bottom:18px}
+  #menuSec button{text-align:left;background:none;border:0;padding:12px 14px;border-radius:16px;font-size:18px;font-weight:500;color:var(--fg-d);cursor:pointer;transition:background .2s,color .2s}
+  #menuSec button.on{background:var(--fg-d);color:var(--ink)}
+  #menuMes{display:flex;flex-wrap:wrap;gap:8px;padding-inline:4px}
+  #menuMes button{border:0;border-radius:999px;padding:10px 16px;font-size:14px;font-weight:600;background:rgba(255,255,255,.08);color:var(--fg-d);cursor:pointer;transition:background .2s}
+  #menuMes button.on{background:var(--azul);color:#fff}
+  .menu-on .menu-m #menuSec button,.menu-on .menu-m #menuMes button{animation:palavra .45s ease backwards;animation-delay:calc(.08s + var(--k,0)*45ms)}
+  .nav.entrada .hamb{animation:abre-pilula .8s cubic-bezier(.65,0,.2,1) .8s backwards}
 }
 @media (max-width:1040px){
   .quatro,.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -350,7 +373,14 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
       <img src="logo-overso.svg" alt="Overso">
       <div class="links" id="links"></div>
       <div class="mesbox"><label for="mes" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Mês do relatório</label><select id="mes"></select></div>
+      <button type="button" class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuM"><i></i><i></i><i></i></button>
       <span id="prog" aria-hidden="true"></span>
+    </div>
+    <div class="menu-m" id="menuM">
+      <p class="menu-t">Seções</p>
+      <div id="menuSec"></div>
+      <p class="menu-t">Mês do relatório</p>
+      <div id="menuMes"></div>
     </div>
   </div>
 </nav>
@@ -528,6 +558,31 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
   }
 
   /* página */
+  /* menu do celular */
+  var menuAberto=false,yMenu=0;
+  function abrirMenu(v){
+    menuAberto=v;yMenu=scrollY;
+    var b=$('#hamb');
+    $('.nav').classList.toggle('menu-on',v);
+    b.setAttribute('aria-expanded',v?'true':'false');
+    b.setAttribute('aria-label',v?'Fechar menu':'Abrir menu');
+  }
+  function fecharMenu(){if(menuAberto)abrirMenu(false)}
+  $('#hamb').addEventListener('click',function(){abrirMenu(!menuAberto)});
+  $('#menuM').addEventListener('click',function(e){
+    var mb=e.target.closest('[data-mes]');
+    if(mb){
+      var s=$('#mes'),id=mb.getAttribute('data-mes');
+      fecharMenu();
+      if(s.value!==id){s.value=id;s.onchange()}
+      return;
+    }
+    if(e.target.closest('[data-ir]'))fecharMenu();
+  });
+  document.addEventListener('click',function(e){if(menuAberto&&!e.target.closest('.nav .bar,#menuM'))fecharMenu()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&menuAberto){fecharMenu();$('#hamb').focus()}});
+  (function(){var mq=matchMedia('(min-width:761px)');if(mq.addEventListener)mq.addEventListener('change',fecharMenu);else if(mq.addListener)mq.addListener(fecharMenu)})();
+
   /* tabela que não cabe na tela ganha esmaecido, aviso e barra de progresso */
   var larguraDicas=0;
   function dicasRolagem(){
@@ -644,6 +699,8 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     luzFim.montar($('.obrigado',app));
     vidro.montar($('.estrias',app));
     $('#links').innerHTML=panels.filter(function(x){return MENU.indexOf(x.dataset.nav)>=0}).map(function(x,k){return '<button data-ir="'+x.dataset.nav+'" style="--k:'+k+'">'+x.dataset.nav+'</button>'}).join('');
+    $('#menuSec').innerHTML=$('#links').innerHTML;
+    $$('#menuMes button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mes')===m.id)});
     $$('[data-ir]').forEach(function(b){b.onclick=function(){ir(b.getAttribute('data-ir'))}});
     $$('details',app).forEach(function(d){d.addEventListener('toggle',function(){dicasRolagem();medir();aoRolar()})});
     dicasRolagem();
@@ -841,9 +898,10 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
       });
       var ult=tops[tops.length-1];
       $('.nav').classList.toggle('some',ult!=null&&y+vh*.5>=ult);
+      if(menuAberto&&((ult!=null&&y+vh*.5>=ult)||Math.abs(y-yMenu)>60))fecharMenu();
       var nome=null;
       for(var k=Math.min(at,panels.length-1);k>=0;k--){if(MENU.indexOf(panels[k].dataset.nav)>=0){nome=panels[k].dataset.nav;break}}
-      $$('#links button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ir')===nome)});
+      $$('#links button,#menuSec button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-ir')===nome)});
     });
   }
   function contar(el){
@@ -942,6 +1000,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     $('#selo').hidden=!D.exemplo;
     var sel=$('#mes');
     sel.innerHTML=D.meses.map(function(m){return '<option value="'+esc(m.id)+'">'+esc(cap(m.mes))+' '+esc(m.ano)+'</option>'}).join('');
+    $('#menuMes').innerHTML=D.meses.map(function(m,k){return '<button type="button" data-mes="'+esc(m.id)+'" style="--k:'+(k+4)+'">'+esc(cap(m.mes))+' '+esc(m.ano)+'</button>'}).join('');
     var h=location.hash.replace('#','');
     var id=D.meses.some(function(m){return m.id===h})?h:D.meses[D.meses.length-1].id;
     sel.value=id;
