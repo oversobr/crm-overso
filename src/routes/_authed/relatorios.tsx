@@ -4,12 +4,14 @@ import { Copy, ExternalLink, FileText, Pencil, Plus, ShieldAlert, Trash2 } from 
 import { useState } from "react";
 
 import { Card, EmptyState } from "@/components/ds/card";
+import { Switch } from "@/components/ds/controles";
+import { Dropdown } from "@/components/dropdown";
 import { usePainel } from "@/components/painel";
 import { RelatorioMes } from "@/components/relatorio-mes";
 import { TopBar } from "@/components/shell/top-bar";
 import { podeConectarQuery } from "@/lib/queries";
-import type { MesRelatorio } from "@/lib/relatorios";
-import { alterarEndereco, apagarMes, criarRelatorio, definirPublicado, logoClienteQuery, mesesRelatorioQuery, nomeDoMes, paraEndereco, relatorioQuery } from "@/lib/relatorios";
+import type { Destaque, MesRelatorio } from "@/lib/relatorios";
+import { alterarEndereco, alterarLogoCores, alterarResultados, apagarMes, DESTAQUES, criarRelatorio, definirPublicado, logoClienteQuery, mesesRelatorioQuery, nomeDoMes, paraEndereco, relatorioQuery } from "@/lib/relatorios";
 import { toast } from "@/lib/toast";
 
 /**
@@ -124,6 +126,46 @@ function Relatorios() {
                 >
                   <Pencil size={15} strokeWidth={2} aria-hidden /> Alterar endereço
                 </button>
+              </div>
+              <div className="flex items-center justify-between gap-4 border-t border-divisor pt-3">
+                <span className="flex flex-col gap-0.5">
+                  <strong className="text-[13px] text-ink">Manter as cores do logo</strong>
+                  <span className="text-[12px] text-texto-3">
+                    Na abertura do relatório o logo aparece de uma cor só. Ligue para logo em desenho, como um mascote, que perderia os detalhes.
+                  </span>
+                </span>
+                <Switch
+                  ligado={relatorio.logo_cores}
+                  onChange={(v) => void executar(() => alterarLogoCores(relatorio.id, v), v ? "O logo vai aparecer com as cores originais." : "O logo vai aparecer de uma cor só.")}
+                  rotulo="Manter as cores do logo"
+                />
+              </div>
+              <div className="grid gap-3 border-t border-divisor pt-3 sm:grid-cols-2">
+                <label className="flex min-w-0 flex-col gap-1.5">
+                  <strong className="text-[13px] text-ink">Número em destaque no Resumo</strong>
+                  <Dropdown
+                    value={relatorio.destaque}
+                    onChange={(v) => void executar(() => alterarResultados(relatorio.id, { destaque: v as Destaque }), "Destaque do Resumo atualizado.")}
+                    options={DESTAQUES.map((d) => ({ value: d.valor, label: d.rotulo }))}
+                    triggerClassName="campo min-h-[42px] w-full text-[13px]"
+                  />
+                  <span className="text-[12px] text-texto-3">Se o mês não tiver esse resultado, o relatório usa o automático.</span>
+                </label>
+                <label className="flex min-w-0 flex-col gap-1.5">
+                  <strong className="text-[13px] text-ink">Nome da conversão no Google Ads</strong>
+                  <input
+                    key={relatorio.conversao_google}
+                    defaultValue={relatorio.conversao_google}
+                    placeholder="Conversões"
+                    maxLength={40}
+                    onBlur={(e) => {
+                      const v = e.target.value.trim() || "Conversões";
+                      if (v !== relatorio.conversao_google) void executar(() => alterarResultados(relatorio.id, { conversao_google: v }), "Nome da conversão atualizado.");
+                    }}
+                    className="campo min-h-[42px] text-[13px]"
+                  />
+                  <span className="text-[12px] text-texto-3">No plural, como o cliente entende: "Ligações", "Cliques no WhatsApp", "Formulários".</span>
+                </label>
               </div>
             </div>
           </Card>

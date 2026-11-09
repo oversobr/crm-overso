@@ -74,9 +74,23 @@ h3{font-weight:500;font-size:clamp(19px,1.6vw,23px);letter-spacing:-.015em;line-
 .links button:hover{color:#fff}
 .links button.on{color:var(--ink);background:var(--fg-d)}
 .mesbox{position:relative}
-#mes{appearance:none;-webkit-appearance:none;background:var(--azul);border:0;border-radius:999px;padding:10px 36px 10px 17px;font-weight:600;font-size:14px;color:#fff;cursor:pointer}
-#mes option{background:#171F26;color:#fff}
-.mesbox::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+#mesBtn{display:block;background:var(--azul);border:0;border-radius:999px;padding:10px 36px 10px 17px;font-weight:600;font-size:14px;color:#fff;cursor:pointer;white-space:nowrap;transition:background .2s}
+#mesBtn:hover{background:#1C74D0}
+#mesBtn:focus-visible{outline:2px solid var(--ceu);outline-offset:3px}
+.mesbox::after{content:"";position:absolute;right:15px;top:50%;width:7px;height:7px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-70%) rotate(45deg);pointer-events:none;transition:transform .3s cubic-bezier(.65,0,.2,1)}
+.mesbox.aberto::after{transform:translateY(-25%) rotate(-135deg)}
+/* lista de meses: o mesmo vidro escuro do menu do celular */
+.mes-lista{position:absolute;right:-6px;top:calc(100% + 14px);min-width:212px;max-height:min(60vh,380px);overflow:auto;padding:8px;border-radius:20px;background:rgba(23,31,38,.96);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);box-shadow:0 26px 50px -26px rgba(0,0,0,.7);visibility:hidden;opacity:0;transform:translateY(-8px) scale(.98);transform-origin:100% 0;transition:opacity .25s ease,transform .4s cubic-bezier(.65,0,.2,1),visibility 0s .4s}
+.mesbox.aberto .mes-lista{visibility:visible;opacity:1;transform:none;transition:opacity .25s ease,transform .4s cubic-bezier(.65,0,.2,1),visibility 0s}
+.mes-lista p{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--sub-d);margin:6px 12px 8px}
+.mes-lista button{display:flex;align-items:center;justify-content:flex-start;gap:18px;width:100%;border:0;background:none;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:500;color:var(--sub-d);cursor:pointer;text-align:left;white-space:nowrap;transition:background .2s,color .2s}
+.mes-lista button:hover,.mes-lista button:focus-visible{background:rgba(255,255,255,.08);color:#fff;outline:none}
+.mes-lista button[aria-selected="true"]{background:var(--azul);color:#fff;font-weight:600}
+.mes-lista button span{margin-left:auto;font-size:12px;opacity:.6}
+.mes-lista button[aria-selected="true"] span{opacity:.85}
+.mes-lista button[aria-selected="true"]::after{content:"";width:9px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-2px) rotate(-45deg);margin-left:-8px}
+.mesbox.aberto .mes-lista button{animation:palavra .4s ease backwards;animation-delay:calc(.04s + var(--k,0)*35ms)}
+@media (prefers-reduced-motion:reduce){.mes-lista,.mesbox.aberto .mes-lista,.mesbox::after{transition:none}.mesbox.aberto .mes-lista button{animation:none}}
 /* menu do celular: fica escondido no computador */
 .nav .wrap{position:relative}
 .hamb,.menu-m{display:none}
@@ -276,6 +290,8 @@ details .caixa{margin-top:12px}
 #introMais{flex:none;font-weight:800;font-size:clamp(22px,3.2vw,52px);line-height:1;opacity:0;transform:translateY(-.065em)}
 #introCli{min-width:0;max-width:34vw;font-weight:800;font-size:clamp(26px,4.5vw,76px);line-height:1;letter-spacing:-.01em;text-transform:uppercase;opacity:0;will-change:transform,opacity}
 #introCli img{filter:brightness(0);display:block;height:clamp(30px,4.6vw,78px);width:auto;max-width:100%;object-fit:contain}
+/* logo em desenho (mascote): fica com as cores dele e um pouco maior, para os detalhes aparecerem */
+#introCli img.cores{filter:none;height:clamp(56px,7.5vw,120px)}
 html.intro{overflow:hidden}
 html.intro .capa .in,html.intro .capa .in *{animation-play-state:paused!important}
 
@@ -372,7 +388,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     <div class="bar">
       <img src="logo-overso.svg" alt="Overso">
       <div class="links" id="links"></div>
-      <div class="mesbox"><label for="mes" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Mês do relatório</label><select id="mes"></select></div>
+      <div class="mesbox" id="mesBox"><select id="mes" hidden aria-hidden="true" tabindex="-1"></select><button type="button" id="mesBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="mesLista" aria-label="Mês do relatório"></button><div class="mes-lista" id="mesLista" role="listbox" aria-label="Mês do relatório"></div></div>
       <button type="button" class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="menuM"><i></i><i></i><i></i></button>
       <span id="prog" aria-hidden="true"></span>
     </div>
@@ -431,12 +447,44 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     return s==='—'?'':'<span class="st'+(on?'':' off')+'">'+esc(s)+'</span>';
   }
 
+  /* Resultados do Meta pelo objetivo de cada campanha: a coluna Resultados
+     traz "152 leads", "14 conversas", "1.175 visitas ao perfil". Nada aqui
+     conhece um cliente: aparece o que as campanhas dele entregaram.
+     [chave, como reconhecer, rótulo, singular, frase do resumo, prioridade no destaque] */
+  var TIPOS=[
+    ['leads',/lead|cadastro/i,'Leads','lead','leads no Meta ADS',1],
+    ['compras',/compra|venda/i,'Compras','compra','compras no Meta ADS',2],
+    ['conversas',/conversa/i,'Conversas (WhatsApp)','conversa','conversas no WhatsApp',4],
+    ['visitas',/visita/i,'Visitas ao Perfil','visita','visitas ao perfil no Meta ADS',5],
+    ['paginas',/visualiza.*p[aá]gina/i,'Visualizações da Página','visualização','visualizações da página no Meta ADS',6],
+    ['videos',/v[ií]deo|thruplay/i,'Visualizações do Vídeo','visualização','visualizações do vídeo no Meta ADS',7],
+    ['engajamentos',/engaj/i,'Engajamentos','engajamento','engajamentos no Meta ADS',8]
+  ];
+  var qtdTexto=function(s){var m=/[\d.]+(,\d+)?/.exec(s||'');return m?Number(m[0].replace(/\./g,'').replace(',','.')):null};
+  function resultadosMeta(a){
+    if(!a) return [];
+    var por={};
+    (a.campanhas||[]).forEach(function(c){
+      var tx=String(c.resultados||''),q=qtdTexto(tx);if(q==null)return;
+      var t=TIPOS.filter(function(x){return x[1].test(tx)})[0];if(!t)return;
+      var r=por[t[0]]||(por[t[0]]={tipo:t,qtd:0,gasto:0,camps:[]});
+      r.qtd+=q;r.gasto+=c.gasto||0;r.camps.push(c.rotulo||c.nome);
+    });
+    /* o que a equipe digitou nos números do mês vale mais que a soma das campanhas */
+    [['visitas',a.visitasPerfil],['conversas',a.conversas]].forEach(function(x){
+      if(x[1]==null)return;var t=TIPOS.filter(function(y){return y[0]===x[0]})[0];
+      if(por[x[0]])por[x[0]].qtd=x[1];else por[x[0]]={tipo:t,qtd:x[1],gasto:0,camps:[]};
+    });
+    return Object.keys(por).map(function(k){var r=por[k];return {chave:k,rotulo:r.tipo[2],singular:r.tipo[3],frase:r.tipo[4],peso:r.tipo[5],qtd:r.qtd,custo:r.gasto&&r.qtd?r.gasto/r.qtd:null,obs:r.camps.length===1?r.camps[0]:r.camps.length?r.camps.length+' campanhas':''}}).sort(function(x,y){return x.peso-y.peso});
+  }
+  /* "Ligações" → "ligação": o nome da conversão do Google vem da configuração do relatório */
+  function convGoogle(){var p=(D&&D.conversaoGoogle)||'Conversões',s=p.toLowerCase().replace(/ões$/,'ão').replace(/ães$/,'ão').replace(/is$/,'l').replace(/s$/,'');return {plural:p,singular:s}}
+
   /* fatos do mês: saem só dos números do próprio mês */
   function fatos(m){
-    var g=m.google,a=m.meta,l=[];
-    if(a&&a.conversas!=null) l.push('<b>'+F.int(a.conversas)+'</b> conversas no WhatsApp.');
-    if(g&&g.custoConversao!=null) l.push('<b>'+F.brl(g.custoConversao)+'</b> de custo por conversão.');
-    if(a&&a.visitasPerfil!=null) l.push('<b>'+F.int(a.visitasPerfil)+'</b> visitas ao perfil no Meta ADS.');
+    var g=m.google,a=m.meta,l=[],cg=convGoogle();
+    resultadosMeta(a).forEach(function(r){l.push('<b>'+F.int(r.qtd)+'</b> '+r.frase+(r.custo!=null?', a '+F.brl(r.custo)+' cada':'')+'.')});
+    if(g&&g.custoConversao!=null) l.push('<b>'+F.brl(g.custoConversao)+'</b> de custo por '+cg.singular+'.');
     return l;
   }
 
@@ -505,7 +553,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
   }
   /* funil em escala logarítmica, como no original */
   function funilGrafico(g){
-    var itens=[['Impressões',g.impressoes,'#B5C0C6'],['Cliques',g.cliques,'#6EA8E6'],['Conversões',g.conversoes,'#1764BF']];
+    var itens=[['Impressões',g.impressoes,'#B5C0C6'],['Cliques',g.cliques,'#6EA8E6'],[convGoogle().plural,g.conversoes,'#1764BF']];
     var vals=itens.map(function(x){return x[1]}),menor=Math.min.apply(null,vals),maior=Math.max.apply(null,vals);
     var ini=Math.pow(10,Math.floor(Math.log10(menor))),fim=Math.pow(10,Math.ceil(Math.log10(maior)));if(fim<=ini)fim=ini*10;
     var X=function(v){return Math.log(v/ini)/Math.log(fim/ini)*100};
@@ -569,6 +617,31 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
   }
   function fecharMenu(){if(menuAberto)abrirMenu(false)}
   $('#hamb').addEventListener('click',function(){abrirMenu(!menuAberto)});
+  /* seletor de mês do computador: lista própria no lugar da nativa do navegador */
+  var mesBox=$('#mesBox'),mesBtn=$('#mesBtn'),mesLista=$('#mesLista');
+  function opcoesMes(){return $$('#mesLista button')}
+  function abrirMes(v,foco){
+    mesBox.classList.toggle('aberto',v);
+    mesBtn.setAttribute('aria-expanded',v?'true':'false');
+    if(v){var at=opcoesMes().filter(function(b){return b.getAttribute('aria-selected')==='true'})[0]||opcoesMes()[0];if(at&&foco!==false)at.focus()}
+  }
+  function escolherMes(id){
+    var s=$('#mes');abrirMes(false);mesBtn.focus();
+    if(s.value!==id){s.value=id;s.onchange()}
+  }
+  mesBtn.addEventListener('click',function(){abrirMes(!mesBox.classList.contains('aberto'))});
+  mesBtn.addEventListener('keydown',function(e){if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();abrirMes(true)}});
+  mesLista.addEventListener('click',function(e){var b=e.target.closest('[data-mes]');if(b)escolherMes(b.getAttribute('data-mes'))});
+  mesLista.addEventListener('keydown',function(e){
+    var l=opcoesMes(),i=l.indexOf(document.activeElement);
+    if(e.key==='ArrowDown'){e.preventDefault();(l[i+1]||l[0]).focus()}
+    else if(e.key==='ArrowUp'){e.preventDefault();(l[i-1]||l[l.length-1]).focus()}
+    else if(e.key==='Home'){e.preventDefault();l[0].focus()}
+    else if(e.key==='End'){e.preventDefault();l[l.length-1].focus()}
+    else if(e.key==='Escape'){e.preventDefault();abrirMes(false);mesBtn.focus()}
+    else if(e.key==='Tab'){abrirMes(false)}
+  });
+  document.addEventListener('click',function(e){if(mesBox.classList.contains('aberto')&&!mesBox.contains(e.target))abrirMes(false,false)});
   $('#menuM').addEventListener('click',function(e){
     var mb=e.target.closest('[data-mes]');
     if(mb){
@@ -622,11 +695,21 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     var gasto=soma('custo','gasto'),cliques=soma('cliques','cliques'),impr=soma('impressoes','impressoes');
     var maxImp=ambos?Math.max(g.impressoes,a.impressoes):1,maxCli=ambos?Math.max(g.cliques,a.cliques):1;
     var pos=(a&&a.gastoPosicionamento)||somarPos(a&&a.posicionamentos),maxPos=pos.length?Math.max.apply(null,pos.map(function(x){return x.v})):1;
-    var principal=g&&g.conversoes!=null?['Conversões no Google Ads',g.conversoes,'Google Ads']:a&&a.visitasPerfil!=null?['Visitas ao perfil',a.visitasPerfil,'Meta ADS']:a&&a.conversas!=null?['Conversas no WhatsApp',a.conversas,'Meta ADS']:null;
+    var cg=convGoogle(),res=resultadosMeta(a);
+    /* Destaque: o que a configuração pedir; no automático, leads e compras do
+       Meta vêm antes das conversões do Google, que vêm antes de conversas e visitas. */
+    var opcoes=res.map(function(r){return [r.chave,[r.rotulo+' no Meta ADS',r.qtd,'Meta ADS'],r.peso]});
+    if(g&&g.conversoes!=null)opcoes.push(['google',[cg.plural+' no Google Ads',g.conversoes,'Google Ads'],3]);
+    opcoes.sort(function(x,y){return x[2]-y[2]});
+    var escolhido=opcoes.filter(function(o){return o[0]===D.destaque})[0]||opcoes[0];
+    var principal=escolhido?escolhido[1]:null;
+    /* Evolução do Meta: o primeiro resultado que existe em todos os meses do gráfico */
+    var serieMeta=TIPOS.map(function(t){return t[0]}).filter(function(k){return ate.every(function(x){return resultadosMeta(x.meta).some(function(r){return r.chave===k})})})[0];
+    var rotMeta=serieMeta?TIPOS.filter(function(t){return t[0]===serieMeta})[0][2]:'';
     var EVO=[
-      ['Conversões no Google',function(x){return x.google?x.google.conversoes:null},'int',1],
-      ['Custo por conversão',function(x){return x.google?x.google.custoConversao:null},'brl',-1],
-      ['Visitas ao perfil',function(x){return x.meta?x.meta.visitasPerfil:null},'int',1],
+      [cg.plural+' no Google',function(x){return x.google?x.google.conversoes:null},'int',1],
+      ['Custo por '+cg.singular,function(x){return x.google?x.google.custoConversao:null},'brl',-1],
+      [rotMeta,function(x){var r=serieMeta&&resultadosMeta(x.meta).filter(function(y){return y.chave===serieMeta})[0];return r?r.qtd:null},'int',1],
       ['Gasto total',function(x){return x.google||x.meta?(x.google?x.google.custo:0)+(x.meta?x.meta.gasto:0):null},'brl',0]
     ].filter(function(e){return ate.every(function(x){return e[1](x)!=null})});
 
@@ -661,7 +744,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     if(g) h+=
     '<section class="panel" data-nav="Google Ads"><div class="wrap">'+
       '<div class="topo"><h2 data-r>Resumo Google Ads</h2><p data-r style="--d:1">'+esc(g.rede)+' · '+esc(mesAno)+'</p></div>'+
-      '<div class="kpis">'+kpi('Custo Total',g.custo,'brl',0)+kpi('Impressões',g.impressoes,'int',1)+kpi('Cliques',g.cliques,'int',2)+kpi('CTR',g.ctr,'pct',3)+kpi('CPC Médio',g.cpc,'brl',4)+kpi('Conversões',g.conversoes,'int',5,'real')+kpi('Custo / Conversão',g.custoConversao,'brl',6)+kpi('Taxa de Conversão',g.taxaConversao,'pct',7)+'</div>'+
+      '<div class="kpis">'+kpi('Custo Total',g.custo,'brl',0)+kpi('Impressões',g.impressoes,'int',1)+kpi('Cliques',g.cliques,'int',2)+kpi('CTR',g.ctr,'pct',3)+kpi('CPC Médio',g.cpc,'brl',4)+kpi(cg.plural,g.conversoes,'int',5,'real')+kpi('Custo / '+cg.singular.charAt(0).toUpperCase()+cg.singular.slice(1),g.custoConversao,'brl',6)+kpi('Taxa de Conversão',g.taxaConversao,'pct',7)+'</div>'+
       '<div class="lado sec">'+(g.impressoes&&g.cliques&&g.conversoes?'<div class="caixa vivo" data-v data-r><h3>Funil de Performance</h3>'+funilGrafico(g)+'</div>':'')+
       (g.parcelaLeilao&&g.parcelaLeilao.length?'<div class="caixa" data-r style="--d:1"><h3>Parcela de Impressões · Leilão</h3>'+parcelaLeilao(g.parcelaLeilao)+'</div>':g.campanhas&&g.campanhas.length?'<div class="caixa vivo" data-v data-r style="--d:1"><h3>Custo e Conversões por Campanha</h3>'+custoConvGrafico(g.campanhas)+'</div>':'')+'</div>'+
       (g.campanhas&&g.campanhas.length?'<div class="caixa sec" data-r style="margin-top:14px"><h3>Campanhas · Google Ads</h3>'+tabGoogle(g)+(g.observacao?'<p class="nota">'+esc(g.observacao)+'</p>':'')+'</div>':'')+
@@ -672,7 +755,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     '<section class="panel claro" data-nav="Meta ADS"><div class="wrap">'+
       '<div class="topo"><h2 data-r>Resumo Meta ADS</h2><p data-r style="--d:1">Facebook e Instagram · '+esc(mesAno)+'</p></div>'+
       '<div class="kpis">'+kpi('Valor Gasto',a.gasto,'brl',0,'forte')+kpi('Alcance',a.alcance,'int',1,'',a.posicionamentos?'Soma por campanha':'')+kpi('Impressões',a.impressoes,'int',2)+kpi('Frequência',a.frequencia,'dec',3,'',a.posicionamentos?'Estimada':'')+kpi('Cliques (Todos)',a.cliques,'int',4)+kpi('CTR (Todos)',a.ctr,'pct',5)+kpi('CPC (Todos)',a.cpc,'brl',6)+kpi('CPM',a.cpm,'brl',7)+
-      (a.cliquesLink!=null?kpi('Cliques no Link',a.cliquesLink,'int',8):'')+kpi('Visitas ao Perfil',a.visitasPerfil,'int',9,'real','Campanha de tráfego')+kpi('Conversas (WhatsApp)',a.conversas,'int',10,'','Campanha de remarketing')+kpi('Novos Seguidores',a.novosSeguidores,'int',11,'','Via campanha paga')+'</div>'+
+      (a.cliquesLink!=null?kpi('Cliques no Link',a.cliquesLink,'int',8):'')+res.map(function(r,k){return kpi(r.rotulo,r.qtd,'int',9+k*2,k?'':'real',r.obs)+kpi('Custo por '+r.singular,r.custo,'brl',10+k*2)}).join('')+kpi('Novos Seguidores',a.novosSeguidores,'int',9+res.length*2,'','Via campanha paga')+'</div>'+
       (a.campanhas&&a.campanhas.length?'<div class="lado sec"><div class="caixa vivo" data-v data-r><h3>'+esc(a.tituloGasto||'Gasto por Campanha')+'</h3>'+a.campanhas.map(function(c){return barra(c.rotulo||c.nome,c.gasto,'brl',Math.max.apply(null,a.campanhas.map(function(z){return z.gasto})),'#1764BF')}).join('')+'</div><div class="caixa vivo" data-v data-r style="--d:1"><h3>Impressões vs Alcance por Campanha</h3>'+barrasDuplas(a.campanhas,'impressoes','int','Impressões','alcance','int','Alcance')+'</div></div>':'')+
       (pos.length?'<div class="lado" style="margin-top:14px"><div class="caixa vivo" data-v data-r><h3>Gasto por Posicionamento</h3>'+pos.map(function(x,k){return barra(x.n,x.v,'brl',maxPos,k%2?'#6EA8E6':'#1764BF')}).join('')+'</div><div class="caixa" data-r style="--d:1"><h3>Gasto por Faixa Etária e Gênero</h3>'+idadeGrafico(a.idades)+'</div></div>':'')+
       (a.campanhas&&a.campanhas.length?'<div class="caixa" data-r style="margin-top:14px"><h3>'+esc(a.tituloCampanhas||'Campanhas · Meta ADS')+'</h3>'+tabMeta(a)+'</div>':'')+
@@ -701,6 +784,8 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     $('#links').innerHTML=panels.filter(function(x){return MENU.indexOf(x.dataset.nav)>=0}).map(function(x,k){return '<button data-ir="'+x.dataset.nav+'" style="--k:'+k+'">'+x.dataset.nav+'</button>'}).join('');
     $('#menuSec').innerHTML=$('#links').innerHTML;
     $$('#menuMes button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mes')===m.id)});
+    $('#mesBtn').textContent=cap(m.mes)+' '+m.ano;
+    $$('#mesLista button').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-mes')===m.id?'true':'false')});
     $$('[data-ir]').forEach(function(b){b.onclick=function(){ir(b.getAttribute('data-ir'))}});
     $$('details',app).forEach(function(d){d.addEventListener('toggle',function(){dicasRolagem();medir();aoRolar()})});
     dicasRolagem();
@@ -968,7 +1053,7 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
       pronto:function(d){
         dadosOk=true;
         if(!d.logoCliente){cli.textContent=d.cliente;rodar();return}
-        var im=new Image();im.alt=d.cliente;
+        var im=new Image();im.alt=d.cliente;if(d.logoCores)im.className='cores';
         im.onload=function(){cli.appendChild(im);rodar()};
         im.onerror=function(){cli.textContent=d.cliente;rodar()};
         im.src=d.logoCliente;
@@ -1000,6 +1085,8 @@ html.mov [data-p]:not(.in) .pal{opacity:0}
     $('#selo').hidden=!D.exemplo;
     var sel=$('#mes');
     sel.innerHTML=D.meses.map(function(m){return '<option value="'+esc(m.id)+'">'+esc(cap(m.mes))+' '+esc(m.ano)+'</option>'}).join('');
+    /* do mais novo para o mais antigo, como se procura um relatório */
+    $('#mesLista').innerHTML='<p>Mês do relatório</p>'+D.meses.slice().reverse().map(function(m,k){return '<button type="button" role="option" data-mes="'+esc(m.id)+'" aria-selected="false" tabindex="-1" style="--k:'+k+'">'+esc(cap(m.mes))+' <span>'+esc(m.ano)+'</span></button>'}).join('');
     $('#menuMes').innerHTML=D.meses.map(function(m,k){return '<button type="button" data-mes="'+esc(m.id)+'" style="--k:'+(k+4)+'">'+esc(cap(m.mes))+' '+esc(m.ano)+'</button>'}).join('');
     var h=location.hash.replace('#','');
     var id=D.meses.some(function(m){return m.id===h})?h:D.meses[D.meses.length-1].id;

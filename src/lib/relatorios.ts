@@ -18,7 +18,24 @@ export type Relatorio = {
   nome_exibicao: string | null;
   subtitulo: string;
   fontes: string;
+  /** Logo com as cores originais na abertura (39_relatorio_logo_cores.sql). */
+  logo_cores: boolean;
+  /** Número grande do Resumo (40_relatorio_resultados.sql). */
+  destaque: Destaque;
+  /** O que é a conversão no Google Ads desse cliente: "Ligações", "Conversões"... */
+  conversao_google: string;
 };
+
+export type Destaque = "auto" | "leads" | "compras" | "conversas" | "visitas" | "google";
+
+export const DESTAQUES: { valor: Destaque; rotulo: string }[] = [
+  { valor: "auto", rotulo: "Automático (o resultado mais importante do mês)" },
+  { valor: "leads", rotulo: "Leads no Meta ADS" },
+  { valor: "compras", rotulo: "Compras no Meta ADS" },
+  { valor: "conversas", rotulo: "Conversas no WhatsApp" },
+  { valor: "visitas", rotulo: "Visitas ao perfil" },
+  { valor: "google", rotulo: "Conversões do Google Ads" },
+];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DadosMes = Record<string, any>;
@@ -37,13 +54,17 @@ export const relatorioQuery = (projectId: string | undefined) =>
     queryKey: ["relatorio", projectId],
     enabled: Boolean(projectId),
     queryFn: async (): Promise<Relatorio | null> => {
-      const { data, error } = await getSupabaseBrowserClient()
-        .from("relatorios")
-        .select("id, project_id, slug, nome_exibicao, subtitulo, fontes")
-        .eq("project_id", projectId)
-        .maybeSingle();
-      if (error) throw error;
-      return data as Relatorio | null;
+      const sb = getSupabaseBrowserClient();
+      const colunas = "id, project_id, slug, nome_exibicao, subtitulo, fontes";
+      // Do mais novo para o mais antigo: sem a 40 (ou a 39) rodada, a coluna
+      // ainda não existe e a tela segue com o padrão.
+      let resposta = await sb.from("relatorios").select(`${colunas}, logo_cores, destaque, conversao_google`).eq("project_id", projectId).maybeSingle();
+      if (resposta.error && /destaque|conversao_google/.test(resposta.error.message))
+        resposta = await sb.from("relatorios").select(`${colunas}, logo_cores`).eq("project_id", projectId).maybeSingle();
+      if (resposta.error && /logo_cores/.test(resposta.error.message)) resposta = await sb.from("relatorios").select(colunas).eq("project_id", projectId).maybeSingle();
+      if (resposta.error) throw resposta.error;
+      const data = resposta.data;
+      return data ? ({ logo_cores: false, destaque: "auto", conversao_google: "Conversões", ...data } as Relatorio) : null;
     },
   });
 
@@ -124,6 +145,24 @@ export async function definirPublicado(mesId: string, publicado: boolean) {
 export async function apagarMes(mesId: string) {
   const { error } = await getSupabaseBrowserClient().from("relatorio_meses").delete().eq("id", mesId);
   if (error) throw error;
+}
+
+/** Logo com as cores originais (desenho) ou de uma cor só (letras) na abertura. */
+export async function alterarLogoCores(relatorioId: string, logoCores: boolean) {
+  const { error } = await getSupabaseBrowserClient()
+    .from("relatorios")
+    .update({ logo_cores: logoCores, atualizado_em: new Date().toISOString() })
+    .eq("id", relatorioId);
+  if (error) throw /logo_cores/.test(error.message) ? new Error("Rode a supabase/39_relatorio_logo_cores.sql no SQL Editor para usar esta opção.") : error;
+}
+
+/** Destaque do Resumo e nome da conversão do Google, por cliente. */
+export async function alterarResultados(relatorioId: string, campos: Partial<Pick<Relatorio, "destaque" | "conversao_google">>) {
+  const { error } = await getSupabaseBrowserClient()
+    .from("relatorios")
+    .update({ ...campos, atualizado_em: new Date().toISOString() })
+    .eq("id", relatorioId);
+  if (error) throw /destaque|conversao_google/.test(error.message) ? new Error("Rode a supabase/40_relatorio_resultados.sql no SQL Editor para usar esta opção.") : error;
 }
 
 /** Troca o endereço: o anterior para de funcionar na hora. */
@@ -473,6 +512,11 @@ function confere(a: Alerta[], rotulo: string, somado: number, total: number | nu
 }
 
 /** Mesma conferência feita no relatório original: as partes têm de fechar com o total. */
+/** Os resultados que a página do relatório soma (TIPOS em public/relatorio/index.html). */
+const RESULTADO_CONHECIDO = /lead|cadastro|compra|venda|conversa|visita|visualiza|v[ií]deo|thruplay|engaj/i;
+/** Resultados que já são números do mês (cliques, alcance): não entram de novo. */
+const RESULTADO_BASE = /clique|alcan|seguidor/i;
+
 export function conferir(r: Rascunho): Alerta[] {
   const a: Alerta[] = [];
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(r.referencia)) a.push({ nivel: "erro", msg: "Escolha o mês do relatório." });
@@ -505,6 +549,15 @@ export function conferir(r: Rascunho): Alerta[] {
       confere(a, "Gasto das campanhas do Meta", soma(d.meta.campanhas, "gasto"), d.meta.gasto, brl);
       confere(a, "Impressões das campanhas do Meta", soma(d.meta.campanhas, "impressoes"), d.meta.impressoes, num, 0);
       confere(a, "Cliques das campanhas do Meta", soma(d.meta.campanhas, "cliques"), d.meta.cliques, num, 0);
+    }
+    // O relatório reconhece o resultado de cada campanha pelo texto ("152
+    // leads"). O que ele não reconhece não entra nos números do Meta.
+    for (const c of r.meta.campanhas) {
+      const tx = (c.resultados ?? "").trim();
+      if (!tx) continue;
+      if (!/\d/.test(tx)) a.push({ nivel: "aviso", msg: `Campanha "${c.rotulo || c.nome}": o resultado precisa ter o número, como "152 leads".` });
+      else if (!RESULTADO_CONHECIDO.test(tx) && !RESULTADO_BASE.test(tx))
+        a.push({ nivel: "aviso", msg: `Campanha "${c.rotulo || c.nome}": não reconheci "${tx}". Use leads, compras, conversas, visitas, visualizações ou engajamentos para ele entrar nos números do Meta.` });
     }
     if (d.meta.posicionamentos) confere(a, "Gasto por posicionamento", soma(d.meta.posicionamentos, "gasto"), d.meta.gasto, brl);
     if (d.meta.idades) confere(a, "Gasto por faixa etária", soma(d.meta.idades, "gasto"), d.meta.gasto, brl);

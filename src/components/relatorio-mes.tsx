@@ -1,6 +1,6 @@
-import { AlertTriangle, CheckCircle2, Eye, Plus, Trash2, XCircle } from "lucide-react";
-import type { ClipboardEvent } from "react";
-import { useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle2, Eye, FileSpreadsheet, Plus, Trash2, Upload, XCircle } from "lucide-react";
+import type { ClipboardEvent, DragEvent } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import { Switch, Tabs } from "@/components/ds/controles";
 import { Modal } from "@/components/modal";
@@ -22,6 +22,8 @@ import {
   paraRascunho,
   salvarMes,
 } from "@/lib/relatorios";
+import type { Leitura } from "@/lib/relatorio-planilhas";
+import { lerPlanilha } from "@/lib/relatorio-planilhas";
 import { toast } from "@/lib/toast";
 
 type Aba = "mes" | "google" | "meta" | "social" | "conferir";
@@ -191,7 +193,7 @@ export function RelatorioMes({
     try {
       localStorage.setItem(
         "overso-relatorio-previa",
-        JSON.stringify({ exemplo: false, cliente: relatorio.nome_exibicao || nomeCliente, logoCliente, subtitulo: relatorio.subtitulo, fontes: relatorio.fontes, meses: lista }),
+        JSON.stringify({ exemplo: false, cliente: relatorio.nome_exibicao || nomeCliente, logoCliente, logoCores: relatorio.logo_cores, destaque: relatorio.destaque, conversaoGoogle: relatorio.conversao_google, subtitulo: relatorio.subtitulo, fontes: relatorio.fontes, meses: lista }),
       );
       window.open("/relatorio/previa", "_blank", "noopener");
     } catch {
@@ -223,6 +225,22 @@ export function RelatorioMes({
   return (
     <Modal aberto onFechar={onFechar} titulo={editando ? `${nomeDoMes(editando.referencia).replace(/^./, (l) => l.toUpperCase())} de ${editando.referencia.slice(0, 4)}` : "Novo mês do relatório"} maxW="max-w-6xl">
       <div className="flex flex-col gap-5">
+        <ImportarPlanilhas
+          onLido={(leituras) => {
+            const certas = leituras.filter((l) => l.aplicar);
+            if (!certas.length) return;
+            setR((v) => {
+              let n = certas.reduce((acc, l) => l.aplicar!(acc), v);
+              // Mês novo sem referência: vem do período da planilha.
+              const ref = certas.map((l) => l.referencia).find(Boolean);
+              if (!editando && !n.referencia && ref) n = { ...n, referencia: ref };
+              return n;
+            });
+            toast(`${certas.length} ${certas.length === 1 ? "planilha importada" : "planilhas importadas"}. Confira os números nas abas.`);
+            setConferido(false);
+          }}
+          referencia={r.referencia}
+        />
         <Tabs abas={abas} valor={aba} onChange={setAba} rotulo="Partes do mês" />
 
         {aba === "mes" && (
@@ -371,5 +389,113 @@ export function RelatorioMes({
         </footer>
       </div>
     </Modal>
+  );
+}
+
+/* ── Importar planilhas ───────────────────────────────────────────────── */
+
+/**
+ * Arraste (ou escolha) os CSVs exportados do Google Ads e do Meta Ads: cada
+ * um é reconhecido pelo cabeçalho e preenche a parte dele do mês. Os números
+ * entram nas abas, onde dá para conferir e ajustar antes de salvar.
+ */
+function ImportarPlanilhas({ onLido, referencia }: { onLido: (l: Leitura[]) => void; referencia: string }) {
+  const entrada = useRef<HTMLInputElement>(null);
+  const [lidas, setLidas] = useState<Leitura[]>([]);
+  const [lendo, setLendo] = useState(false);
+  const [arrastando, setArrastando] = useState(false);
+
+  async function ler(arquivos: FileList | File[]) {
+    const lista = [...arquivos];
+    if (!lista.length) return;
+    setLendo(true);
+    try {
+      const leituras = await Promise.all(lista.map(lerPlanilha));
+      setLidas(leituras);
+      onLido(leituras);
+    } finally {
+      setLendo(false);
+    }
+  }
+
+  function soltar(e: DragEvent) {
+    e.preventDefault();
+    setArrastando(false);
+    void ler(e.dataTransfer.files);
+  }
+
+  const mesDiferente = (l: Leitura) => Boolean(referencia && l.referencia && l.referencia !== referencia);
+
+  return (
+    <section className="flex flex-col gap-3">
+      <button
+        type="button"
+        onClick={() => entrada.current?.click()}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setArrastando(true);
+        }}
+        onDragLeave={() => setArrastando(false)}
+        onDrop={soltar}
+        className={`flex min-h-16 items-center gap-3.5 rounded-[14px] border-[1.5px] border-dashed px-4 py-3 text-left text-marinho transition-colors ${
+          arrastando ? "border-azul bg-azul-claro-2" : "border-azul-borda bg-azul-claro hover:border-azul"
+        }`}
+      >
+        <span className="flex h-10 w-10 flex-none items-center justify-center rounded-[10px] bg-superficie text-link">
+          <Upload size={18} strokeWidth={2} aria-hidden />
+        </span>
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <strong className="text-[14px]">{lendo ? "Lendo as planilhas…" : "Importar planilhas do mês"}</strong>
+          <span className="text-[12px] text-texto-3">
+            Arraste ou escolha os CSVs do Google Ads (Relatório de campanha, Informações do leilão) e do Meta Ads (campanhas, posicionamento, idade e gênero). Dá para mandar
+            vários de uma vez.
+          </span>
+        </span>
+      </button>
+      <input
+        ref={entrada}
+        type="file"
+        accept=".csv,text/csv"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) void ler(e.target.files);
+          e.target.value = "";
+        }}
+      />
+
+      {lidas.length > 0 && (
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+          {lidas.map((l, i) => (
+            <li key={`${l.arquivo}-${i}`} className="flex items-start gap-2.5 rounded-[12px] bg-superficie-2 px-3.5 py-2.5 text-[13px]">
+              {l.aplicar ? (
+                <CheckCircle2 size={16} strokeWidth={2} aria-hidden className="mt-0.5 flex-none text-sucesso" />
+              ) : (
+                <XCircle size={16} strokeWidth={2} aria-hidden className="mt-0.5 flex-none text-erro-texto" />
+              )}
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="flex flex-wrap items-center gap-x-2">
+                  <FileSpreadsheet size={13} strokeWidth={2} aria-hidden className="text-texto-3" />
+                  <strong className="truncate">{l.tipo ?? l.arquivo}</strong>
+                  {l.tipo && <span className="truncate text-[12px] text-texto-3">{l.arquivo}</span>}
+                </span>
+                {l.resumo && <span className="text-texto-2">{l.resumo}</span>}
+                {mesDiferente(l) && (
+                  <span className="font-semibold text-erro-texto">
+                    Esta planilha é de {nomeDoMes(l.referencia!)} de {l.referencia!.slice(0, 4)}, e o relatório é de {nomeDoMes(referencia)} de {referencia.slice(0, 4)}.
+                  </span>
+                )}
+                {l.avisos.map((a) => (
+                  <span key={a} className="flex items-start gap-1.5 text-[12px] text-texto-3">
+                    <AlertTriangle size={12} strokeWidth={2} aria-hidden className="mt-0.5 flex-none text-alerta" />
+                    {a}
+                  </span>
+                ))}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
